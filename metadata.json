@@ -1,0 +1,6 @@
+{
+  "name": "Communication Assessment Tool",
+  "description": "A digital assessment platform for Speech Language Pathologists to assess patient communication behaviors.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
