@@ -36,7 +36,9 @@ export default function Assessment() {
 
   // Patients list from API & selected patient
   const [patients, setPatients] = useState([]);
-  const [selectedPatientId, setSelectedPatientId] = useState('');
+  const [selectedPatientId, setSelectedPatientId] = useState(() => {
+    return sessionStorage.getItem('assessment_selectedPatientId') || '';
+  });
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [loadingPatients, setLoadingPatients] = useState(true);
 
@@ -79,8 +81,15 @@ export default function Assessment() {
         const res = await patientService.getPatients({ limit: 50 });
         if (res.success && res.data?.patients?.length) {
           setPatients(res.data.patients);
-          setSelectedPatientId(res.data.patients[0]._id);
-          setSelectedPatient(res.data.patients[0]);
+          const savedId = sessionStorage.getItem('assessment_selectedPatientId');
+          const matched = savedId ? res.data.patients.find(p => (p._id || p.id) === savedId) : null;
+          if (matched) {
+            setSelectedPatientId(savedId);
+            setSelectedPatient(matched);
+          } else {
+            setSelectedPatientId(res.data.patients[0]._id || res.data.patients[0].id);
+            setSelectedPatient(res.data.patients[0]);
+          }
         }
       } catch (err) {
         console.error('Error fetching patients for assessment:', err);
@@ -101,6 +110,22 @@ export default function Assessment() {
         return;
       }
       
+      const unsavedResponses = sessionStorage.getItem(`assessment_responses_${selectedPatientId}`);
+      const unsavedNotes = sessionStorage.getItem(`assessment_notes_${selectedPatientId}`);
+      if (unsavedResponses) {
+        setResponses(JSON.parse(unsavedResponses));
+        if (unsavedNotes) setNotes(JSON.parse(unsavedNotes));
+        try {
+          const res = await assessmentService.getAssessmentsByPatient(selectedPatientId);
+          if (res.success && res.data?.assessments?.length > 0) {
+            setCurrentAssessmentId(res.data.assessments[0]._id || res.data.assessments[0].id);
+          }
+        } catch {
+          setCurrentAssessmentId(null);
+        }
+        return;
+      }
+
       try {
         const res = await assessmentService.getAssessmentsByPatient(selectedPatientId);
         if (res.success && res.data?.assessments?.length > 0) {
@@ -165,6 +190,25 @@ export default function Assessment() {
     setAiError(null);
 
     loadPatientAssessment();
+  }, [selectedPatientId]);
+
+  // Sync to sessionStorage
+  useEffect(() => {
+    if (selectedPatientId && Object.keys(responses).length > 0) {
+      sessionStorage.setItem(`assessment_responses_${selectedPatientId}`, JSON.stringify(responses));
+    }
+  }, [responses, selectedPatientId]);
+
+  useEffect(() => {
+    if (selectedPatientId && Object.keys(notes).length > 0) {
+      sessionStorage.setItem(`assessment_notes_${selectedPatientId}`, JSON.stringify(notes));
+    }
+  }, [notes, selectedPatientId]);
+
+  useEffect(() => {
+    if (selectedPatientId) {
+      sessionStorage.setItem('assessment_selectedPatientId', selectedPatientId);
+    }
   }, [selectedPatientId]);
 
   // Handle selecting a patient
@@ -288,6 +332,10 @@ export default function Assessment() {
   const handleReset = () => {
     setResponses({});
     setNotes({});
+    if (selectedPatientId) {
+      sessionStorage.removeItem(`assessment_responses_${selectedPatientId}`);
+      sessionStorage.removeItem(`assessment_notes_${selectedPatientId}`);
+    }
     setValidationError(null);
     setSaveSuccessMessage(false);
     setIsResetModalOpen(false);
@@ -354,6 +402,10 @@ export default function Assessment() {
 
       if (res.success) {
         setSaveSuccessMessage(true);
+        if (selectedPatientId) {
+          sessionStorage.removeItem(`assessment_responses_${selectedPatientId}`);
+          sessionStorage.removeItem(`assessment_notes_${selectedPatientId}`);
+        }
         setTimeout(() => {
           setSaveSuccessMessage(false);
         }, 4000);
@@ -372,6 +424,10 @@ export default function Assessment() {
     try {
       const res = await assessmentService.deleteAssessment(currentAssessmentId);
       if (res.success) {
+        if (selectedPatientId) {
+          sessionStorage.removeItem(`assessment_responses_${selectedPatientId}`);
+          sessionStorage.removeItem(`assessment_notes_${selectedPatientId}`);
+        }
         handleReset();
         setIsDeleteModalOpen(false);
       }

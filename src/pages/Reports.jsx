@@ -71,9 +71,27 @@ export default function Reports() {
   }, [activeReport]);
 
   // Search, Filter & Sort States
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
+  const [searchQuery, setSearchQuery] = useState(() => {
+    return sessionStorage.getItem('reports_searchQuery') || '';
+  });
+  const [filterType, setFilterType] = useState(() => {
+    return sessionStorage.getItem('reports_filterType') || 'all';
+  });
+  const [sortBy, setSortBy] = useState(() => {
+    return sessionStorage.getItem('reports_sortBy') || 'newest';
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('reports_searchQuery', searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    sessionStorage.setItem('reports_filterType', filterType);
+  }, [filterType]);
+
+  useEffect(() => {
+    sessionStorage.setItem('reports_sortBy', sortBy);
+  }, [sortBy]);
 
   const fetchReportsAndAssessments = async () => {
     setLoading(true);

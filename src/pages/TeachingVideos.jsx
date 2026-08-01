@@ -80,9 +80,27 @@ export default function TeachingVideos() {
   const { user } = useAuth();
   const isParent = user?.role === 'parent';
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(() => {
+    return sessionStorage.getItem('teachingVideos_searchQuery') || '';
+  });
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    return sessionStorage.getItem('teachingVideos_selectedCategory') || 'All';
+  });
+  const [onlyFavorites, setOnlyFavorites] = useState(() => {
+    return sessionStorage.getItem('teachingVideos_onlyFavorites') === 'true';
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('teachingVideos_searchQuery', searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    sessionStorage.setItem('teachingVideos_selectedCategory', selectedCategory);
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    sessionStorage.setItem('teachingVideos_onlyFavorites', onlyFavorites.toString());
+  }, [onlyFavorites]);
 
   // Local state for favorite video IDs
   const [favorites, setFavorites] = useState(['vid-01', 'vid-03', 'vid-08']);

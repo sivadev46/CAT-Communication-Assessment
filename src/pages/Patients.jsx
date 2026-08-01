@@ -32,10 +32,35 @@ export default function Patients() {
   const [actionLoading, setActionLoading] = useState(false);
 
   // Pagination, Search, Filter & Sort States
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('All');
-  const [sortBy, setSortBy] = useState('newest');
-  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState(() => {
+    return sessionStorage.getItem('patients_searchQuery') || '';
+  });
+  const [selectedStatus, setSelectedStatus] = useState(() => {
+    return sessionStorage.getItem('patients_selectedStatus') || 'All';
+  });
+  const [sortBy, setSortBy] = useState(() => {
+    return sessionStorage.getItem('patients_sortBy') || 'newest';
+  });
+  const [page, setPage] = useState(() => {
+    const saved = sessionStorage.getItem('patients_page');
+    return saved ? parseInt(saved, 10) : 1;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('patients_searchQuery', searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    sessionStorage.setItem('patients_selectedStatus', selectedStatus);
+  }, [selectedStatus]);
+
+  useEffect(() => {
+    sessionStorage.setItem('patients_sortBy', sortBy);
+  }, [sortBy]);
+
+  useEffect(() => {
+    sessionStorage.setItem('patients_page', page.toString());
+  }, [page]);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
