@@ -33,6 +33,30 @@ const reportSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    patientId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Patient',
+      index: true,
+    },
+    doctorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+    },
+    parentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+      default: null,
+    },
+    shared: {
+      type: Boolean,
+      default: false,
+    },
+    sharedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

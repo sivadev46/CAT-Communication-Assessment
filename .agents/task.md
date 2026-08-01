@@ -1,0 +1,16 @@
+- [x] Modify `backend/models/User.js` role enum to include doctor and parent.
+- [x] Modify `backend/models/Report.js` to add patientId, doctorId, parentId, shared, sharedAt.
+- [x] Modify `backend/routes/patientRoutes.js` to authorize 'doctor'.
+- [x] Modify `backend/routes/assessmentRoutes.js` to authorize 'doctor'.
+- [x] Modify `backend/routes/dashboardRoutes.js` to authorize 'doctor', 'Clinician', 'Admin' and secure it from parents.
+- [x] Modify `backend/controllers/reportController.js` to handle dynamic patient/doctor mappings, role-based filtering/access for parents, and sharing.
+- [x] Modify `backend/routes/reportRoutes.js` to add '/:id/share' and authorize 'doctor'.
+- [x] Modify `src/context/AuthContext.jsx` to add `registerUser`.
+- [x] Modify `src/services/reportService.js` to add `shareReport`.
+- [x] Modify `src/components/ProtectedRoute.jsx` to support allowedRoles.
+- [x] Modify `src/App.tsx` to apply role protection and remove caregiver standalone page.
+- [x] Modify `src/components/Sidebar/Sidebar.jsx` to remove caregiver link.
+- [x] Modify `src/pages/DoctorLogin.jsx` to support registration modal.
+- [x] Modify `src/pages/ParentLogin.jsx` to support registration and auth against backend.
+- [x] Modify `src/pages/Reports.jsx` to support editing caregiver report and sending to parent.
+- [x] Modify `src/pages/ParentDashboard.jsx` to load shared reports and restrict to caregiver view.

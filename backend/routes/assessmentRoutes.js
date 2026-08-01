@@ -21,7 +21,7 @@ const assessmentValidation = [
 router.post(
   '/',
   protect,
-  authorize('Admin', 'Clinician'),
+  authorize('Admin', 'Clinician', 'doctor'),
   assessmentValidation,
   validateRequest,
   createAssessment

@@ -30,4 +30,9 @@ export const reportService = {
     const response = await api.delete(`/reports/${id}`);
     return response.data;
   },
+
+  shareReport: async (id, email) => {
+    const response = await api.post(`/reports/${id}/share`, { email });
+    return response.data;
+  },
 };

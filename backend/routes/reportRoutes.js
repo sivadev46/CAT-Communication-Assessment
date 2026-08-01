@@ -7,6 +7,7 @@ import {
   deleteReport,
   generateAIReport,
   getReports,
+  shareReport,
 } from '../controllers/reportController.js';
 import { getRecentReports } from '../controllers/dashboardController.js';
 import { protect } from '../middleware/authMiddleware.js';
@@ -22,7 +23,7 @@ const reportValidation = [
 router.post(
   '/generate',
   protect,
-  authorize('Admin', 'Clinician'),
+  authorize('Admin', 'Clinician', 'doctor'),
   reportValidation,
   validateRequest,
   generateReport
@@ -31,7 +32,7 @@ router.post(
 router.post(
   '/generate-ai',
   protect,
-  authorize('Admin', 'Clinician'),
+  authorize('Admin', 'Clinician', 'doctor'),
   reportValidation,
   validateRequest,
   generateAIReport
@@ -40,6 +41,13 @@ router.post(
 router.get('/', protect, getReports);
 router.get('/:id', protect, getReport);
 router.put('/:id', protect, updateReport);
-router.delete('/:id', protect, authorize('Admin', 'Clinician'), deleteReport);
+router.delete('/:id', protect, authorize('Admin', 'Clinician', 'doctor'), deleteReport);
+
+router.post(
+  '/:id/share',
+  protect,
+  authorize('Admin', 'Clinician', 'doctor'),
+  shareReport
+);
 
 export default router;

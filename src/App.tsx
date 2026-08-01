@@ -11,7 +11,6 @@ import Dashboard from './pages/Dashboard';
 import Patients from './pages/Patients';
 import Assessment from './pages/Assessment';
 import Reports from './pages/Reports';
-import Caregiver from './pages/Caregiver';
 import TeachingVideos from './pages/TeachingVideos';
 import VRAssessment from './pages/VRAssessment';
 import Settings from './pages/Settings';
@@ -26,19 +25,22 @@ export default function App() {
           <Route path="/" element={<RoleSelection />} />
           <Route path="/doctor-login" element={<DoctorLogin />} />
           <Route path="/parent-login" element={<ParentLogin />} />
-          <Route path="/parent-dashboard" element={<ParentDashboard />} />
+
+          {/* Protected Parent Dashboard Route */}
+          <Route element={<ProtectedRoute allowedRoles={['parent']} />}>
+            <Route path="/parent-dashboard" element={<ParentDashboard />} />
+          </Route>
 
           {/* Legacy /login redirects to new doctor-login for ProtectedRoute compatibility */}
           <Route path="/login" element={<Navigate to="/doctor-login" replace />} />
 
           {/* Protected Dashboard Routes for Doctor/Clinician */}
-          <Route element={<ProtectedRoute />}>
+          <Route element={<ProtectedRoute allowedRoles={['Clinician', 'doctor', 'Admin']} />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/patients" element={<Patients />} />
               <Route path="/assessment" element={<Assessment />} />
               <Route path="/reports" element={<Reports />} />
-              <Route path="/caregiver" element={<Caregiver />} />
               <Route path="/teaching-videos" element={<TeachingVideos />} />
               <Route path="/vr" element={<VRAssessment />} />
               <Route path="/settings" element={<Settings />} />

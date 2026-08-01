@@ -23,7 +23,7 @@ const patientValidation = [
 router.post(
   '/',
   protect,
-  authorize('Admin', 'Clinician'),
+  authorize('Admin', 'Clinician', 'doctor'),
   patientValidation,
   validateRequest,
   createPatient

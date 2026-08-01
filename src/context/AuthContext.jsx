@@ -47,6 +47,19 @@ export const AuthProvider = ({ children }) => {
     return res;
   };
 
+  const registerUser = async (userData) => {
+    const res = await authService.register(userData);
+    if (res.success && res.data?.token) {
+      setToken(res.data.token);
+      setUser(res.data.user);
+      setIsAuthenticated(true);
+      localStorage.setItem('cat_token', res.data.token);
+      localStorage.setItem('cat_user', JSON.stringify(res.data.user));
+      localStorage.setItem('cat_is_authenticated', 'true');
+    }
+    return res;
+  };
+
   const logoutUser = async () => {
     await authService.logout();
     setUser(null);
@@ -70,6 +83,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         loading,
         loginUser,
+        registerUser,
         logoutUser,
         updateUserProfile,
       }}

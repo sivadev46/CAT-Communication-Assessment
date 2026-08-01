@@ -5,7 +5,6 @@ import {
   Users,
   ClipboardCheck,
   FileText,
-  HeartHandshake,
   Video,
   Glasses,
   Settings
@@ -17,7 +16,6 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Patients', path: '/patients', icon: Users },
     { name: 'Assessment', path: '/assessment', icon: ClipboardCheck },
     { name: 'Reports', path: '/reports', icon: FileText },
-    { name: 'Caregiver', path: '/caregiver', icon: HeartHandshake },
     { name: 'Teaching Videos', path: '/teaching-videos', icon: Video },
     { name: 'VR Assessment', path: '/vr', icon: Glasses },
   ];

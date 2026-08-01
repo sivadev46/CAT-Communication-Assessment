@@ -1,5 +1,6 @@
 import Report from '../models/Report.js';
 import Assessment from '../models/Assessment.js';
+import User from '../models/User.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { geminiService } from '../services/geminiService.js';
 
@@ -29,6 +30,8 @@ export const generateReport = asyncHandler(async (req, res) => {
   // Create report document
   const report = await Report.create({
     assessment: assessmentId,
+    patientId: assessment.patient?._id || assessment.patient,
+    doctorId: req.user._id,
     clinicalReport: clinicalReport || {
       summary: `Speech-Language Pathologist diagnostic evaluation for ${assessment.patient?.fullName || 'Patient'} based on CAT metrics.`,
       domainBreakdown: {
@@ -99,6 +102,17 @@ export const getReport = asyncHandler(async (req, res) => {
       message: 'Report record not found',
       data: null,
     });
+  }
+
+  // Security authorization check for parents
+  if (req.user.role === 'parent') {
+    if (!report.shared || !report.parentId || report.parentId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to view this report record.',
+        data: null,
+      });
+    }
   }
 
   res.status(200).json({
@@ -203,6 +217,8 @@ export const generateAIReport = asyncHandler(async (req, res) => {
     if (aiResponse) {
       reportData = {
         assessment: assessmentId,
+        patientId: assessment.patient?._id || assessment.patient,
+        doctorId: req.user._id,
         clinicalReport: {
           summary: aiResponse.clinicalSummary,
           riskLevel: aiResponse.riskLevel,
@@ -238,6 +254,8 @@ export const generateAIReport = asyncHandler(async (req, res) => {
   if (!isAiGenerated) {
     reportData = {
       assessment: assessmentId,
+      patientId: assessment.patient?._id || assessment.patient,
+      doctorId: req.user._id,
       clinicalReport: {
         summary: "AI report could not be generated at this time. A standard clinical report has been created instead.",
         domainBreakdown: {
@@ -293,7 +311,11 @@ export const generateAIReport = asyncHandler(async (req, res) => {
 // @route   GET /api/reports
 // @access  Private (Clinician/Admin/Parent)
 export const getReports = asyncHandler(async (req, res) => {
-  const reports = await Report.find()
+  let query = {};
+  if (req.user.role === 'parent') {
+    query = { parentId: req.user._id, shared: true };
+  }
+  const reports = await Report.find(query)
     .populate({
       path: 'assessment',
       populate: { path: 'patient' },
@@ -305,6 +327,56 @@ export const getReports = asyncHandler(async (req, res) => {
     success: true,
     message: 'All reports retrieved successfully',
     data: reports,
+  });
+});
+
+// @desc    Share report with parent
+// @route   POST /api/reports/:id/share
+// @access  Private (Clinician/Admin/Doctor)
+export const shareReport = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please provide a parent email address',
+      data: null,
+    });
+  }
+
+  const parent = await User.findOne({ email: email.toLowerCase(), role: 'parent' });
+  if (!parent) {
+    return res.status(404).json({
+      success: false,
+      message: 'No parent account registered with this email address.',
+      data: null,
+    });
+  }
+
+  // Find by ID or assessment ID
+  let report = await Report.findById(id);
+  if (!report) {
+    report = await Report.findOne({ assessment: id });
+  }
+
+  if (!report) {
+    return res.status(404).json({
+      success: false,
+      message: 'Report not found',
+      data: null,
+    });
+  }
+
+  report.parentId = parent._id;
+  report.shared = true;
+  report.sharedAt = new Date();
+  await report.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Report shared successfully with ${parent.fullName}`,
+    data: report,
   });
 });
 

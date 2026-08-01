@@ -16,7 +16,9 @@ import {
   Copy,
   Check,
   Heart,
-  Printer
+  Printer,
+  Share2,
+  Edit2
 } from 'lucide-react';
 import Header from '../components/Header/Header';
 import Card from '../components/Card/Card';
@@ -41,6 +43,32 @@ export default function Reports() {
   const [selectedAssessmentId, setSelectedAssessmentId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedSection, setCopiedSection] = useState(null);
+
+  // Caregiver Edit States
+  const [isEditingCaregiver, setIsEditingCaregiver] = useState(false);
+  const [editSummary, setEditSummary] = useState('');
+  const [editStrengths, setEditStrengths] = useState('');
+  const [editAreas, setEditAreas] = useState('');
+  const [editHome, setEditHome] = useState('');
+  const [editRecommendations, setEditRecommendations] = useState('');
+
+  // Share States
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [parentEmail, setParentEmail] = useState('');
+  const [shareError, setShareError] = useState(null);
+  const [shareSuccess, setShareSuccess] = useState(null);
+  const [isSharing, setIsSharing] = useState(false);
+
+  useEffect(() => {
+    if (activeReport) {
+      setEditSummary(activeReport.caregiverReport?.summary || '');
+      setEditStrengths((activeReport.strengths || []).join('\n'));
+      setEditAreas((activeReport.areasForImprovement || []).join('\n'));
+      setEditHome((activeReport.caregiverReport?.homeStrategies || []).join('\n'));
+      setEditRecommendations((activeReport.recommendations || []).join('\n'));
+      setIsEditingCaregiver(false);
+    }
+  }, [activeReport]);
 
   // Search, Filter & Sort States
   const [searchQuery, setSearchQuery] = useState('');
@@ -187,6 +215,73 @@ export default function Reports() {
     navigator.clipboard.writeText(text);
     setCopiedSection(sectionName);
     setTimeout(() => setCopiedSection(null), 2500);
+  };
+
+  const handleSaveCaregiverEdits = async () => {
+    setIsSubmitting(true);
+    try {
+      const updatedData = {
+        caregiverReport: {
+          ...activeReport.caregiverReport,
+          summary: editSummary,
+          homeStrategies: editHome.split('\n').map(s => s.trim()).filter(Boolean),
+        },
+        strengths: editStrengths.split('\n').map(s => s.trim()).filter(Boolean),
+        areasForImprovement: editAreas.split('\n').map(s => s.trim()).filter(Boolean),
+        recommendations: editRecommendations.split('\n').map(s => s.trim()).filter(Boolean),
+      };
+
+      const res = await reportService.updateReport(activeReport._id || activeReport.id, updatedData);
+      if (res.success && res.data) {
+        setIsEditingCaregiver(false);
+        const updatedReport = {
+          ...activeReport,
+          ...res.data,
+          assessment: activeReport.assessment,
+          generatedBy: activeReport.generatedBy,
+        };
+        setActiveReport(updatedReport);
+        setReports(reports.map(r => (r._id === activeReport._id || r.id === activeReport.id) ? updatedReport : r));
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error updating caregiver guide.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleShareReport = async (e) => {
+    e.preventDefault();
+    if (!parentEmail) return;
+
+    setIsSharing(true);
+    setShareError(null);
+    setShareSuccess(null);
+
+    try {
+      const res = await reportService.shareReport(activeReport._id || activeReport.id, parentEmail);
+      if (res.success && res.data) {
+        setShareSuccess(res.message || 'Report shared successfully!');
+        const updatedReport = {
+          ...activeReport,
+          parentId: res.data.parentId,
+          shared: true,
+          sharedAt: res.data.sharedAt,
+        };
+        setActiveReport(updatedReport);
+        setReports(reports.map(r => (r._id === activeReport._id || r.id === activeReport.id) ? updatedReport : r));
+        
+        setTimeout(() => {
+          setIsShareModalOpen(false);
+          setParentEmail('');
+          setShareSuccess(null);
+        }, 1500);
+      }
+    } catch (err) {
+      setShareError(err.response?.data?.message || 'Failed to share report. Verify parent email exists.');
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   if (loading) {
@@ -557,49 +652,164 @@ export default function Reports() {
                           Caregiver & Parent Guide (Simple Language)
                         </h3>
                       </div>
-                      <button
-                        onClick={() => handleCopyText(
-                          `${activeReport.caregiverReport.summary || ''}\n\nHome Strategies:\n${(activeReport.caregiverReport.homeStrategies || []).join('\n')}`,
-                          'caregiver'
-                        )}
-                        className="p-1.5 rounded text-gray-400 hover:text-emerald-600 cursor-pointer flex items-center gap-1 text-[10px] border border-transparent hover:border-gray-200 bg-gray-50/50"
-                      >
-                        {copiedSection === 'caregiver' ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-emerald-600" />
-                            <span className="text-emerald-600 font-semibold">Copied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>Copy Caregiver Guide</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                    
-                    <div className="p-5 bg-emerald-50/30 rounded-xl border border-emerald-105 space-y-4">
-                      <div>
-                        <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider block mb-1">Friendly Summary</span>
-                        <p className="text-xs text-emerald-900 leading-relaxed font-medium">
-                          {activeReport.caregiverReport.summary}
-                        </p>
-                      </div>
-
-                      {activeReport.caregiverReport.homeStrategies && activeReport.caregiverReport.homeStrategies.length > 0 && (
-                        <div>
-                          <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider block mb-2">Recommended Home Activities</span>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {activeReport.caregiverReport.homeStrategies.map((strategy, idx) => (
-                              <div key={idx} className="p-3 bg-white rounded-lg border border-emerald-50 text-xs text-emerald-850 flex items-start gap-2 shadow-2xs">
-                                <span className="font-bold text-emerald-600 mt-0.5">•</span>
-                                <span>{strategy}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                      {!isEditingCaregiver && (
+                        <button
+                          onClick={() => handleCopyText(
+                            `${activeReport.caregiverReport.summary || ''}\n\nHome Strategies:\n${(activeReport.caregiverReport.homeStrategies || []).join('\n')}`,
+                            'caregiver'
+                          )}
+                          className="p-1.5 rounded text-gray-400 hover:text-emerald-600 cursor-pointer flex items-center gap-1 text-[10px] border border-transparent hover:border-gray-200 bg-gray-50/50"
+                        >
+                          {copiedSection === 'caregiver' ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="text-emerald-600 font-semibold">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Copy Caregiver Guide</span>
+                            </>
+                          )}
+                        </button>
                       )}
                     </div>
+                    
+                    {isEditingCaregiver ? (
+                      <div className="p-5 bg-emerald-50/30 rounded-xl border border-emerald-100 space-y-4">
+                        <div>
+                          <label className="block text-[10px] text-emerald-700 font-bold uppercase tracking-wider mb-1">Friendly Summary</label>
+                          <textarea
+                            rows={3}
+                            value={editSummary}
+                            onChange={(e) => setEditSummary(e.target.value)}
+                            className="w-full p-2.5 bg-white border border-emerald-250 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-50"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] text-emerald-700 font-bold uppercase tracking-wider mb-1">Key Strengths (one per line)</label>
+                            <textarea
+                              rows={4}
+                              value={editStrengths}
+                              onChange={(e) => setEditStrengths(e.target.value)}
+                              className="w-full p-2.5 bg-white border border-emerald-250 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-50"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-emerald-700 font-bold uppercase tracking-wider mb-1">Areas to Practice (one per line)</label>
+                            <textarea
+                              rows={4}
+                              value={editAreas}
+                              onChange={(e) => setEditAreas(e.target.value)}
+                              className="w-full p-2.5 bg-white border border-emerald-250 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-50"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] text-emerald-700 font-bold uppercase tracking-wider mb-1">Home Activities (one per line)</label>
+                            <textarea
+                              rows={4}
+                              value={editHome}
+                              onChange={(e) => setEditHome(e.target.value)}
+                              className="w-full p-2.5 bg-white border border-emerald-250 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-50"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-emerald-700 font-bold uppercase tracking-wider mb-1">Recommendations (one per line)</label>
+                            <textarea
+                              rows={4}
+                              value={editRecommendations}
+                              onChange={(e) => setEditRecommendations(e.target.value)}
+                              className="w-full p-2.5 bg-white border border-emerald-250 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-50"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsEditingCaregiver(false)}
+                            className="text-xs"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            variant="primary"
+                            onClick={handleSaveCaregiverEdits}
+                            disabled={isSubmitting}
+                            className="text-xs bg-emerald-600 hover:bg-emerald-700 border-emerald-600"
+                          >
+                            {isSubmitting ? 'Saving...' : 'Save Changes'}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="p-5 bg-emerald-50/30 rounded-xl border border-emerald-105 space-y-4">
+                          <div>
+                            <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider block mb-1">Friendly Summary</span>
+                            <p className="text-xs text-emerald-900 leading-relaxed font-medium">
+                              {activeReport.caregiverReport.summary}
+                            </p>
+                          </div>
+
+                          {activeReport.caregiverReport.homeStrategies && activeReport.caregiverReport.homeStrategies.length > 0 && (
+                            <div>
+                              <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider block mb-2">Recommended Home Activities</span>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {activeReport.caregiverReport.homeStrategies.map((strategy, idx) => (
+                                  <div key={idx} className="p-3 bg-white rounded-lg border border-emerald-50 text-xs text-emerald-855 flex items-start gap-2 shadow-2xs">
+                                    <span className="font-bold text-emerald-600 mt-0.5">•</span>
+                                    <span>{strategy}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Caregiver Actions Toolbar (Edit, Share, Shared Status) */}
+                        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 bg-slate-50/50 p-4 rounded-xl border border-slate-200">
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsEditingCaregiver(true)}
+                              className="text-xs flex items-center gap-1 border-emerald-250 hover:bg-emerald-50/50 text-emerald-755 font-bold cursor-pointer"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                              <span>Edit Caregiver Guide</span>
+                            </Button>
+                            
+                            <Button
+                              variant="primary"
+                              onClick={() => {
+                                setParentEmail('');
+                                setShareError(null);
+                                setShareSuccess(null);
+                                setIsShareModalOpen(true);
+                              }}
+                              className="text-xs flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 border-emerald-600 text-white cursor-pointer"
+                            >
+                              <Share2 className="w-3.5 h-3.5" />
+                              <span>Send to Parent</span>
+                            </Button>
+                          </div>
+
+                          {activeReport.shared ? (
+                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-lg flex items-center gap-1.5">
+                              <Check className="w-3.5 h-3.5 text-emerald-650 font-bold" />
+                              <span>Shared with Parent {activeReport.sharedAt && `on ${new Date(activeReport.sharedAt).toLocaleDateString()}`}</span>
+                            </span>
+                          ) : (
+                            <span className="text-xs font-medium text-slate-500">Not shared with parent yet</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </Card>
@@ -666,6 +876,63 @@ export default function Reports() {
                 )}
               </Button>
             </div>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Share Report Modal */}
+      <Modal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        title="Share Report with Parent"
+      >
+        <form onSubmit={handleShareReport} className="space-y-4 text-xs font-sans">
+          {shareError && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-750 rounded-xl text-xs flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <span className="font-medium">{shareError}</span>
+            </div>
+          )}
+
+          {shareSuccess && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-xs flex items-start gap-2">
+              <Check className="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-600 font-bold" />
+              <span className="font-medium">{shareSuccess}</span>
+            </div>
+          )}
+
+          <div>
+            <label className="block font-semibold text-gray-700 mb-1">Parent's Email Address *</label>
+            <input
+              type="email"
+              required
+              placeholder="parent@example.com"
+              value={parentEmail}
+              onChange={(e) => setParentEmail(e.target.value)}
+              className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            />
+            <p className="text-[10px] text-gray-500 mt-1">
+              Note: This links the report in-app. The parent must have an active CAT account under this email.
+            </p>
+          </div>
+
+          <div className="pt-4 border-t border-gray-150 flex justify-end gap-2">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setIsShareModalOpen(false)}
+              className="text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={isSharing}
+              className="text-xs bg-emerald-600 hover:bg-emerald-755 text-white border border-emerald-600"
+            >
+              {isSharing ? 'Sending...' : 'Send to Parent'}
+            </Button>
           </div>
         </form>
       </Modal>

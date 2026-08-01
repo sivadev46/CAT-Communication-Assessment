@@ -7,13 +7,17 @@ import {
   getActivityTimeline,
 } from '../controllers/dashboardController.js';
 import { protect } from '../middleware/authMiddleware.js';
+import { authorize } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
-router.get('/stats', protect, getDashboardStats);
-router.get('/recent-patients', protect, getRecentPatients);
-router.get('/recent-assessments', protect, getRecentAssessments);
-router.get('/recent-reports', protect, getRecentReports);
-router.get('/activity', protect, getActivityTimeline);
+// Restrict all dashboard endpoints to clinical staff
+router.use(protect, authorize('Admin', 'Clinician', 'doctor'));
+
+router.get('/stats', getDashboardStats);
+router.get('/recent-patients', getRecentPatients);
+router.get('/recent-assessments', getRecentAssessments);
+router.get('/recent-reports', getRecentReports);
+router.get('/activity', getActivityTimeline);
 
 export default router;

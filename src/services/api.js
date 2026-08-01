@@ -24,14 +24,19 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear token and redirect to login if unauthenticated
-      localStorage.removeItem('cat_token');
-      localStorage.removeItem('cat_user');
-      localStorage.removeItem('cat_is_authenticated');
+      const isLoginRequest = error.config?.url?.includes('/auth/login');
       
-      // Prevent infinite redirect loops if already on login page
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+      if (!isLoginRequest) {
+        // Clear token and redirect to login if unauthenticated
+        localStorage.removeItem('cat_token');
+        localStorage.removeItem('cat_user');
+        localStorage.removeItem('cat_is_authenticated');
+        
+        // Prevent infinite redirect loops if already on a login page
+        const path = window.location.pathname;
+        if (path !== '/login' && path !== '/doctor-login' && path !== '/parent-login') {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);

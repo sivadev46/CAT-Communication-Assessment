@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, AlertCircle, Loader2, ArrowLeft, Mail, Lock, Heart, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { LogIn, AlertCircle, Loader2, ArrowLeft, Mail, Lock, Heart, Eye, EyeOff, Sparkles, X, Stethoscope } from 'lucide-react';
 
 export default function ParentLogin() {
   const navigate = useNavigate();
+  const { loginUser, registerUser } = useAuth();
 
   const [email, setEmail] = useState('parent@cat.com');
   const [password, setPassword] = useState('Password123!');
@@ -11,6 +13,17 @@ export default function ParentLogin() {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Registration Modal States
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [registerStep, setRegisterStep] = useState(1);
+  const [registerRole, setRegisterRole] = useState('parent'); // 'doctor' or 'parent'
+  const [regFullName, setRegFullName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
+  const [registerLoading, setRegisterLoading] = useState(false);
+  const [registerError, setRegisterError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,13 +35,25 @@ export default function ParentLogin() {
     setLoading(true);
     setError(null);
 
-    // Mock parent authentication flow to simulate backend readiness
-    setTimeout(() => {
+    try {
+      const res = await loginUser({ email, password });
+      if (res.success) {
+        if (res.data?.user?.role === 'parent') {
+          navigate('/parent-dashboard');
+        } else {
+          // If doctor logged in, redirect to doctor dashboard
+          navigate('/dashboard');
+        }
+      } else {
+        setError(res.message || 'Authentication failed. Please verify credentials.');
+        setPassword('');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login connection failed. Please try again.');
+      setPassword('');
+    } finally {
       setLoading(false);
-      localStorage.setItem('cat_parent_authenticated', 'true');
-      localStorage.setItem('cat_parent_email', email);
-      navigate('/parent-dashboard');
-    }, 1000);
+    }
   };
 
   return (
@@ -154,12 +179,12 @@ export default function ParentLogin() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs text-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                    className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:bg-white rounded-xl text-xs text-slate-80 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-100"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-650 cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -199,6 +224,26 @@ export default function ParentLogin() {
                 )}
               </button>
             </form>
+
+            {/* New User? Create Account */}
+            <div className="mt-6 text-center text-xs">
+              <span className="text-slate-500">New User? </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setRegisterStep(1);
+                  setIsRegisterOpen(true);
+                  setRegisterError(null);
+                  setRegFullName('');
+                  setRegEmail('');
+                  setRegPassword('');
+                  setRegConfirmPassword('');
+                }}
+                className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
+              >
+                Create Account
+              </button>
+            </div>
           </div>
 
           {/* Info Footer */}
@@ -208,6 +253,193 @@ export default function ParentLogin() {
         </div>
 
       </div>
+
+      {/* Registration Modal */}
+      {isRegisterOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-md w-full overflow-hidden relative animate-fade-in font-sans">
+            {/* Close button */}
+            <button
+              onClick={() => setIsRegisterOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-650 cursor-pointer p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="p-6 md:p-8">
+              {registerStep === 1 ? (
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <h3 className="text-lg font-extrabold text-slate-900">Select Account Type</h3>
+                    <p className="text-xs text-slate-500 mt-1">Choose how you will be using the CAT platform</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-2">
+                    {/* Doctor Card */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRegisterRole('doctor');
+                        setRegisterStep(2);
+                      }}
+                      className="p-5 border border-blue-100 hover:border-blue-300 rounded-2xl bg-blue-50/20 hover:bg-blue-50/50 transition-all text-center flex flex-col items-center gap-3 cursor-pointer group"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <Stethoscope className="w-6 h-6" />
+                      </div>
+                      <span className="font-bold text-xs text-slate-800">Doctor / Clinician</span>
+                    </button>
+
+                    {/* Parent Card */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRegisterRole('parent');
+                        setRegisterStep(2);
+                      }}
+                      className="p-5 border border-emerald-100 hover:border-emerald-300 rounded-2xl bg-emerald-50/20 hover:bg-emerald-50/50 transition-all text-center flex flex-col items-center gap-3 cursor-pointer group"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-650 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <Heart className="w-6 h-6" />
+                      </div>
+                      <span className="font-bold text-xs text-slate-800">Parent / Caregiver</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (!regFullName || !regEmail || !regPassword || !regConfirmPassword) {
+                      setRegisterError('All fields are required.');
+                      return;
+                    }
+                    if (regPassword !== regConfirmPassword) {
+                      setRegisterError('Passwords do not match.');
+                      return;
+                    }
+                    if (regPassword.length < 6) {
+                      setRegisterError('Password must be at least 6 characters.');
+                      return;
+                    }
+
+                    setRegisterLoading(true);
+                    setRegisterError(null);
+
+                    try {
+                      const res = await registerUser({
+                        fullName: regFullName,
+                        email: regEmail,
+                        password: regPassword,
+                        role: registerRole,
+                      });
+
+                      if (res.success) {
+                        setIsRegisterOpen(false);
+                        if (registerRole === 'parent') {
+                          navigate('/parent-dashboard');
+                        } else {
+                          navigate('/dashboard');
+                        }
+                      } else {
+                        setRegisterError(res.message || 'Registration failed.');
+                      }
+                    } catch (err) {
+                      setRegisterError(err.response?.data?.message || 'Registration failed. Email might be in use.');
+                    } finally {
+                      setRegisterLoading(false);
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  <div className="text-center">
+                    <h3 className="text-lg font-extrabold text-slate-900">
+                      Create {registerRole === 'doctor' ? 'Clinician' : 'Parent'} Account
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => setRegisterStep(1)}
+                      className="text-[11px] font-bold text-emerald-600 hover:underline mt-1 cursor-pointer"
+                    >
+                      Change Account Type
+                    </button>
+                  </div>
+
+                  {registerError && (
+                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span className="font-medium">{registerError}</span>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={regFullName}
+                      onChange={(e) => setRegFullName(e.target.value)}
+                      placeholder={registerRole === 'doctor' ? 'Dr. Jane Doe' : 'Jane Doe'}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-850 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={regEmail}
+                      onChange={(e) => setRegEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-850 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Password</label>
+                    <input
+                      type="password"
+                      required
+                      value={regPassword}
+                      onChange={(e) => setRegPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-850 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Confirm Password</label>
+                    <input
+                      type="password"
+                      required
+                      value={regConfirmPassword}
+                      onChange={(e) => setRegConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-850 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={registerLoading}
+                    className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl text-xs disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                  >
+                    {registerLoading ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Creating account...</span>
+                      </>
+                    ) : (
+                      <span>Create Account</span>
+                    )}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
