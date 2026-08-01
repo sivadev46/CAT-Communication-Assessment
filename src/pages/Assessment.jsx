@@ -16,7 +16,8 @@ import {
   ShieldAlert,
   Award,
   Loader2,
-  Trash2
+  Trash2,
+  Sparkles
 } from 'lucide-react';
 import Card from '../components/Card/Card';
 import Button from '../components/Button/Button';
@@ -26,6 +27,7 @@ import SkeletonLoader from '../components/Loader/SkeletonLoader';
 import { assessmentCategories } from '../data/assessmentData';
 import { patientService } from '../services/patientService';
 import { assessmentService } from '../services/assessmentService';
+import { reportService } from '../services/reportService';
 import { useAuth } from '../context/AuthContext';
 
 export default function Assessment() {
@@ -64,6 +66,10 @@ export default function Assessment() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // AI report states
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiError, setAiError] = useState(null);
 
   // Fetch patients list from backend API
   useEffect(() => {
@@ -286,6 +292,26 @@ export default function Assessment() {
     }
   };
 
+  // Generate AI Report calling backend
+  const handleGenerateAIReport = async () => {
+    if (!currentAssessmentId) return;
+
+    setIsGeneratingAI(true);
+    setAiError(null);
+    try {
+      const res = await reportService.generateAIReport({ assessmentId: currentAssessmentId });
+      if (res.success) {
+        navigate('/reports', { state: { highlightReportId: res.data?._id || res.data?.id } });
+      } else {
+        setAiError(res.message || 'AI Generation returned a failure response.');
+      }
+    } catch (err) {
+      setAiError(err.response?.data?.message || 'Error communicating with Google Gemini AI backend.');
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
   // Navigation between categories
   const handlePrevCategory = () => {
     if (activeCategoryIndex > 0) {
@@ -310,6 +336,25 @@ export default function Assessment() {
 
   return (
     <div className="space-y-6 pb-12">
+      {/* AI Generating Loading Overlay */}
+      {isGeneratingAI && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full p-8 text-center space-y-4 shadow-2xl border border-indigo-100 bg-white">
+            <div className="w-16 h-16 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto border border-indigo-100 shadow-xs">
+              <Sparkles className="w-8 h-8 fill-indigo-650 animate-pulse text-indigo-650" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900">Generating AI Report</h3>
+            <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+              Google Gemini is analyzing patient records, evaluation metrics, and clinician notes to formulate structured professional summaries and parent care guides.
+            </p>
+            <div className="flex items-center justify-center gap-2 text-indigo-655 font-bold text-xs pt-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Analyzing and formulating...</span>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* Top Patient Selector & Header Info */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-xs p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -372,12 +417,35 @@ export default function Assessment() {
 
       {/* Save Success Alert */}
       {saveSuccessMessage && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center justify-between text-sm shadow-xs">
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3.5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm shadow-xs animate-fade-in">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-            <span className="font-semibold">Assessment saved successfully to backend API database!</span>
+            <span className="font-semibold">Assessment saved successfully! You can now generate an AI Clinical Report.</span>
           </div>
-          <button onClick={() => setSaveSuccessMessage(false)} className="text-emerald-600 hover:text-emerald-800">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="primary"
+              onClick={handleGenerateAIReport}
+              className="text-xs !py-1 px-3 bg-emerald-650 hover:bg-emerald-700 text-white flex items-center gap-1 cursor-pointer border border-emerald-650"
+            >
+              <Sparkles className="w-3.5 h-3.5 fill-white text-white" />
+              <span>Generate AI Report</span>
+            </Button>
+            <button onClick={() => setSaveSuccessMessage(false)} className="text-emerald-600 hover:text-emerald-850 p-1">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* AI Error Banner */}
+      {aiError && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl flex items-center justify-between text-sm shadow-xs animate-shake">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-rose-600 flex-shrink-0" />
+            <span className="font-semibold">{aiError}</span>
+          </div>
+          <button onClick={() => setAiError(null)} className="text-rose-600 hover:text-rose-800">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -609,10 +677,21 @@ export default function Assessment() {
               >
                 Cancel
               </Button>
+              {currentAssessmentId && (
+                <Button
+                  variant="primary"
+                  onClick={handleGenerateAIReport}
+                  disabled={isSubmitting || isGeneratingAI}
+                  className="text-xs bg-indigo-650 hover:bg-indigo-700 text-white flex items-center justify-center gap-1 px-4 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5 fill-white text-white" />
+                  <span>Generate AI Report</span>
+                </Button>
+              )}
               <Button
                 variant="primary"
                 onClick={handleSave}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isGeneratingAI}
                 className="text-xs flex items-center justify-center gap-1 px-5"
               >
                 {isSubmitting ? (

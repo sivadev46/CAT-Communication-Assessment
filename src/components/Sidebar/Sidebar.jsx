@@ -20,7 +20,6 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Caregiver', path: '/caregiver', icon: HeartHandshake },
     { name: 'Teaching Videos', path: '/teaching-videos', icon: Video },
     { name: 'VR Assessment', path: '/vr', icon: Glasses },
-    { name: 'Settings', path: '/settings', icon: Settings },
   ];
 
   return (

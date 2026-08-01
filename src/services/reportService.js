@@ -6,6 +6,16 @@ export const reportService = {
     return response.data;
   },
 
+  generateAIReport: async (reportData) => {
+    const response = await api.post('/reports/generate-ai', reportData);
+    return response.data;
+  },
+
+  getReports: async () => {
+    const response = await api.get('/reports');
+    return response.data;
+  },
+
   getReport: async (id) => {
     const response = await api.get(`/reports/${id}`);
     return response.data;

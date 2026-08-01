@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   FileText,
   Download,
-  Share2,
   Calendar,
   User,
   CheckCircle2,
@@ -11,7 +11,12 @@ import {
   Award,
   Plus,
   Trash2,
-  Loader2
+  Loader2,
+  Sparkles,
+  Copy,
+  Check,
+  Heart,
+  Printer
 } from 'lucide-react';
 import Header from '../components/Header/Header';
 import Card from '../components/Card/Card';
@@ -24,6 +29,8 @@ import { reportService } from '../services/reportService';
 import { assessmentService } from '../services/assessmentService';
 
 export default function Reports() {
+  const location = useLocation();
+
   const [reports, setReports] = useState([]);
   const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +40,7 @@ export default function Reports() {
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copiedSection, setCopiedSection] = useState(null);
 
   const fetchReportsAndAssessments = async () => {
     setLoading(true);
@@ -45,7 +53,17 @@ export default function Reports() {
 
       if (reportsRes.success && reportsRes.data) {
         setReports(reportsRes.data);
-        if (reportsRes.data.length > 0) {
+        
+        // Highlight a specific report if redirected from assessment save success
+        const highlightId = location.state?.highlightReportId;
+        if (highlightId) {
+          const found = reportsRes.data.find(r => (r._id === highlightId || r.id === highlightId));
+          if (found) {
+            setActiveReport(found);
+          } else if (reportsRes.data.length > 0) {
+            setActiveReport(reportsRes.data[0]);
+          }
+        } else if (reportsRes.data.length > 0) {
           setActiveReport(reportsRes.data[0]);
         }
       }
@@ -65,7 +83,7 @@ export default function Reports() {
 
   useEffect(() => {
     fetchReportsAndAssessments();
-  }, []);
+  }, [location.state?.highlightReportId]);
 
   // Handle generating a new report for an assessment
   const handleGenerateReport = async (e) => {
@@ -77,10 +95,32 @@ export default function Reports() {
       const res = await reportService.generateReport({ assessmentId: selectedAssessmentId });
       if (res.success && res.data) {
         setIsGenerateModalOpen(false);
-        fetchReportsAndAssessments();
+        await fetchReportsAndAssessments();
       }
     } catch (err) {
       alert(err.response?.data?.message || 'Error generating report.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle generating an AI report using Gemini
+  const handleGenerateAIReport = async () => {
+    if (!selectedAssessmentId) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await reportService.generateAIReport({ assessmentId: selectedAssessmentId });
+      if (res.success && res.data) {
+        setIsGenerateModalOpen(false);
+        await fetchReportsAndAssessments();
+        // Highlight the newly created AI report
+        const reportId = res.data?._id || res.data?.id;
+        const found = reports.find(r => r._id === reportId || r.id === reportId);
+        setActiveReport(found || res.data);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error generating AI report.');
     } finally {
       setIsSubmitting(false);
     }
@@ -108,6 +148,13 @@ export default function Reports() {
     window.print();
   };
 
+  // Copy helper
+  const handleCopyText = (text, sectionName) => {
+    navigator.clipboard.writeText(text);
+    setCopiedSection(sectionName);
+    setTimeout(() => setCopiedSection(null), 2500);
+  };
+
   if (loading) {
     return (
       <div className="space-y-6 pb-12">
@@ -126,7 +173,7 @@ export default function Reports() {
   const domainBreakdown = activeReport?.clinicalReport?.domainBreakdown || {};
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12 font-sans">
       <Header
         title="Assessment Reports"
         subtitle="Clinical diagnostic reports, caregiver guides, and PDF export modules."
@@ -181,6 +228,7 @@ export default function Reports() {
             {reports.map((report) => {
               const reportPt = report.assessment?.patient;
               const isSelected = activeReport && (activeReport._id === report._id || activeReport.id === report.id);
+              const isAI = report.clinicalReport?.isAiGenerated;
 
               return (
                 <Card
@@ -197,8 +245,13 @@ export default function Reports() {
                       <h4 className="font-bold text-gray-900 text-xs">
                         {reportPt?.fullName || 'Patient Report'}
                       </h4>
-                      <p className="text-[11px] text-gray-500 mt-0.5">
-                        MRN: {reportPt?.patientId || 'N/A'}
+                      <p className="text-[11px] text-gray-500 mt-0.5 flex items-center gap-1.5">
+                        <span>MRN: {reportPt?.patientId || 'N/A'}</span>
+                        {isAI && (
+                          <span className="px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-600 text-[8px] font-bold border border-indigo-100 flex items-center gap-0.5">
+                            <Sparkles className="w-2 h-2 fill-indigo-550 text-indigo-550" /> AI
+                          </span>
+                        )}
                       </p>
                     </div>
                     <button
@@ -206,7 +259,7 @@ export default function Reports() {
                         e.stopPropagation();
                         handleDeleteReport(report._id || report.id);
                       }}
-                      className="text-gray-400 hover:text-rose-600 p-1"
+                      className="text-gray-400 hover:text-rose-600 p-1 cursor-pointer"
                       title="Delete report"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -229,36 +282,89 @@ export default function Reports() {
           {/* Right Column: Detailed Printable Clinical Report View */}
           {activeReport && (
             <div className="lg:col-span-3 space-y-6">
-              <Card className="!p-8 space-y-8 bg-white print:border-none print:shadow-none">
+              <Card className="!p-8 space-y-8 bg-white print:border-none print:shadow-none print:!p-0 border border-gray-200 shadow-sm">
+                
                 {/* Report Header */}
-                <div className="border-b border-gray-200 pb-6 flex flex-col sm:flex-row justify-between gap-4">
-                  <div>
-                    <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-                      Speech Language Diagnostic Report
+                <div className="border-b border-gray-200 pb-6 flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div className="space-y-1">
+                    <span className="text-xs font-bold text-blue-600 uppercase tracking-wider flex items-center gap-1">
+                      <FileText className="w-4 h-4" />
+                      <span>Speech Language Diagnostic Report</span>
                     </span>
                     <h2 className="text-2xl font-extrabold text-gray-900 mt-1">
                       {patient?.fullName || 'Patient Evaluation Report'}
                     </h2>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Communication Assessment Tool (CAT) Standardized Evaluation
-                    </p>
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 pt-1">
+                      <p><span className="font-semibold text-gray-700">Evaluator:</span> {clinician?.fullName || 'Dr. Sarah Jenkins'}</p>
+                      <p><span className="font-semibold text-gray-700">Date:</span> {new Date(activeReport.createdAt || Date.now()).toLocaleDateString()}</p>
+                    </div>
                   </div>
 
-                  <div className="text-left sm:text-right text-xs text-gray-600 space-y-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <p><span className="font-semibold text-gray-700">MRN:</span> {patient?.patientId || 'N/A'}</p>
-                    <p><span className="font-semibold text-gray-700">Age / Gender:</span> {patient?.age} yrs / {patient?.gender || 'N/A'}</p>
-                    <p><span className="font-semibold text-gray-700">Evaluator:</span> {clinician?.fullName || 'Dr. Sarah Jenkins'}</p>
-                    <p><span className="font-semibold text-gray-700">Date:</span> {new Date(activeReport.createdAt || Date.now()).toLocaleDateString()}</p>
-                  </div>
+                  {activeReport.clinicalReport?.isAiGenerated ? (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-150 text-indigo-700 text-xs font-bold shadow-2xs print:bg-slate-100 print:text-slate-800">
+                      <Sparkles className="w-3.5 h-3.5 fill-indigo-650 text-indigo-650" />
+                      <span>AI Generated by Gemini</span>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-50 border border-gray-250 text-gray-600 text-xs font-semibold">
+                      <span>Standard Report Template</span>
+                    </div>
+                  )}
                 </div>
+
+                {/* AI Metadata Banner (Risk Level & Follow-up Recommendation) */}
+                {(activeReport.clinicalReport?.riskLevel || activeReport.clinicalReport?.followUpRecommendation) && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-b border-gray-100 pb-6">
+                    <div>
+                      <span className="text-[10px] text-gray-450 font-bold uppercase tracking-wider block mb-1">Developmental Risk Level</span>
+                      {activeReport.clinicalReport?.riskLevel ? (
+                        <span className={`px-2.5 py-1 rounded-lg text-xs font-bold inline-block ${
+                          activeReport.clinicalReport.riskLevel === 'High' 
+                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                            : activeReport.clinicalReport.riskLevel === 'Medium'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        }`}>
+                          {activeReport.clinicalReport.riskLevel} Risk
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-500 font-medium">Not evaluated</span>
+                      )}
+                    </div>
+                    <div className="sm:col-span-2">
+                      <span className="text-[10px] text-gray-450 font-bold uppercase tracking-wider block mb-1">Suggested Follow-Up Plan</span>
+                      <span className="text-xs text-gray-800 font-semibold block mt-1 leading-relaxed">
+                        {activeReport.clinicalReport?.followUpRecommendation || 'No suggestion logged'}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Clinical Executive Summary */}
                 <div className="space-y-3">
-                  <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-blue-600" />
-                    <span>Clinical Executive Summary</span>
-                  </h3>
-                  <p className="text-xs text-gray-700 leading-relaxed bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      <span>Clinical Executive Summary</span>
+                    </h3>
+                    <button
+                      onClick={() => handleCopyText(activeReport.clinicalReport?.summary || '', 'summary')}
+                      className="p-1.5 rounded text-gray-400 hover:text-blue-600 cursor-pointer flex items-center gap-1 text-[10px] border border-transparent hover:border-gray-200 bg-gray-50/50"
+                    >
+                      {copiedSection === 'summary' ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          <span className="text-emerald-600 font-semibold">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-700 leading-relaxed bg-blue-50/20 p-4 rounded-xl border border-blue-100/60 font-medium">
                     {activeReport.clinicalReport?.summary ||
                       `Standardized CAT evaluation completed. Overall communication baseline index established at ${activeReport.clinicalReport?.overallScore || 84}%.`}
                   </p>
@@ -305,33 +411,37 @@ export default function Reports() {
                 {/* Strengths & Improvement Areas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Strengths */}
-                  <div className="space-y-3 bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
-                    <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Key Clinical Strengths
-                    </h4>
-                    <ul className="space-y-2 text-xs text-emerald-900">
-                      {(activeReport.strengths || []).map((str, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <span className="text-emerald-500 font-bold">•</span>
-                          <span>{str}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="space-y-3 bg-emerald-50/60 p-4 rounded-xl border border-emerald-100 flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5 mb-3 border-b border-emerald-100 pb-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Key Clinical Strengths
+                      </h4>
+                      <ul className="space-y-2 text-xs text-emerald-900">
+                        {(activeReport.strengths || []).map((str, idx) => (
+                          <li key={idx} className="flex items-start gap-2 leading-relaxed">
+                            <span className="text-emerald-500 font-bold">•</span>
+                            <span>{str}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
 
                   {/* Areas for Improvement */}
-                  <div className="space-y-3 bg-amber-50/60 p-4 rounded-xl border border-amber-100">
-                    <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
-                      <TrendingUp className="w-4 h-4 text-amber-600" /> Focus Improvement Areas
-                    </h4>
-                    <ul className="space-y-2 text-xs text-amber-900">
-                      {(activeReport.areasForImprovement || []).map((area, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <span className="text-amber-500 font-bold">•</span>
-                          <span>{area}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="space-y-3 bg-amber-50/60 p-4 rounded-xl border border-amber-100 flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5 mb-3 border-b border-amber-100 pb-2">
+                        <TrendingUp className="w-4 h-4 text-amber-600" /> Focus Improvement Areas
+                      </h4>
+                      <ul className="space-y-2 text-xs text-amber-900">
+                        {(activeReport.areasForImprovement || []).map((area, idx) => (
+                          <li key={idx} className="flex items-start gap-2 leading-relaxed">
+                            <span className="text-amber-500 font-bold">•</span>
+                            <span>{area}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
 
@@ -350,6 +460,62 @@ export default function Reports() {
                     ))}
                   </div>
                 </div>
+
+                {/* Caregiver Report Panel Preview (Green Parent friendly theme) */}
+                {activeReport.caregiverReport && (
+                  <div className="space-y-4 pt-6 border-t border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Heart className="w-5 h-5 text-emerald-600 fill-emerald-100" />
+                        <h3 className="text-sm font-bold text-gray-900">
+                          Caregiver & Parent Guide (Simple Language)
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => handleCopyText(
+                          `${activeReport.caregiverReport.summary || ''}\n\nHome Strategies:\n${(activeReport.caregiverReport.homeStrategies || []).join('\n')}`,
+                          'caregiver'
+                        )}
+                        className="p-1.5 rounded text-gray-400 hover:text-emerald-600 cursor-pointer flex items-center gap-1 text-[10px] border border-transparent hover:border-gray-200 bg-gray-50/50"
+                      >
+                        {copiedSection === 'caregiver' ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            <span className="text-emerald-600 font-semibold">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy Caregiver Guide</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    
+                    <div className="p-5 bg-emerald-50/30 rounded-xl border border-emerald-105 space-y-4">
+                      <div>
+                        <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider block mb-1">Friendly Summary</span>
+                        <p className="text-xs text-emerald-900 leading-relaxed font-medium">
+                          {activeReport.caregiverReport.summary}
+                        </p>
+                      </div>
+
+                      {activeReport.caregiverReport.homeStrategies && activeReport.caregiverReport.homeStrategies.length > 0 && (
+                        <div>
+                          <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider block mb-2">Recommended Home Activities</span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {activeReport.caregiverReport.homeStrategies.map((strategy, idx) => (
+                              <div key={idx} className="p-3 bg-white rounded-lg border border-emerald-50 text-xs text-emerald-850 flex items-start gap-2 shadow-2xs">
+                                <span className="font-bold text-emerald-600 mt-0.5">•</span>
+                                <span>{strategy}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </Card>
             </div>
           )}
@@ -372,23 +538,48 @@ export default function Reports() {
             >
               {assessments.map((a) => (
                 <option key={a._id} value={a._id}>
-                  {a.patient?.fullName || 'Patient'} - Score: {a.overallScore}% ({new Date(a.createdAt).toLocaleDateString()})
+                  {a.patient?.fullName || 'Patient'} - Score: {a.overallScore || a.overallPercentage || 0}% ({new Date(a.createdAt).toLocaleDateString()})
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="pt-3 border-t border-gray-100 flex justify-end gap-2">
+          <div className="pt-4 border-t border-gray-150 flex flex-wrap justify-between items-center gap-3">
             <Button
               variant="outline"
               type="button"
               onClick={() => setIsGenerateModalOpen(false)}
+              className="text-xs"
             >
               Cancel
             </Button>
-            <Button variant="primary" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Generate Report'}
-            </Button>
+            
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                type="submit" 
+                disabled={isSubmitting}
+                className="text-xs"
+              >
+                {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Generate Manual Report'}
+              </Button>
+              <Button 
+                variant="primary" 
+                type="button" 
+                onClick={handleGenerateAIReport}
+                disabled={isSubmitting}
+                className="text-xs bg-indigo-650 hover:bg-indigo-755 text-white flex items-center gap-1 cursor-pointer border border-indigo-650"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5 fill-white text-white" />
+                    <span>Generate AI Report</span>
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </Modal>

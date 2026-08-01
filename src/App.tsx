@@ -3,7 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
-import Login from './pages/Login';
+import RoleSelection from './pages/RoleSelection';
+import DoctorLogin from './pages/DoctorLogin';
+import ParentLogin from './pages/ParentLogin';
+import ParentDashboard from './pages/ParentDashboard';
 import Dashboard from './pages/Dashboard';
 import Patients from './pages/Patients';
 import Assessment from './pages/Assessment';
@@ -19,12 +22,18 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          {/* Public Entry Experience Routes */}
+          <Route path="/" element={<RoleSelection />} />
+          <Route path="/doctor-login" element={<DoctorLogin />} />
+          <Route path="/parent-login" element={<ParentLogin />} />
+          <Route path="/parent-dashboard" element={<ParentDashboard />} />
 
-          {/* Protected Dashboard Routes */}
+          {/* Legacy /login redirects to new doctor-login for ProtectedRoute compatibility */}
+          <Route path="/login" element={<Navigate to="/doctor-login" replace />} />
+
+          {/* Protected Dashboard Routes for Doctor/Clinician */}
           <Route element={<ProtectedRoute />}>
             <Route element={<DashboardLayout />}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/patients" element={<Patients />} />
               <Route path="/assessment" element={<Assessment />} />

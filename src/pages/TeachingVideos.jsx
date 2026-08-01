@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
-  PlayCircle,
+  Youtube,
   Search,
   Filter,
   Heart,
@@ -9,14 +9,10 @@ import {
   BookOpen,
   CheckCircle2,
   X,
-  Share2,
   Tag,
-  Eye,
-  Award,
   Film,
-  UserCheck,
   RotateCcw,
-  Check
+  ExternalLink
 } from 'lucide-react';
 import Header from '../components/Header/Header';
 import Card from '../components/Card/Card';
@@ -63,7 +59,7 @@ export default function TeachingVideos() {
         vid.title.toLowerCase().includes(query) ||
         vid.description.toLowerCase().includes(query) ||
         vid.category.toLowerCase().includes(query) ||
-        vid.relatedBehaviors.some((b) => b.toLowerCase().includes(query));
+        vid.tags.some((t) => t.toLowerCase().includes(query));
 
       const matchesCategory =
         selectedCategory === 'All' || vid.category === selectedCategory;
@@ -96,19 +92,19 @@ export default function TeachingVideos() {
     switch (level) {
       case 'Beginner':
         return (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
             Beginner
           </span>
         );
       case 'Intermediate':
         return (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
             Intermediate
           </span>
         );
       case 'Advanced':
         return (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
             Advanced
           </span>
         );
@@ -118,7 +114,7 @@ export default function TeachingVideos() {
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12 font-sans">
       <Header
         title="Teaching Videos"
         subtitle="Watch instructional videos linked to communication behaviours and intervention techniques."
@@ -140,7 +136,7 @@ export default function TeachingVideos() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -225,35 +221,41 @@ export default function TeachingVideos() {
                     key={video.id}
                     className="group hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden !p-0 border border-gray-200"
                   >
-                    {/* Video Thumbnail Placeholder */}
+                    {/* Video Thumbnail using live YouTube API */}
                     <div
                       onClick={() => handleOpenVideo(video)}
-                      className={`relative h-40 ${video.thumbnailBg} p-4 flex flex-col justify-between cursor-pointer overflow-hidden`}
+                      className="relative h-40 bg-slate-900 cursor-pointer overflow-hidden"
                     >
-                      <div className="flex items-start justify-between z-10">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/90 text-gray-800 backdrop-blur-xs">
+                      <img 
+                        src={`https://img.youtube.com/vi/${video.youtubeVideoId}/mqdefault.jpg`}
+                        alt={video.title}
+                        className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-300"
+                      />
+
+                      {/* Header overlay */}
+                      <div className="absolute top-3 left-3 z-10">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/95 text-gray-800 shadow-sm">
                           {video.category}
                         </span>
-                        <button
-                          onClick={(e) => toggleFavorite(e, video.id)}
-                          className="p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-xs transition-colors cursor-pointer"
-                        >
-                          <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500 text-rose-500' : 'text-white'}`} />
-                        </button>
                       </div>
 
-                      {/* Center Play Button Overlay */}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-all">
-                        <div className="w-12 h-12 rounded-full bg-white/90 text-blue-600 flex items-center justify-center shadow-md transform group-hover:scale-110 transition-transform">
-                          <PlayCircle className="w-8 h-8 fill-blue-600 text-white" />
-                        </div>
-                      </div>
+                      <button
+                        onClick={(e) => toggleFavorite(e, video.id)}
+                        className="absolute top-3 right-3 p-1.5 rounded-full bg-black/45 hover:bg-black/60 text-white backdrop-blur-xs transition-colors cursor-pointer z-20"
+                      >
+                        <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-rose-500 text-rose-500' : 'text-white'}`} />
+                      </button>
 
-                      <div className="flex items-center justify-between z-10 text-white text-[11px] font-medium">
-                        <span className="flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-md backdrop-blur-xs">
+                      {/* Video Badges Bottom Overlay */}
+                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 z-10">
+                        <span className="flex items-center gap-1 bg-black/60 text-white text-[10px] font-semibold px-2 py-0.5 rounded backdrop-blur-xs">
                           <Clock className="w-3 h-3" /> {video.duration}
                         </span>
-                        {getDifficultyBadge(video.difficulty)}
+                      </div>
+
+                      <div className="absolute bottom-3 right-3 px-2 py-0.5 rounded bg-red-655 text-white text-[9px] font-bold flex items-center gap-1 backdrop-blur-xs shadow-sm z-10">
+                        <Youtube className="w-3 h-3 text-white fill-white" />
+                        <span>YouTube</span>
                       </div>
                     </div>
 
@@ -271,30 +273,31 @@ export default function TeachingVideos() {
                         </p>
                       </div>
 
-                      {/* Related Behaviors Tags */}
+                      {/* Tags */}
                       <div className="flex flex-wrap gap-1">
-                        {video.relatedBehaviors.slice(0, 2).map((beh, idx) => (
+                        {video.tags.slice(0, 2).map((beh, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded-md bg-gray-100 text-[10px] font-medium text-gray-600 flex items-center gap-0.5"
+                            className="px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-[10px] font-semibold text-slate-600 flex items-center gap-0.5"
                           >
-                            <Tag className="w-2.5 h-2.5 text-gray-400" /> {beh}
+                            <Tag className="w-2.5 h-2.5 text-slate-400" /> {beh}
                           </span>
                         ))}
                       </div>
 
                       {/* Card Action */}
-                      <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
-                        <span className="text-[11px] text-gray-400 font-medium flex items-center gap-1">
-                          <Eye className="w-3 h-3" /> {video.views} views
+                      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span>
+                          {getDifficultyBadge(video.difficulty)}
                         </span>
+                        
                         <Button
-                          variant="secondary"
-                          onClick={() => handleOpenVideo(video)}
-                          className="text-xs py-1 px-3 flex items-center gap-1"
+                          variant="outline"
+                          onClick={() => window.open(video.youtubeUrl, '_blank')}
+                          className="text-[11px] py-1.5 px-3 flex items-center gap-1.5 cursor-pointer bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-200"
                         >
-                          <PlayCircle className="w-3.5 h-3.5 text-blue-600" />
-                          <span>Watch Video</span>
+                          <Youtube className="w-3.5 h-3.5 fill-red-600 text-red-600" />
+                          <span>▶ Watch on YouTube</span>
                         </Button>
                       </div>
                     </div>
@@ -309,7 +312,7 @@ export default function TeachingVideos() {
         <div className="space-y-6">
           
           {/* Recently Viewed Panel */}
-          <Card className="!p-4 space-y-3">
+          <Card className="!p-4 space-y-3 border border-gray-200 shadow-2xs">
             <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
               <RotateCcw className="w-4 h-4 text-blue-600" />
               Recently Viewed
@@ -324,8 +327,15 @@ export default function TeachingVideos() {
                     onClick={() => handleOpenVideo(vid)}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-200"
                   >
-                    <div className={`w-12 h-10 rounded-md ${vid.thumbnailBg} flex items-center justify-center flex-shrink-0 text-white`}>
-                      <PlayCircle className="w-5 h-5" />
+                    <div className="w-12 h-10 rounded-md overflow-hidden bg-slate-900 flex-shrink-0 relative">
+                      <img 
+                        src={`https://img.youtube.com/vi/${vid.youtubeVideoId}/mqdefault.jpg`} 
+                        alt="" 
+                        className="w-full h-full object-cover opacity-80" 
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Youtube className="w-4 h-4 text-red-600 fill-white" />
+                      </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-gray-800 truncate leading-tight">{vid.title}</p>
@@ -359,10 +369,10 @@ export default function TeachingVideos() {
                     </span>
                   </div>
                   <h4 className="text-xs font-bold text-gray-900 leading-snug line-clamp-2">{vid.title}</h4>
-                  <div className="flex items-center justify-between pt-1 border-t border-gray-100">
-                    <span className="text-[10px] text-gray-500">{vid.author}</span>
-                    <span className="text-xs font-semibold text-blue-600 flex items-center gap-0.5 hover:underline">
-                      Watch <PlayCircle className="w-3 h-3" />
+                  <div className="flex items-center justify-between pt-1.5 border-t border-gray-100">
+                    <span className="text-[9px] text-gray-400">{vid.difficulty}</span>
+                    <span className="text-xs font-semibold text-blue-650 flex items-center gap-0.5 hover:underline">
+                      Watch <ExternalLink className="w-3 h-3" />
                     </span>
                   </div>
                 </div>
@@ -381,18 +391,15 @@ export default function TeachingVideos() {
         >
           <div className="space-y-5 text-xs text-gray-700">
             
-            {/* Large Video Player Placeholder */}
-            <div className={`w-full h-64 md:h-72 ${selectedVideo.thumbnailBg} rounded-2xl flex flex-col items-center justify-center text-white p-6 relative overflow-hidden shadow-inner`}>
-              <div className="w-16 h-16 rounded-full bg-white/90 text-blue-600 flex items-center justify-center shadow-lg cursor-pointer transform hover:scale-105 transition-transform">
-                <PlayCircle className="w-12 h-12 fill-blue-600 text-white" />
-              </div>
-              <p className="text-sm font-bold mt-3 text-white">Instructional Video Stream Demonstration</p>
-              <p className="text-xs text-white/80 mt-0.5">Duration: {selectedVideo.duration} • HD 1080p</p>
-              
-              <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-[11px] text-white/90 bg-black/30 px-3 py-1.5 rounded-lg backdrop-blur-xs">
-                <span>{selectedVideo.author}</span>
-                <span>{selectedVideo.views} views</span>
-              </div>
+            {/* Embedded Live YouTube Player using iframe */}
+            <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-md bg-slate-900 border border-slate-800">
+              <iframe
+                src={`https://www.youtube.com/embed/${selectedVideo.youtubeVideoId}?rel=0&autoplay=1`}
+                title={selectedVideo.title}
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
             </div>
 
             {/* Title & Metadata */}
@@ -402,6 +409,9 @@ export default function TeachingVideos() {
                   {selectedVideo.category}
                 </span>
                 {getDifficultyBadge(selectedVideo.difficulty)}
+                <span className="text-slate-400 text-xs flex items-center gap-0.5 ml-2">
+                  <Clock className="w-3.5 h-3.5" /> {selectedVideo.duration}
+                </span>
               </div>
               <button
                 onClick={(e) => toggleFavorite(e, selectedVideo.id)}
@@ -438,11 +448,11 @@ export default function TeachingVideos() {
               </ul>
             </div>
 
-            {/* Related Behaviours */}
+            {/* Target Behaviors Tags */}
             <div>
               <h4 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-2">Target Communication Behaviours</h4>
               <div className="flex flex-wrap gap-1.5">
-                {selectedVideo.relatedBehaviors.map((b, i) => (
+                {selectedVideo.tags.map((b, i) => (
                   <span key={i} className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 font-medium text-xs border border-blue-100 flex items-center gap-1">
                     <Tag className="w-3 h-3 text-blue-500" /> {b}
                   </span>
@@ -451,9 +461,18 @@ export default function TeachingVideos() {
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-3 border-t border-gray-100 flex justify-end">
+            <div className="pt-3 border-t border-gray-100 flex items-center justify-between gap-4">
               <Button
                 variant="outline"
+                onClick={() => window.open(selectedVideo.youtubeUrl, '_blank')}
+                className="text-xs flex items-center gap-1.5 bg-red-50 text-red-655 hover:bg-red-100/80 border-red-200"
+              >
+                <Youtube className="w-4 h-4 fill-red-600 text-red-600" />
+                <span>Open in YouTube Tab</span>
+              </Button>
+              
+              <Button
+                variant="secondary"
                 onClick={() => setSelectedVideo(null)}
                 className="text-xs"
               >

@@ -20,9 +20,9 @@ export const mockVideos = [
       'Utilize visual focal points and positive reinforcement.',
       'Recognize over-stimulation cues and implement sensory pauses.'
     ],
-    relatedBehaviors: ['Sustained Gaze', 'Social Greeting', 'Turn-Taking'],
-    thumbnailBg: 'bg-gradient-to-br from-blue-500 to-indigo-600',
-    views: '1.2k',
+    tags: ['Sustained Gaze', 'Social Greeting', 'Turn-Taking'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=2_Csk_uG29c',
+    youtubeVideoId: '2_Csk_uG29c',
     author: 'Dr. Sarah Jenkins, CCC-SLP'
   },
   {
@@ -37,9 +37,9 @@ export const mockVideos = [
       'Use playful pauses to prompt natural eye contact.',
       'Build gaze duration gradually from 1 second to 3+ seconds.'
     ],
-    relatedBehaviors: ['Joint Attention', 'Play Engagement'],
-    thumbnailBg: 'bg-gradient-to-br from-blue-600 to-teal-600',
-    views: '940',
+    tags: ['Joint Attention', 'Play Engagement'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=2_Csk_uG29c',
+    youtubeVideoId: '2_Csk_uG29c',
     author: 'Mark Davis, Pediatric SLP'
   },
   {
@@ -54,9 +54,9 @@ export const mockVideos = [
       'Establish triadic attention between clinician, learner, and item.',
       'Use vocal inflection to draw shared focus.'
     ],
-    relatedBehaviors: ['Point Following', 'Shared Interest', 'Receptive Cueing'],
-    thumbnailBg: 'bg-gradient-to-br from-teal-500 to-emerald-600',
-    views: '2.1k',
+    tags: ['Point Following', 'Shared Interest', 'Receptive Cueing'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=9hR870hC1W0',
+    youtubeVideoId: '9hR870hC1W0',
     author: 'Dr. Emily Chen, Clinical Director'
   },
   {
@@ -71,9 +71,9 @@ export const mockVideos = [
       'Pause on key images to invite joint pointing.',
       'Combine auditory naming with physical page-touching.'
     ],
-    relatedBehaviors: ['Book Engagement', 'Receptive Naming'],
-    thumbnailBg: 'bg-gradient-to-br from-emerald-500 to-teal-700',
-    views: '1.5k',
+    tags: ['Book Engagement', 'Receptive Naming'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=9hR870hC1W0',
+    youtubeVideoId: '9hR870hC1W0',
     author: 'Laura Adams, MS, CCC-SLP'
   },
   {
@@ -88,9 +88,9 @@ export const mockVideos = [
       'Fade physical prompts systematically.',
       'Evaluate response latency and comprehension accuracy.'
     ],
-    relatedBehaviors: ['Instruction Following', 'Auditory Processing'],
-    thumbnailBg: 'bg-gradient-to-br from-indigo-500 to-purple-600',
-    views: '3.4k',
+    tags: ['Instruction Following', 'Auditory Processing'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=HkSmBylT11w',
+    youtubeVideoId: 'HkSmBylT11w',
     author: 'Robert Vance, Lead Speech Pathologist'
   },
   {
@@ -105,9 +105,9 @@ export const mockVideos = [
       'Reinforce correct object selections with immediate praise.',
       'Expand vocabulary arrays progressively.'
     ],
-    relatedBehaviors: ['Receptive Vocabulary', 'Choice Making'],
-    thumbnailBg: 'bg-gradient-to-br from-purple-500 to-pink-600',
-    views: '1.8k',
+    tags: ['Receptive Vocabulary', 'Choice Making'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=HkSmBylT11w',
+    youtubeVideoId: 'HkSmBylT11w',
     author: 'Dr. Sarah Jenkins, CCC-SLP'
   },
   {
@@ -122,9 +122,9 @@ export const mockVideos = [
       'Incorporate brief delay periods before task execution.',
       'Track comprehension retention across sessions.'
     ],
-    relatedBehaviors: ['Auditory Working Memory', 'Complex Tasks'],
-    thumbnailBg: 'bg-gradient-to-br from-blue-600 to-purple-700',
-    views: '890',
+    tags: ['Auditory Working Memory', 'Complex Tasks'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=HkSmBylT11w',
+    youtubeVideoId: 'HkSmBylT11w',
     author: 'Dr. Emily Chen, Clinical Director'
   },
   {
@@ -139,9 +139,9 @@ export const mockVideos = [
       'Transitioning from hummed melodies to spoken phrases.',
       'Practicing essential functional words (water, help, yes/no).'
     ],
-    relatedBehaviors: ['Word Retrieval', 'Vocal Pitch', 'Syllable Staging'],
-    thumbnailBg: 'bg-gradient-to-br from-amber-500 to-orange-600',
-    views: '2.7k',
+    tags: ['Word Retrieval', 'Vocal Pitch', 'Syllable Staging'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtubeVideoId: 'dQw4w9WgXcQ',
     author: 'Rachel Taylor, Neurological SLP'
   },
   {
@@ -156,9 +156,9 @@ export const mockVideos = [
       'Model carrier phrases with clear articulation.',
       'Encourage self-correction and verbal repetition.'
     ],
-    relatedBehaviors: ['Phrase Building', 'Expressive Syntax'],
-    thumbnailBg: 'bg-gradient-to-br from-orange-500 to-rose-600',
-    views: '1.9k',
+    tags: ['Phrase Building', 'Expressive Syntax'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtubeVideoId: 'dQw4w9WgXcQ',
     author: 'Mark Davis, Pediatric SLP'
   },
   {
@@ -173,9 +173,9 @@ export const mockVideos = [
       'Prompt icon touching paired with verbal modeling.',
       'Transition from single icons to full sentence strings.'
     ],
-    relatedBehaviors: ['AAC Devices', 'Symbolic Communication'],
-    thumbnailBg: 'bg-gradient-to-br from-rose-500 to-pink-700',
-    views: '4.1k',
+    tags: ['AAC Devices', 'Symbolic Communication'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtubeVideoId: 'dQw4w9WgXcQ',
     author: 'Dr. Sarah Jenkins, CCC-SLP'
   },
   {
@@ -190,9 +190,9 @@ export const mockVideos = [
       'Enforce 3-second wait times before speaking.',
       'Acknowledge partner responses with head nods.'
     ],
-    relatedBehaviors: ['Turn Taking', 'Pragmatics', 'Active Listening'],
-    thumbnailBg: 'bg-gradient-to-br from-cyan-500 to-blue-600',
-    views: '1.6k',
+    tags: ['Turn Taking', 'Pragmatics', 'Active Listening'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtubeVideoId: 'dQw4w9WgXcQ',
     author: 'Laura Adams, MS, CCC-SLP'
   },
   {
@@ -207,9 +207,9 @@ export const mockVideos = [
       'Practice empathetic response phrases.',
       'Roleplay common playground and group scenarios.'
     ],
-    relatedBehaviors: ['Emotion Recognition', 'Empathy', 'Social Response'],
-    thumbnailBg: 'bg-gradient-to-br from-sky-500 to-indigo-600',
-    views: '1.1k',
+    tags: ['Emotion Recognition', 'Empathy', 'Social Response'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtubeVideoId: 'dQw4w9WgXcQ',
     author: 'Dr. Emily Chen, Clinical Director'
   },
   {
@@ -224,9 +224,9 @@ export const mockVideos = [
       'Pair greetings with appropriate personal space distance.',
       'Reinforce successful social approaches.'
     ],
-    relatedBehaviors: ['Social Initiation', 'Peer Interaction'],
-    thumbnailBg: 'bg-gradient-to-br from-blue-500 to-emerald-600',
-    views: '2.3k',
+    tags: ['Social Initiation', 'Peer Interaction'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtubeVideoId: 'dQw4w9WgXcQ',
     author: 'Robert Vance, Lead Speech Pathologist'
   },
   {
@@ -241,9 +241,9 @@ export const mockVideos = [
       'Create a low-pressure group response environment.',
       'Use peer scaffolding effectively.'
     ],
-    relatedBehaviors: ['Group Therapy', 'Word Finding', 'Circumlocution'],
-    thumbnailBg: 'bg-gradient-to-br from-purple-600 to-blue-700',
-    views: '970',
+    tags: ['Group Therapy', 'Word Finding', 'Circumlocution'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtubeVideoId: 'dQw4w9WgXcQ',
     author: 'Rachel Taylor, Neurological SLP'
   },
   {
@@ -258,9 +258,9 @@ export const mockVideos = [
       'Distribute gaze prompts evenly across group participants.',
       'Track multi-directional joint attention switches.'
     ],
-    relatedBehaviors: ['Group Focus', 'Triadic Attention'],
-    thumbnailBg: 'bg-gradient-to-br from-teal-600 to-indigo-700',
-    views: '760',
+    tags: ['Group Focus', 'Triadic Attention'],
+    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtubeVideoId: 'dQw4w9WgXcQ',
     author: 'Mark Davis, Pediatric SLP'
   }
 ];
