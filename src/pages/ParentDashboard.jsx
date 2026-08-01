@@ -77,6 +77,18 @@ export default function ParentDashboard() {
     };
   }, [isReportModalOpen]);
 
+  const getComplianceColorClass = (val) => {
+    if (val >= 75) return 'from-emerald-500 to-teal-500'; // Green
+    if (val >= 35) return 'from-amber-400 to-amber-600'; // Amber
+    return 'from-rose-500 to-red-650'; // Red
+  };
+
+  const getComplianceTextColorClass = (val) => {
+    if (val >= 75) return 'text-emerald-700';
+    if (val >= 35) return 'text-amber-700';
+    return 'text-rose-700';
+  };
+
   const handleLogout = async () => {
     await logoutUser();
     navigate('/');
@@ -485,30 +497,30 @@ export default function ParentDashboard() {
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
                       <span>Receptive Language</span>
-                      <span className="text-emerald-700">{receptiveCompliance}%</span>
+                      <span className={getComplianceTextColorClass(receptiveCompliance)}>{receptiveCompliance}%</span>
                     </div>
                     <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full" style={{ width: `${receptiveCompliance}%` }} />
+                      <div className={`bg-gradient-to-r ${getComplianceColorClass(receptiveCompliance)} h-full rounded-full`} style={{ width: `${receptiveCompliance}%` }} />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
                       <span>Expressive Language</span>
-                      <span className="text-emerald-700">{expressiveCompliance}%</span>
+                      <span className={getComplianceTextColorClass(expressiveCompliance)}>{expressiveCompliance}%</span>
                     </div>
                     <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full" style={{ width: `${expressiveCompliance}%` }} />
+                      <div className={`bg-gradient-to-r ${getComplianceColorClass(expressiveCompliance)} h-full rounded-full`} style={{ width: `${expressiveCompliance}%` }} />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
                       <span>Social/Attention</span>
-                      <span className="text-emerald-700">{socialCompliance}%</span>
+                      <span className={getComplianceTextColorClass(socialCompliance)}>{socialCompliance}%</span>
                     </div>
                     <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full" style={{ width: `${socialCompliance}%` }} />
+                      <div className={`bg-gradient-to-r ${getComplianceColorClass(socialCompliance)} h-full rounded-full`} style={{ width: `${socialCompliance}%` }} />
                     </div>
                   </div>
                 </div>

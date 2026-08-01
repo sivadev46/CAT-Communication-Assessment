@@ -41,10 +41,36 @@ export const geminiService = {
       .map(([itemId, text]) => `- Item ${itemId}: "${text.trim()}"`)
       .join('\n') || 'No specific item observations logged.';
 
+    // Compile detailed behavior responses
+    let responsesDetails = '';
+    if (assessment.responses) {
+      try {
+        const parsedResponses = JSON.parse(assessment.responses);
+        responsesDetails = Object.entries(parsedResponses)
+          .map(([itemId, val]) => {
+            const stateLabel = val === 'present' ? 'Fully Present (Established)' : 
+                               val === 'partially-present' ? 'Partially Present (Emerging / Inconsistent performance)' : 
+                               'Absent (Not observed)';
+            const noteText = notes[itemId] ? ` (Clinician Note: "${notes[itemId]}")` : '';
+            return `- Behavior/Skill [${itemId}]: ${stateLabel}${noteText}`;
+          })
+          .join('\n');
+      } catch {
+        responsesDetails = 'Detailed behavior states could not be parsed.';
+      }
+    } else {
+      responsesDetails = 'No detailed behavior states provided.';
+    }
+
     // Construct Prompts (Separate prompts definition as requested)
     const prompt = `
 You are an expert AI clinical Speech-Language Pathologist (SLP) assisting with diagnostic analysis.
-Analyze the following patient profile, assessment scores, and clinician observations:
+Analyze the following patient profile, assessment scores, detailed behavior states, and clinician observations.
+
+The assessment utilizes a three-state evaluation system:
+- **Fully Present**: The behavior/milestone is established and consistently observed (1.0 points).
+- **Partially Present**: The behavior/milestone is emerging, developing, or inconsistent, showing progress with guidance but requiring moderate support (0.5 points).
+- **Absent**: The behavior/milestone is not observed or is absent (0.0 points).
 
 === PATIENT DETAILS ===
 Name: ${patient.fullName}
@@ -57,22 +83,29 @@ Clinician General Notes: ${patient.notes || 'N/A'}
 === ASSESSMENT METRICS ===
 ${scoresSummary}
 
-=== CLINICAL OBSERVATIONS ===
+=== DETAILED BEHAVIORAL STATES ===
+${responsesDetails}
+
+=== CLINICAL OBSERVATIONS & NOTES ===
 ${observations}
 
 === INSTRUCTIONS ===
-Perform a deep clinical analysis of the data. You must generate:
+Perform a deep clinical analysis of the data. Avoid binary (present/absent) clinical descriptions.
+Treat "Partially Present" skills as emerging skills, developing abilities, or inconsistent performances that show progress but require guidance or moderate support.
+
+You must generate:
 1. A **Clinical Executive Summary** (saved inside clinicalSummary) which:
    - Must be unique for this patient based on details, scores, notes, and results.
    - Must sound like a professional speech-language pathologist's clinical report.
-   - Must consist of exactly 2 to 4 concise, professional paragraphs (do not return a single sentence or bullet points).
+   - Must consist of exactly 2 to 4 concise, professional paragraphs.
+   - Must explicitly discuss emerging (Partially Present) abilities as developing/inconsistent, specifying where progress is visible with guidance.
    - Paragraph 1 should outline the evaluation context, patient background, and overall score metrics.
-   - Paragraph 2 should detail specific behavioral observations and performance across domains from clinician notes.
+   - Paragraph 2 should detail specific behavioral observations and performance across domains from clinician notes and behavior states.
    - Paragraph 3/4 should interpret these findings clinically, classifying developmental risk and stating clinical expectations.
    - Must NOT contain the text "System Generated Fallback" or "Clinical assessment completed...".
-2. A **Caregiver Report** (Summary and Home Strategies) using simple, warm, parent-friendly language. Avoid all medical jargon and terms.
-3. A list of 2-4 **Key Clinical Strengths**.
-4. A list of 2-4 **Focus Areas for Improvement**.
+2. A **Caregiver Report** (Summary and Home Strategies) (saved inside caregiverSummary and homeStrategies) using simple, warm, parent-friendly language. Avoid all medical jargon. Reflect emerging skills as areas of progress to be encouraged, and home strategies should include activities to practice these developing skills.
+3. A list of 2-4 **Key Clinical Strengths** (include established present skills and notable emerging skills).
+4. A list of 2-4 **Focus Areas for Improvement** (focus on absent skills and emerging skills that need moderate support).
 5. A list of 2-4 **Clinical Recommendations** (specific therapy plan recommendations).
 
 Return the response strictly adhering to the JSON schema requested.

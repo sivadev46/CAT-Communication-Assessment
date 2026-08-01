@@ -37,6 +37,7 @@ export const createAssessment = asyncHandler(async (req, res) => {
     expressiveLanguage,
     socialInteraction,
     notes,
+    responses,
     status,
     assessmentDate,
   } = req.body;
@@ -70,6 +71,7 @@ export const createAssessment = asyncHandler(async (req, res) => {
     overallScore,
     overallPercentage,
     notes: notes || '',
+    responses: responses || '',
     status: status || 'Completed',
     assessmentDate: assessmentDate || new Date(),
     clinician: req.user._id,

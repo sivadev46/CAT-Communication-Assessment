@@ -119,21 +119,31 @@ export default function Assessment() {
             setNotes({});
           }
 
-          // Reconstruct checkbox responses based on category scores
-          const newResponses = {};
-          assessmentCategories.forEach(category => {
-            const fieldName = category.id === 'eye-contact' ? 'eyeContact' : 
-                              category.id === 'joint-attention' ? 'jointAttention' :
-                              category.id === 'receptive-language' ? 'receptiveLanguage' :
-                              category.id === 'expressive-language' ? 'expressiveLanguage' :
-                              'socialInteraction';
-            const scorePercentage = latest[fieldName] || 0;
-            const totalItems = category.items.length;
-            const presentCount = Math.round((scorePercentage / 100) * totalItems);
-            category.items.forEach((item, idx) => {
-              newResponses[item.id] = idx < presentCount ? 'present' : 'absent';
+          // Reconstruct responses from responses field or category scores
+          let newResponses = {};
+          if (latest.responses) {
+            try {
+              newResponses = JSON.parse(latest.responses);
+            } catch {
+              newResponses = {};
+            }
+          }
+          
+          if (Object.keys(newResponses).length === 0) {
+            assessmentCategories.forEach(category => {
+              const fieldName = category.id === 'eye-contact' ? 'eyeContact' : 
+                                category.id === 'joint-attention' ? 'jointAttention' :
+                                category.id === 'receptive-language' ? 'receptiveLanguage' :
+                                category.id === 'expressive-language' ? 'expressiveLanguage' :
+                                'socialInteraction';
+              const scorePercentage = latest[fieldName] || 0;
+              const totalItems = category.items.length;
+              const presentCount = Math.round((scorePercentage / 100) * totalItems);
+              category.items.forEach((item, idx) => {
+                newResponses[item.id] = idx < presentCount ? 'present' : 'absent';
+              });
             });
-          });
+          }
           setResponses(newResponses);
         } else {
           // If no assessment exists, reset form responses for this patient
@@ -175,12 +185,16 @@ export default function Assessment() {
   // Calculate scores and progress dynamically
   const scores = useMemo(() => {
     let completedCount = 0;
+    let totalPoints = 0;
     let totalPresent = 0;
+    let totalPartiallyPresent = 0;
     let totalAbsent = 0;
 
     const categoryStats = assessmentCategories.map((category) => {
       let catCompleted = 0;
+      let catPoints = 0;
       let catPresent = 0;
+      let catPartiallyPresent = 0;
       let catAbsent = 0;
 
       category.items.forEach((item) => {
@@ -190,7 +204,14 @@ export default function Assessment() {
           completedCount += 1;
           if (response === 'present') {
             catPresent += 1;
+            catPoints += 1;
             totalPresent += 1;
+            totalPoints += 1;
+          } else if (response === 'partially-present') {
+            catPartiallyPresent += 1;
+            catPoints += 0.5;
+            totalPartiallyPresent += 1;
+            totalPoints += 0.5;
           } else if (response === 'absent') {
             catAbsent += 1;
             totalAbsent += 1;
@@ -199,7 +220,7 @@ export default function Assessment() {
       });
 
       const catTotal = category.items.length;
-      const catPercentage = catTotal > 0 ? Math.round((catPresent / catTotal) * 100) : 0;
+      const catPercentage = catTotal > 0 ? Math.round((catPoints / catTotal) * 100) : 0;
       const catCompletionPercentage = catTotal > 0 ? Math.round((catCompleted / catTotal) * 100) : 0;
 
       return {
@@ -208,6 +229,7 @@ export default function Assessment() {
         completed: catCompleted,
         total: catTotal,
         present: catPresent,
+        partiallyPresent: catPartiallyPresent,
         absent: catAbsent,
         scorePercentage: catPercentage,
         completionPercentage: catCompletionPercentage,
@@ -217,7 +239,7 @@ export default function Assessment() {
 
     const remainingCount = totalItemsCount - completedCount;
     const completionPercentage = Math.round((completedCount / totalItemsCount) * 100);
-    const overallPercentage = completedCount > 0 ? Math.round((totalPresent / totalItemsCount) * 100) : 0;
+    const overallPercentage = completedCount > 0 ? Math.round((totalPoints / totalItemsCount) * 100) : 0;
     const isFullyComplete = completedCount === totalItemsCount;
 
     return {
@@ -225,7 +247,9 @@ export default function Assessment() {
       remainingCount,
       totalItemsCount,
       totalPresent,
+      totalPartiallyPresent,
       totalAbsent,
+      totalPoints,
       completionPercentage,
       overallPercentage,
       isFullyComplete,
@@ -600,7 +624,7 @@ export default function Assessment() {
                     <div className="flex items-center gap-4">
                       <div className="text-right hidden sm:block">
                         <div className="text-xs font-bold text-gray-900">
-                          Score: <span className="text-blue-600">{catStat?.present}/{catStat?.total}</span> ({catStat?.scorePercentage}%)
+                          Score: <span className="text-blue-600">{catStat?.points}/{catStat?.total}</span> ({catStat?.scorePercentage}%)
                         </div>
                         <p className="text-[11px] text-gray-500 font-medium">
                           {catStat?.completed === catStat?.total ? 'Completed' : `${catStat?.completed}/${catStat?.total} answered`}
@@ -630,8 +654,10 @@ export default function Assessment() {
                                 ? 'border-rose-300 bg-rose-50/40 ring-2 ring-rose-400/20'
                                 : currentVal === 'present'
                                 ? 'border-emerald-200 bg-emerald-50/20'
-                                : currentVal === 'absent'
+                                : currentVal === 'partially-present'
                                 ? 'border-amber-200 bg-amber-50/20'
+                                : currentVal === 'absent'
+                                ? 'border-rose-200 bg-rose-50/20'
                                 : 'border-gray-200 bg-white'
                             }`}
                           >
@@ -646,31 +672,44 @@ export default function Assessment() {
                                 </p>
                               </div>
 
-                              <div className="flex items-center gap-2 flex-shrink-0">
+                              <div className="grid grid-cols-3 gap-2 w-full sm:w-72 flex-shrink-0">
                                 <button
                                   type="button"
                                   onClick={() => handleToggle(item.id, 'present')}
-                                  className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition-all cursor-pointer ${
+                                  className={`py-2 px-1 rounded-lg text-[10px] sm:text-xs font-bold flex items-center justify-center gap-1 border transition-all cursor-pointer text-center ${
                                     currentVal === 'present'
                                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                                       : 'bg-white text-gray-700 border-gray-300 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300'
                                   }`}
                                 >
-                                  <CheckCircle2 className="w-4 h-4" />
-                                  <span>Present (1)</span>
+                                  <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
+                                  <span>Present</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggle(item.id, 'partially-present')}
+                                  className={`py-2 px-1 rounded-lg text-[10px] sm:text-xs font-bold flex items-center justify-center gap-1 border transition-all cursor-pointer text-center ${
+                                    currentVal === 'partially-present'
+                                      ? 'bg-amber-550 text-white border-amber-550 shadow-xs'
+                                      : 'bg-white text-gray-700 border-gray-300 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300'
+                                  }`}
+                                >
+                                  <span className="w-3.5 h-3.5 rounded-full border border-current flex items-center justify-center text-[8px] font-black flex-shrink-0">P</span>
+                                  <span>Partial</span>
                                 </button>
 
                                 <button
                                   type="button"
                                   onClick={() => handleToggle(item.id, 'absent')}
-                                  className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition-all cursor-pointer ${
+                                  className={`py-2 px-1 rounded-lg text-[10px] sm:text-xs font-bold flex items-center justify-center gap-1 border transition-all cursor-pointer text-center ${
                                     currentVal === 'absent'
                                       ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
                                       : 'bg-white text-gray-700 border-gray-300 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300'
                                   }`}
                                 >
-                                  <XCircle className="w-4 h-4" />
-                                  <span>Absent (0)</span>
+                                  <XCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                                  <span>Absent</span>
                                 </button>
                               </div>
                             </div>
@@ -699,31 +738,33 @@ export default function Assessment() {
           </div>
 
           {/* Bottom Category Step Navigation & Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-xs">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Button
-                variant="outline"
-                onClick={handlePrevCategory}
-                disabled={activeCategoryIndex === 0}
-                className="flex-1 sm:flex-none text-xs flex items-center justify-center gap-1 disabled:opacity-40"
-              >
-                <ChevronLeft className="w-4 h-4" /> Previous Category
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleNextCategory}
-                disabled={activeCategoryIndex === assessmentCategories.length - 1}
-                className="flex-1 sm:flex-none text-xs flex items-center justify-center gap-1 disabled:opacity-40"
-              >
-                Next Category <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-5 rounded-xl border border-gray-200 shadow-xs">
+            {!currentAssessmentId ? (
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                <Button
+                  variant="outline"
+                  onClick={handlePrevCategory}
+                  disabled={activeCategoryIndex === 0}
+                  className="flex-1 md:flex-none text-xs flex items-center justify-center gap-1 disabled:opacity-40 cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Previous Category
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleNextCategory}
+                  disabled={activeCategoryIndex === assessmentCategories.length - 1}
+                  className="flex-1 md:flex-none text-xs flex items-center justify-center gap-1 disabled:opacity-40 cursor-pointer"
+                >
+                  Next Category <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : null}
 
-            <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+            <div className={`flex flex-wrap items-center gap-2 w-full ${currentAssessmentId ? 'justify-end' : 'md:w-auto justify-end'}`}>
               <Button
                 variant="outline"
                 onClick={() => setIsResetModalOpen(true)}
-                className="text-xs text-gray-600 hover:text-rose-600 flex items-center justify-center gap-1"
+                className="text-xs text-gray-650 hover:text-rose-600 flex items-center justify-center gap-1 cursor-pointer flex-1 sm:flex-none"
               >
                 <RotateCcw className="w-3.5 h-3.5" /> Reset
               </Button>
@@ -731,7 +772,7 @@ export default function Assessment() {
                 <Button
                   variant="outline"
                   onClick={() => setIsDeleteModalOpen(true)}
-                  className="text-xs text-rose-600 hover:bg-rose-50 border-rose-200 flex items-center justify-center gap-1"
+                  className="text-xs text-rose-600 hover:bg-rose-50 border-rose-200 flex items-center justify-center gap-1 cursor-pointer flex-1 sm:flex-none"
                 >
                   <Trash2 className="w-3.5 h-3.5" /> Delete
                 </Button>
@@ -739,7 +780,7 @@ export default function Assessment() {
               <Button
                 variant="outline"
                 onClick={() => navigate('/dashboard')}
-                className="text-xs text-gray-600 flex items-center justify-center gap-1"
+                className="text-xs text-gray-655 flex items-center justify-center gap-1 cursor-pointer flex-1 sm:flex-none"
               >
                 Cancel
               </Button>
@@ -748,7 +789,7 @@ export default function Assessment() {
                   variant="primary"
                   onClick={handleGenerateAIReport}
                   disabled={isSubmitting || isGeneratingAI}
-                  className="text-xs bg-indigo-650 hover:bg-indigo-700 text-white flex items-center justify-center gap-1 px-4 cursor-pointer"
+                  className="text-xs bg-indigo-650 hover:bg-indigo-700 text-white flex items-center justify-center gap-1 px-4 cursor-pointer flex-1 sm:flex-none"
                 >
                   <Sparkles className="w-3.5 h-3.5 fill-white text-white" />
                   <span>Generate AI Report</span>
@@ -758,7 +799,7 @@ export default function Assessment() {
                 variant="primary"
                 onClick={handleSave}
                 disabled={isSubmitting || isGeneratingAI}
-                className="text-xs flex items-center justify-center gap-1 px-5"
+                className="text-xs flex items-center justify-center gap-1 px-5 cursor-pointer flex-1 sm:flex-none"
               >
                 {isSubmitting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -790,7 +831,7 @@ export default function Assessment() {
               <div className="p-3 bg-blue-50/70 rounded-xl border border-blue-100">
                 <p className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Overall Score</p>
                 <p className="text-2xl font-extrabold text-blue-900 mt-1">{scores.overallPercentage}%</p>
-                <p className="text-[10px] text-blue-700 font-medium mt-0.5">{scores.totalPresent}/{scores.totalItemsCount} Points</p>
+                <p className="text-[10px] text-blue-700 font-medium mt-0.5">{scores.totalPoints}/{scores.totalItemsCount} Points</p>
               </div>
 
               <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
@@ -806,12 +847,16 @@ export default function Assessment() {
                 <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">{scores.totalPresent}</span>
               </div>
               <div className="flex justify-between items-center text-gray-600">
+                <span>Partially Present (0.5 pt)</span>
+                <span className="font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100">{scores.totalPartiallyPresent}</span>
+              </div>
+              <div className="flex justify-between items-center text-gray-600">
                 <span>Absent Behaviors (0 pt)</span>
                 <span className="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">{scores.totalAbsent}</span>
               </div>
               <div className="flex justify-between items-center text-gray-600">
                 <span>Unanswered Items</span>
-                <span className="font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100">{scores.remainingCount}</span>
+                <span className="font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">{scores.remainingCount}</span>
               </div>
             </div>
 
@@ -827,7 +872,7 @@ export default function Assessment() {
                         {catStat.name}
                       </span>
                       <span className="font-bold text-gray-900">
-                        {catStat.present}/{catStat.total} <span className="text-gray-400 font-normal">({catStat.scorePercentage}%)</span>
+                        {catStat.points}/{catStat.total} <span className="text-gray-400 font-normal">({catStat.scorePercentage}%)</span>
                       </span>
                     </div>
                     <ProgressBar progress={catStat.scorePercentage} />

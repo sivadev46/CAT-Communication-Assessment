@@ -66,6 +66,10 @@ const assessmentSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    responses: {
+      type: String,
+      default: '',
+    },
     clinician: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
