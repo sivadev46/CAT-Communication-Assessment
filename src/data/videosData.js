@@ -21,8 +21,8 @@ export const mockVideos = [
       'Recognize over-stimulation cues and implement sensory pauses.'
     ],
     tags: ['Sustained Gaze', 'Social Greeting', 'Turn-Taking'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=2_Csk_uG29c',
-    youtubeVideoId: '2_Csk_uG29c',
+    youtubeUrl: 'https://youtu.be/gucPYNUqecI?si=8_uQ20G2IPVbNiLf',
+    youtubeVideoId: '8_uQ20G2IPVbNiLf',
     author: 'Dr. Sarah Jenkins, CCC-SLP'
   },
   {
@@ -38,8 +38,8 @@ export const mockVideos = [
       'Build gaze duration gradually from 1 second to 3+ seconds.'
     ],
     tags: ['Joint Attention', 'Play Engagement'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=2_Csk_uG29c',
-    youtubeVideoId: '2_Csk_uG29c',
+    youtubeUrl: 'https://youtu.be/jsLZm8QXw-k?si=baJ37lkwRM3oJN92',
+    youtubeVideoId: 'baJ37lkwRM3oJN92',
     author: 'Mark Davis, Pediatric SLP'
   },
   {
@@ -55,8 +55,8 @@ export const mockVideos = [
       'Use vocal inflection to draw shared focus.'
     ],
     tags: ['Point Following', 'Shared Interest', 'Receptive Cueing'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=9hR870hC1W0',
-    youtubeVideoId: '9hR870hC1W0',
+    youtubeUrl: 'https://youtu.be/hySdewG7krE?si=Ic05fIAF8CQkbnEM',
+    youtubeVideoId: 'Ic05fIAF8CQkbnEM',
     author: 'Dr. Emily Chen, Clinical Director'
   },
   {
@@ -72,8 +72,8 @@ export const mockVideos = [
       'Combine auditory naming with physical page-touching.'
     ],
     tags: ['Book Engagement', 'Receptive Naming'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=9hR870hC1W0',
-    youtubeVideoId: '9hR870hC1W0',
+    youtubeUrl: 'https://youtu.be/CxMJ3m-NyW8?si=sTzSaZn8FIE_2i1S',
+    youtubeVideoId: 'sTzSaZn8FIE_2i1S',
     author: 'Laura Adams, MS, CCC-SLP'
   },
   {
@@ -89,8 +89,8 @@ export const mockVideos = [
       'Evaluate response latency and comprehension accuracy.'
     ],
     tags: ['Instruction Following', 'Auditory Processing'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=HkSmBylT11w',
-    youtubeVideoId: 'HkSmBylT11w',
+    youtubeUrl: 'https://youtu.be/3XGNP_SzcI8?si=iayP8gNza_t1C8HN',
+    youtubeVideoId: 'iayP8gNza_t1C8HN',
     author: 'Robert Vance, Lead Speech Pathologist'
   },
   {
@@ -106,8 +106,8 @@ export const mockVideos = [
       'Expand vocabulary arrays progressively.'
     ],
     tags: ['Receptive Vocabulary', 'Choice Making'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=HkSmBylT11w',
-    youtubeVideoId: 'HkSmBylT11w',
+    youtubeUrl: 'https://youtu.be/NO-nVC2hlFQ?si=5yVAuex2xp7BDG7L',
+    youtubeVideoId: '5yVAuex2xp7BDG7L',
     author: 'Dr. Sarah Jenkins, CCC-SLP'
   },
   {
@@ -123,8 +123,8 @@ export const mockVideos = [
       'Track comprehension retention across sessions.'
     ],
     tags: ['Auditory Working Memory', 'Complex Tasks'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=HkSmBylT11w',
-    youtubeVideoId: 'HkSmBylT11w',
+    youtubeUrl: 'https://youtu.be/wxLYzpVA3PE?si=2nw-lJV9Z2dJpttR',
+    youtubeVideoId: '2nw-lJV9Z2dJpttR',
     author: 'Dr. Emily Chen, Clinical Director'
   },
   {
@@ -140,14 +140,14 @@ export const mockVideos = [
       'Practicing essential functional words (water, help, yes/no).'
     ],
     tags: ['Word Retrieval', 'Vocal Pitch', 'Syllable Staging'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    youtubeVideoId: 'dQw4w9WgXcQ',
+    youtubeUrl: 'https://youtu.be/yDvCheioePM?si=VXrJ3u2WuMFlx0pe',
+    youtubeVideoId: 'VXrJ3u2WuMFlx0pe',
     author: 'Rachel Taylor, Neurological SLP'
   },
   {
     id: 'vid-09',
     title: 'Expanding Single Words to 2-3 Word Phrases',
-    category: 'Expressive Language',
+    category: 'Expreshttps://www.youtube.com/watch?v=HkSmBylT11wsive Language',
     duration: '05:15',
     difficulty: 'Intermediate',
     description: 'Scaffolding single-noun utterances into carrier phrases (e.g., "want apple", "big bus").',
@@ -157,8 +157,8 @@ export const mockVideos = [
       'Encourage self-correction and verbal repetition.'
     ],
     tags: ['Phrase Building', 'Expressive Syntax'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    youtubeVideoId: 'dQw4w9WgXcQ',
+    youtubeUrl: 'https://youtu.be/TafF1osHJF8?si=iHWDfOGmvzSkLG48',
+    youtubeVideoId: 'iHWDfOGmvzSkLG48',
     author: 'Mark Davis, Pediatric SLP'
   },
   {
@@ -174,8 +174,8 @@ export const mockVideos = [
       'Transition from single icons to full sentence strings.'
     ],
     tags: ['AAC Devices', 'Symbolic Communication'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    youtubeVideoId: 'dQw4w9WgXcQ',
+    youtubeUrl: 'https://youtu.be/sy3kS5vXtRk?si=nikx45xcH-aJy01X',
+    youtubeVideoId: 'nikx45xcH-aJy01X',
     author: 'Dr. Sarah Jenkins, CCC-SLP'
   },
   {
@@ -191,8 +191,8 @@ export const mockVideos = [
       'Acknowledge partner responses with head nods.'
     ],
     tags: ['Turn Taking', 'Pragmatics', 'Active Listening'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    youtubeVideoId: 'dQw4w9WgXcQ',
+    youtubeUrl: 'https://youtu.be/Sm1dl3n5U_U?si=twFZAVaGsQaCMGBY',
+    youtubeVideoId: 'twFZAVaGsQaCMGBY',
     author: 'Laura Adams, MS, CCC-SLP'
   },
   {
@@ -208,8 +208,8 @@ export const mockVideos = [
       'Roleplay common playground and group scenarios.'
     ],
     tags: ['Emotion Recognition', 'Empathy', 'Social Response'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    youtubeVideoId: 'dQw4w9WgXcQ',
+    youtubeUrl: 'https://youtu.be/2eS17VuNlGc?si=TwIUbX5e8KzXKleF',
+    youtubeVideoId: 'TwIUbX5e8KzXKleF',
     author: 'Dr. Emily Chen, Clinical Director'
   },
   {
@@ -225,8 +225,8 @@ export const mockVideos = [
       'Reinforce successful social approaches.'
     ],
     tags: ['Social Initiation', 'Peer Interaction'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    youtubeVideoId: 'dQw4w9WgXcQ',
+    youtubeUrl: 'https://youtu.be/n0oUX9U5qTE?si=6f5hzoZQWmfbC5LF',
+    youtubeVideoId: '6f5hzoZQWmfbC5LF',
     author: 'Robert Vance, Lead Speech Pathologist'
   },
   {
@@ -242,8 +242,8 @@ export const mockVideos = [
       'Use peer scaffolding effectively.'
     ],
     tags: ['Group Therapy', 'Word Finding', 'Circumlocution'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    youtubeVideoId: 'dQw4w9WgXcQ',
+    youtubeUrl: 'https://youtu.be/bSOGSDGmNt4?si=pa0V6QLKMLwPBocB',
+    youtubeVideoId: 'pa0V6QLKMLwPBocB',
     author: 'Rachel Taylor, Neurological SLP'
   },
   {
@@ -259,8 +259,8 @@ export const mockVideos = [
       'Track multi-directional joint attention switches.'
     ],
     tags: ['Group Focus', 'Triadic Attention'],
-    youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    youtubeVideoId: 'dQw4w9WgXcQ',
+    youtubeUrl: 'https://youtu.be/iN09CEMmKIQ?si=OvD_1MA3izKYB7X6',
+    youtubeVideoId: 'OvD_1MA3izKYB7X6',
     author: 'Mark Davis, Pediatric SLP'
   }
 ];

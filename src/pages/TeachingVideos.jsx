@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Youtube,
   Search,
@@ -19,8 +19,67 @@ import Card from '../components/Card/Card';
 import Button from '../components/Button/Button';
 import Modal from '../components/Modal/Modal';
 import { videoCategories, mockVideos } from '../data/videosData';
+import { useAuth } from '../context/AuthContext';
+
+const resolveVideoId = (video) => {
+  if (!video) return '';
+  const extractId = (url) => {
+    if (!url) return '';
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? match[2] : '';
+  };
+
+  if (video.youtubeVideoId && video.youtubeVideoId.length === 11) {
+    return video.youtubeVideoId;
+  }
+  return extractId(video.youtubeUrl) || video.youtubeVideoId || '';
+};
+
+function YoutubeThumbnail({ video, className }) {
+  const videoId = useMemo(() => resolveVideoId(video), [video]);
+  const [src, setSrc] = useState('');
+  const [errorCount, setErrorCount] = useState(0);
+
+  const placeholderUrl = 'https://images.unsplash.com/photo-1616469829581-73993eb86b02?auto=format&fit=crop&w=800&q=80';
+
+  useEffect(() => {
+    if (videoId) {
+      setSrc(`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`);
+      setErrorCount(0);
+    } else {
+      setSrc(placeholderUrl);
+    }
+  }, [videoId]);
+
+  const handleError = () => {
+    if (errorCount === 0) {
+      setSrc(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+      setErrorCount(1);
+    } else if (errorCount === 1) {
+      setSrc(`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`);
+      setErrorCount(2);
+    } else if (errorCount === 2) {
+      setSrc(placeholderUrl);
+      setErrorCount(3);
+    }
+  };
+
+  return (
+    <img
+      src={src}
+      alt={video.title}
+      className={className}
+      onError={handleError}
+      loading="lazy"
+    />
+  );
+}
 
 export default function TeachingVideos() {
+  const { user } = useAuth();
+  const isParent = user?.role === 'parent';
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
@@ -131,7 +190,7 @@ export default function TeachingVideos() {
               placeholder="Search by behaviour name, category, or keyword..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-8 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-gray-800 transition-all"
+              className={`w-full pl-9 pr-8 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:bg-white text-gray-800 transition-all ${isParent ? 'focus:ring-emerald-500' : 'focus:ring-blue-500'}`}
             />
             {searchQuery && (
               <button
@@ -168,7 +227,9 @@ export default function TeachingVideos() {
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-blue-600 text-white shadow-2xs'
+                  ? isParent
+                    ? 'bg-emerald-600 text-white shadow-2xs'
+                    : 'bg-blue-600 text-white shadow-2xs'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -185,7 +246,7 @@ export default function TeachingVideos() {
         <div className="lg:col-span-3 space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-gray-900 tracking-tight flex items-center gap-2">
-              <Film className="w-5 h-5 text-blue-600" />
+              <Film className={`w-5 h-5 ${isParent ? 'text-emerald-600' : 'text-blue-600'}`} />
               Instructional Video Library
             </h2>
             <span className="text-xs font-medium text-gray-500">
@@ -226,9 +287,8 @@ export default function TeachingVideos() {
                       onClick={() => handleOpenVideo(video)}
                       className="relative h-40 bg-slate-900 cursor-pointer overflow-hidden"
                     >
-                      <img 
-                        src={`https://img.youtube.com/vi/${video.youtubeVideoId}/mqdefault.jpg`}
-                        alt={video.title}
+                      <YoutubeThumbnail
+                        video={video}
                         className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-300"
                       />
 
@@ -264,7 +324,7 @@ export default function TeachingVideos() {
                       <div>
                         <h3
                           onClick={() => handleOpenVideo(video)}
-                          className="font-bold text-gray-900 text-sm leading-snug hover:text-blue-600 cursor-pointer line-clamp-2"
+                          className={`font-bold text-gray-900 text-sm leading-snug cursor-pointer line-clamp-2 ${isParent ? 'hover:text-emerald-600' : 'hover:text-blue-600'}`}
                         >
                           {video.title}
                         </h3>
@@ -314,7 +374,7 @@ export default function TeachingVideos() {
           {/* Recently Viewed Panel */}
           <Card className="!p-4 space-y-3 border border-gray-200 shadow-2xs">
             <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
-              <RotateCcw className="w-4 h-4 text-blue-600" />
+              <RotateCcw className={`w-4 h-4 ${isParent ? 'text-emerald-600' : 'text-blue-600'}`} />
               Recently Viewed
             </h3>
             {recentVideoObjects.length === 0 ? (
@@ -328,10 +388,9 @@ export default function TeachingVideos() {
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-200"
                   >
                     <div className="w-12 h-10 rounded-md overflow-hidden bg-slate-900 flex-shrink-0 relative">
-                      <img 
-                        src={`https://img.youtube.com/vi/${vid.youtubeVideoId}/mqdefault.jpg`} 
-                        alt="" 
-                        className="w-full h-full object-cover opacity-80" 
+                      <YoutubeThumbnail
+                        video={vid}
+                        className="w-full h-full object-cover opacity-80"
                       />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <Youtube className="w-4 h-4 text-red-600 fill-white" />
@@ -348,9 +407,9 @@ export default function TeachingVideos() {
           </Card>
 
           {/* Recommended Videos Panel */}
-          <Card className="!p-4 space-y-3 bg-blue-50/40 border border-blue-100">
-            <h3 className="text-xs font-bold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-blue-600" />
+          <Card className={`!p-4 space-y-3 border ${isParent ? 'bg-emerald-50/10 border-emerald-100' : 'bg-blue-50/40 border-blue-100'}`}>
+            <h3 className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${isParent ? 'text-emerald-800' : 'text-blue-900'}`}>
+              <Sparkles className={`w-4 h-4 ${isParent ? 'text-emerald-600' : 'text-blue-600'}`} />
               Recommended Modules
             </h3>
             <div className="space-y-3">
@@ -358,10 +417,10 @@ export default function TeachingVideos() {
                 <div
                   key={vid.id}
                   onClick={() => handleOpenVideo(vid)}
-                  className="bg-white p-3 rounded-xl border border-blue-100 shadow-2xs hover:shadow-xs transition-shadow cursor-pointer space-y-2"
+                  className={`p-3 rounded-xl border shadow-2xs hover:shadow-xs transition-shadow cursor-pointer space-y-2 bg-white ${isParent ? 'border-emerald-100/60' : 'border-blue-100'}`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isParent ? 'text-emerald-700 bg-emerald-100' : 'text-blue-700 bg-blue-100'}`}>
                       {vid.category}
                     </span>
                     <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
@@ -371,7 +430,7 @@ export default function TeachingVideos() {
                   <h4 className="text-xs font-bold text-gray-900 leading-snug line-clamp-2">{vid.title}</h4>
                   <div className="flex items-center justify-between pt-1.5 border-t border-gray-100">
                     <span className="text-[9px] text-gray-400">{vid.difficulty}</span>
-                    <span className="text-xs font-semibold text-blue-650 flex items-center gap-0.5 hover:underline">
+                    <span className={`text-xs font-semibold flex items-center gap-0.5 hover:underline ${isParent ? 'text-emerald-600' : 'text-blue-650'}`}>
                       Watch <ExternalLink className="w-3 h-3" />
                     </span>
                   </div>
@@ -394,7 +453,7 @@ export default function TeachingVideos() {
             {/* Embedded Live YouTube Player using iframe */}
             <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-md bg-slate-900 border border-slate-800">
               <iframe
-                src={`https://www.youtube.com/embed/${selectedVideo.youtubeVideoId}?rel=0&autoplay=1`}
+                src={`https://www.youtube.com/embed/${resolveVideoId(selectedVideo)}?rel=0&autoplay=1`}
                 title={selectedVideo.title}
                 className="w-full h-full border-0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -405,7 +464,7 @@ export default function TeachingVideos() {
             {/* Title & Metadata */}
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3">
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${isParent ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}`}>
                   {selectedVideo.category}
                 </span>
                 {getDifficultyBadge(selectedVideo.difficulty)}
@@ -441,7 +500,7 @@ export default function TeachingVideos() {
               <ul className="space-y-1.5 text-xs text-gray-800">
                 {selectedVideo.objectives.map((obj, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
+                    <span className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${isParent ? 'bg-emerald-600' : 'bg-blue-600'}`} />
                     <span>{obj}</span>
                   </li>
                 ))}
@@ -453,8 +512,8 @@ export default function TeachingVideos() {
               <h4 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-2">Target Communication Behaviours</h4>
               <div className="flex flex-wrap gap-1.5">
                 {selectedVideo.tags.map((b, i) => (
-                  <span key={i} className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 font-medium text-xs border border-blue-100 flex items-center gap-1">
-                    <Tag className="w-3 h-3 text-blue-500" /> {b}
+                  <span key={i} className={`px-2.5 py-1 rounded-lg font-medium text-xs border flex items-center gap-1 ${isParent ? 'bg-emerald-50 text-emerald-800 border-emerald-100' : 'bg-blue-50 text-blue-800 border-blue-100'}`}>
+                    <Tag className={`w-3 h-3 ${isParent ? 'text-emerald-500' : 'text-blue-500'}`} /> {b}
                   </span>
                 ))}
               </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard,
   Users,
@@ -7,18 +8,29 @@ import {
   FileText,
   Video,
   Glasses,
-  Settings
+  LogOut
 } from 'lucide-react';
 
 export default function Sidebar({ isOpen, onClose }) {
-  const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Patients', path: '/patients', icon: Users },
-    { name: 'Assessment', path: '/assessment', icon: ClipboardCheck },
-    { name: 'Reports', path: '/reports', icon: FileText },
-    { name: 'Teaching Videos', path: '/teaching-videos', icon: Video },
-    { name: 'VR Assessment', path: '/vr', icon: Glasses },
-  ];
+  const { user, logoutUser } = useAuth();
+  const isParent = user?.role === 'parent';
+
+  const navItems = isParent
+    ? [
+        { name: 'Dashboard', path: '/parent-dashboard', icon: LayoutDashboard },
+        { name: 'Teaching Videos', path: '/teaching-videos', icon: Video },
+      ]
+    : [
+        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'Patients', path: '/patients', icon: Users },
+        { name: 'Assessment', path: '/assessment', icon: ClipboardCheck },
+        { name: 'Reports', path: '/reports', icon: FileText },
+        { name: 'VR Assessment', path: '/vr', icon: Glasses },
+      ];
+
+  const handleLogout = async () => {
+    await logoutUser();
+  };
 
   return (
     <>
@@ -53,13 +65,16 @@ export default function Sidebar({ isOpen, onClose }) {
                 key={item.path}
                 to={item.path}
                 onClick={onClose}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600 pl-2.5'
+                className={({ isActive }) => {
+                  const isCurrentActive = isActive || (item.path.includes('#') && window.location.pathname + window.location.hash === item.path);
+                  return `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    isCurrentActive
+                      ? isParent
+                        ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600 pl-2.5'
+                        : 'bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600 pl-2.5'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`
-                }
+                  }`;
+                }}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 <span>{item.name}</span>
@@ -67,6 +82,21 @@ export default function Sidebar({ isOpen, onClose }) {
             );
           })}
         </nav>
+
+        {/* Sidebar Footer Logout */}
+        <div className="p-4 border-t border-gray-100 mt-auto">
+          <button
+            onClick={handleLogout}
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium w-full text-left transition-colors cursor-pointer ${
+              isParent
+                ? 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
+                : 'text-gray-600 hover:bg-rose-50 hover:text-rose-600'
+            }`}
+          >
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            <span>Logout</span>
+          </button>
+        </div>
       </aside>
     </>
   );

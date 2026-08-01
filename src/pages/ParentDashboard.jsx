@@ -77,6 +77,19 @@ export default function ParentDashboard() {
     };
   }, [isReportModalOpen]);
 
+  // Auto-scroll to reports section if hash is present
+  useEffect(() => {
+    if (window.location.hash === '#reports') {
+      const timer = setTimeout(() => {
+        const element = document.getElementById('reports');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [window.location.hash]);
+
   const getComplianceColorClass = (val) => {
     if (val >= 75) return 'from-emerald-500 to-teal-500'; // Green
     if (val >= 35) return 'from-amber-400 to-amber-600'; // Amber
@@ -291,40 +304,7 @@ export default function ParentDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-slate-50 to-teal-50 font-sans text-slate-800 pb-12 print:bg-white print:pb-0">
-      
-      {/* Navbar */}
-      <nav className="bg-white border-b border-emerald-100/80 sticky top-0 z-50 shadow-xs print:hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-100">
-              <Heart className="w-5.5 h-5.5 fill-white" />
-            </div>
-            <div>
-              <span className="font-extrabold text-slate-900 tracking-tight text-base block leading-none">CAT Caregiver</span>
-              <span className="text-[10px] text-emerald-600 font-semibold tracking-wider uppercase mt-0.5 block">Parent Portal</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:block text-right">
-              <span className="text-xs font-bold text-slate-700 block">{user?.email}</span>
-              <span className="text-[10px] text-slate-455 font-semibold">Child Profile: {childName}</span>
-            </div>
-            
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3 py-2 border border-slate-200 hover:border-red-200 text-xs font-semibold text-slate-600 hover:text-red-655 rounded-xl bg-white hover:bg-red-50/50 transition-all cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Log Out</span>
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 print:hidden">
+    <div className="space-y-8 pb-12 print:hidden">
         
         {/* Welcome Banner */}
         <div className="bg-white rounded-2xl border border-emerald-100 p-6 md:p-8 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
@@ -433,7 +413,7 @@ export default function ParentDashboard() {
               </div>
 
               {/* Shared Reports History List */}
-              <div className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs space-y-4">
+              <div id="reports" className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs space-y-4">
                 <div>
                   <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                     <FileText className="w-5 h-5 text-emerald-600" />
@@ -614,8 +594,6 @@ export default function ParentDashboard() {
 
           </div>
         )}
-
-      </div>
 
       {/* Parent Report Viewer Modal (Parent-safe fields only, clinical internals hidden) */}
       {isReportModalOpen && selectedReport && (

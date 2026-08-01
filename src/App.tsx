@@ -28,7 +28,10 @@ export default function App() {
 
           {/* Protected Parent Dashboard Route */}
           <Route element={<ProtectedRoute allowedRoles={['parent']} />}>
-            <Route path="/parent-dashboard" element={<ParentDashboard />} />
+            <Route element={<DashboardLayout />}>
+              <Route path="/parent-dashboard" element={<ParentDashboard />} />
+              <Route path="/teaching-videos" element={<TeachingVideos />} />
+            </Route>
           </Route>
 
           {/* Legacy /login redirects to new doctor-login for ProtectedRoute compatibility */}
@@ -41,7 +44,6 @@ export default function App() {
               <Route path="/patients" element={<Patients />} />
               <Route path="/assessment" element={<Assessment />} />
               <Route path="/reports" element={<Reports />} />
-              <Route path="/teaching-videos" element={<TeachingVideos />} />
               <Route path="/vr" element={<VRAssessment />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
