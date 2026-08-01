@@ -30,7 +30,7 @@ export const generateReport = asyncHandler(async (req, res) => {
   const report = await Report.create({
     assessment: assessmentId,
     clinicalReport: clinicalReport || {
-      summary: `Clinical assessment for ${assessment.patient?.fullName || 'Patient'} completed on ${new Date(assessment.assessmentDate).toLocaleDateString()}.`,
+      summary: `Speech-Language Pathologist diagnostic evaluation for ${assessment.patient?.fullName || 'Patient'} based on CAT metrics.`,
       domainBreakdown: {
         eyeContact: assessment.eyeContact,
         jointAttention: assessment.jointAttention,
@@ -193,6 +193,7 @@ export const generateAIReport = asyncHandler(async (req, res) => {
 
   // 3. Try to call Gemini Service
   try {
+    console.log(`[Gemini] Starting AI report generation request for assessment ID: ${assessmentId}`);
     const aiResponse = await geminiService.generateAIReportFromAssessment(
       assessment.patient,
       assessment,
@@ -229,7 +230,7 @@ export const generateAIReport = asyncHandler(async (req, res) => {
       isAiGenerated = true;
     }
   } catch (error) {
-    console.warn(`[Gemini AI Fail Fallback Triggered]: ${error.message}`);
+    console.error(`[Gemini AI Fail Fallback Triggered]. Reason: ${error.message}`);
     // If Gemini fails (e.g. missing API key, rate limit, timeout), implement automatic fallback to the existing traditional manual report generation as requested.
   }
 
@@ -238,7 +239,7 @@ export const generateAIReport = asyncHandler(async (req, res) => {
     reportData = {
       assessment: assessmentId,
       clinicalReport: {
-        summary: `Clinical assessment for ${assessment.patient?.fullName || 'Patient'} completed on ${new Date(assessment.createdAt).toLocaleDateString()}. (System Generated Fallback)`,
+        summary: "AI report could not be generated at this time. A standard clinical report has been created instead.",
         domainBreakdown: {
           eyeContact: assessment.eyeContact,
           jointAttention: assessment.jointAttention,
@@ -251,7 +252,7 @@ export const generateAIReport = asyncHandler(async (req, res) => {
         fallbackReason: 'AI generation failed or was bypassed'
       },
       caregiverReport: {
-        summary: `Actionable home communication guide for caregiver of ${assessment.patient?.fullName || 'Patient'}. (System Generated Fallback)`,
+        summary: `Actionable home communication guide for caregiver of ${assessment.patient?.fullName || 'Patient'}.`,
         homeStrategies: [
           'Maintain direct eye contact during daily routine commands',
           'Use visual cue boards for joint attention exercises',
@@ -287,4 +288,24 @@ export const generateAIReport = asyncHandler(async (req, res) => {
     isAiGenerated
   });
 });
+
+// @desc    Get all clinical reports
+// @route   GET /api/reports
+// @access  Private (Clinician/Admin/Parent)
+export const getReports = asyncHandler(async (req, res) => {
+  const reports = await Report.find()
+    .populate({
+      path: 'assessment',
+      populate: { path: 'patient' },
+    })
+    .populate('generatedBy', 'fullName email')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    message: 'All reports retrieved successfully',
+    data: reports,
+  });
+});
+
 

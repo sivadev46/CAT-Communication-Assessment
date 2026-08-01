@@ -43,6 +43,16 @@ const patientSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    email: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    notes: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     dateOfBirth: {
       type: Date,
     },

@@ -62,8 +62,15 @@ ${observations}
 
 === INSTRUCTIONS ===
 Perform a deep clinical analysis of the data. You must generate:
-1. A **Clinical Report** (Executive summary, Risk Level, and Follow-up Recommendations) using professional clinical terminology suitable for other healthcare professionals.
-2. A **Caregiver Report** (Summary and Home Strategies) using simple, warm, parent-friendly language. Avoid all medical jargon and terms (e.g. use "understands what we say" instead of "receptive language", "talking and expressing" instead of "expressive syntax", etc.).
+1. A **Clinical Executive Summary** (saved inside clinicalSummary) which:
+   - Must be unique for this patient based on details, scores, notes, and results.
+   - Must sound like a professional speech-language pathologist's clinical report.
+   - Must consist of exactly 2 to 4 concise, professional paragraphs (do not return a single sentence or bullet points).
+   - Paragraph 1 should outline the evaluation context, patient background, and overall score metrics.
+   - Paragraph 2 should detail specific behavioral observations and performance across domains from clinician notes.
+   - Paragraph 3/4 should interpret these findings clinically, classifying developmental risk and stating clinical expectations.
+   - Must NOT contain the text "System Generated Fallback" or "Clinical assessment completed...".
+2. A **Caregiver Report** (Summary and Home Strategies) using simple, warm, parent-friendly language. Avoid all medical jargon and terms.
 3. A list of 2-4 **Key Clinical Strengths**.
 4. A list of 2-4 **Focus Areas for Improvement**.
 5. A list of 2-4 **Clinical Recommendations** (specific therapy plan recommendations).
@@ -77,7 +84,7 @@ Return the response strictly adhering to the JSON schema requested.
       properties: {
         clinicalSummary: {
           type: 'STRING',
-          description: 'A detailed professional summary of the assessment findings in medical terms.'
+          description: 'A detailed professional summary of the assessment findings in medical terms. Must consist of exactly 2 to 4 concise paragraphs.'
         },
         riskLevel: {
           type: 'STRING',
@@ -126,9 +133,15 @@ Return the response strictly adhering to the JSON schema requested.
     };
 
     try {
-      // Call Gemini 2.5 Flash for fast, accurate structured JSON output
+      console.log(`[Gemini Request Payload Info]:`);
+      console.log(`- Model Used: gemini-flash-latest`);
+      console.log(`- Prompt Length: ${prompt.length} characters`);
+      console.log(`- Prompt Sent:\n${prompt}`);
+      console.log(`- Response Schema:\n${JSON.stringify(responseSchema, null, 2)}`);
+
+      // Call Gemini Flash Latest for fast, accurate structured JSON output
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-flash-latest',
         contents: prompt,
         config: {
           responseMimeType: 'application/json',
@@ -138,31 +151,46 @@ Return the response strictly adhering to the JSON schema requested.
       });
 
       const responseText = response.text;
+      console.log(`- Raw Gemini Response:\n${responseText}`);
+
       if (!responseText) {
         throw new Error('Empty response received from Gemini AI model.');
       }
 
       // Safely parse JSON structure
       const parsedData = JSON.parse(responseText.trim());
+      console.log(`- Parsed JSON:\n${JSON.stringify(parsedData, null, 2)}`);
       return parsedData;
 
     } catch (error) {
-      console.error('[Gemini AI Error]:', error);
+      console.error('[Gemini AI Exception Raised]:');
+      console.error('- Full error stack:', error.stack || error);
+      console.error('- Complete error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+      if (error.status) console.error(`- API Status Code: ${error.status}`);
+      if (error.message) console.error(`- API Message: ${error.message}`);
       
       // Categorize and throw user-friendly error messages
       if (error.name === 'SyntaxError') {
         throw new Error('Failed to parse AI response. Gemini returned an invalid JSON structure.');
       }
       
-      if (error.status === 403 || error.message.includes('API key')) {
+      if (error.status === 403 || error.message?.includes('API key')) {
         throw new Error('Google Gemini authentication failed. Please verify that your API key is correct and active.');
       }
       
-      if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+      if (error.status === 404) {
+        throw new Error('Google Gemini model endpoint not found (404). Please ensure the model is available.');
+      }
+
+      if (error.status === 429) {
+        throw new Error('Google Gemini rate limit/quota exceeded (429). Please check billing/quota details.');
+      }
+      
+      if (error.code === 'ETIMEDOUT' || error.message?.includes('timeout')) {
         throw new Error('AI report generation timed out. Please check your network connection and try again.');
       }
 
-      throw new Error(`AI generation failed: ${error.message}`);
+      throw new Error(`AI generation failed: ${error.message || error}`);
     }
   }
 };

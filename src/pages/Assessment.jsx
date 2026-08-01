@@ -91,6 +91,72 @@ export default function Assessment() {
     loadPatients();
   }, []);
 
+  // Load patient's latest assessment if it exists
+  useEffect(() => {
+    const loadPatientAssessment = async () => {
+      if (!selectedPatientId) {
+        setCurrentAssessmentId(null);
+        setResponses({});
+        setNotes({});
+        return;
+      }
+      
+      try {
+        const res = await assessmentService.getAssessmentsByPatient(selectedPatientId);
+        if (res.success && res.data?.assessments?.length > 0) {
+          const latest = res.data.assessments[0];
+          setCurrentAssessmentId(latest._id || latest.id);
+          
+          // Reconstruct clinician notes from JSON if stored
+          if (latest.notes) {
+            try {
+              const parsedNotes = JSON.parse(latest.notes);
+              setNotes(parsedNotes);
+            } catch {
+              setNotes({ general: latest.notes });
+            }
+          } else {
+            setNotes({});
+          }
+
+          // Reconstruct checkbox responses based on category scores
+          const newResponses = {};
+          assessmentCategories.forEach(category => {
+            const fieldName = category.id === 'eye-contact' ? 'eyeContact' : 
+                              category.id === 'joint-attention' ? 'jointAttention' :
+                              category.id === 'receptive-language' ? 'receptiveLanguage' :
+                              category.id === 'expressive-language' ? 'expressiveLanguage' :
+                              'socialInteraction';
+            const scorePercentage = latest[fieldName] || 0;
+            const totalItems = category.items.length;
+            const presentCount = Math.round((scorePercentage / 100) * totalItems);
+            category.items.forEach((item, idx) => {
+              newResponses[item.id] = idx < presentCount ? 'present' : 'absent';
+            });
+          });
+          setResponses(newResponses);
+        } else {
+          // If no assessment exists, reset form responses for this patient
+          setCurrentAssessmentId(null);
+          setResponses({});
+          setNotes({});
+        }
+      } catch (err) {
+        console.error('Error loading patient assessment:', err);
+        setCurrentAssessmentId(null);
+        setResponses({});
+        setNotes({});
+      }
+    };
+
+    // Reset alert states when switching patients
+    setValidationError(null);
+    setSaveSuccessMessage(false);
+    setAiError(null);
+
+    loadPatientAssessment();
+  }, [selectedPatientId]);
+
   // Handle selecting a patient
   const handleSelectPatient = (e) => {
     const id = e.target.value;

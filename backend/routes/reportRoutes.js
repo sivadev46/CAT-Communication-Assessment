@@ -6,6 +6,7 @@ import {
   updateReport,
   deleteReport,
   generateAIReport,
+  getReports,
 } from '../controllers/reportController.js';
 import { getRecentReports } from '../controllers/dashboardController.js';
 import { protect } from '../middleware/authMiddleware.js';
@@ -36,7 +37,7 @@ router.post(
   generateAIReport
 );
 
-router.get('/', protect, getRecentReports);
+router.get('/', protect, getReports);
 router.get('/:id', protect, getReport);
 router.put('/:id', protect, updateReport);
 router.delete('/:id', protect, authorize('Admin', 'Clinician'), deleteReport);

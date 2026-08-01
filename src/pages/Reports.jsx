@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   FileText,
@@ -42,6 +42,11 @@ export default function Reports() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedSection, setCopiedSection] = useState(null);
 
+  // Search, Filter & Sort States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
+
   const fetchReportsAndAssessments = async () => {
     setLoading(true);
     setError(null);
@@ -84,6 +89,35 @@ export default function Reports() {
   useEffect(() => {
     fetchReportsAndAssessments();
   }, [location.state?.highlightReportId]);
+
+  // Derived filtered & sorted reports
+  const filteredReports = useMemo(() => {
+    let result = [...reports];
+
+    // 1. Search Query (patient name)
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(r => 
+        r.assessment?.patient?.fullName?.toLowerCase().includes(q)
+      );
+    }
+
+    // 2. Filter Type (AI vs Standard)
+    if (filterType === 'ai') {
+      result = result.filter(r => r.clinicalReport?.isAiGenerated);
+    } else if (filterType === 'standard') {
+      result = result.filter(r => !r.clinicalReport?.isAiGenerated);
+    }
+
+    // 3. Sort By
+    result.sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0);
+      const dateB = new Date(b.createdAt || 0);
+      return sortBy === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    return result;
+  }, [reports, searchQuery, filterType, sortBy]);
 
   // Handle generating a new report for an assessment
   const handleGenerateReport = async (e) => {
@@ -220,63 +254,115 @@ export default function Reports() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Column: List of generated reports */}
-          <div className="lg:col-span-1 space-y-3">
+          <div className="lg:col-span-1 space-y-4">
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider px-1">
               Select Patient Report
             </h3>
 
-            {reports.map((report) => {
-              const reportPt = report.assessment?.patient;
-              const isSelected = activeReport && (activeReport._id === report._id || activeReport.id === report.id);
-              const isAI = report.clinicalReport?.isAiGenerated;
+            {/* Search & Filter Controls */}
+            <div className="space-y-3 bg-gray-50/70 p-3.5 rounded-xl border border-gray-200 text-xs">
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Search Patient</label>
+                <input
+                  type="text"
+                  placeholder="Search by name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-800"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Report Type</label>
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg text-xs bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Types</option>
+                    <option value="ai">AI Reports</option>
+                    <option value="standard">Standard</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Sort By</label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg text-xs bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                  </select>
+                </div>
+              </div>
+            </div>
 
-              return (
-                <Card
-                  key={report._id || report.id}
-                  onClick={() => setActiveReport(report)}
-                  className={`!p-3.5 cursor-pointer transition-all border ${
-                    isSelected
-                      ? 'border-blue-500 bg-blue-50/40 shadow-xs'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="font-bold text-gray-900 text-xs">
-                        {reportPt?.fullName || 'Patient Report'}
-                      </h4>
-                      <p className="text-[11px] text-gray-500 mt-0.5 flex items-center gap-1.5">
-                        <span>MRN: {reportPt?.patientId || 'N/A'}</span>
-                        {isAI && (
-                          <span className="px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-600 text-[8px] font-bold border border-indigo-100 flex items-center gap-0.5">
-                            <Sparkles className="w-2 h-2 fill-indigo-550 text-indigo-550" /> AI
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteReport(report._id || report.id);
-                      }}
-                      className="text-gray-400 hover:text-rose-600 p-1 cursor-pointer"
-                      title="Delete report"
+            {/* Reports List */}
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+              {filteredReports.length === 0 ? (
+                <div className="text-center py-8 text-xs text-gray-400 bg-gray-50/40 rounded-xl border border-dashed border-gray-200">
+                  No matching reports found.
+                </div>
+              ) : (
+                filteredReports.map((report) => {
+                  const reportPt = report.assessment?.patient;
+                  const isSelected = activeReport && (activeReport._id === report._id || activeReport.id === report.id);
+                  const isAI = report.clinicalReport?.isAiGenerated;
+
+                  return (
+                    <Card
+                      key={report._id || report.id}
+                      onClick={() => setActiveReport(report)}
+                      className={`!p-3.5 cursor-pointer transition-all border ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-50/40 shadow-xs'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h4 className="font-bold text-gray-900 text-xs">
+                            {reportPt?.fullName || 'Patient Report'}
+                          </h4>
+                          <p className="text-[11px] text-gray-500 mt-0.5 flex flex-wrap items-center gap-1.5">
+                            <span>MRN: {reportPt?.patientId || 'N/A'}</span>
+                            {isAI ? (
+                              <span className="px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-600 text-[8px] font-bold border border-indigo-100 flex items-center gap-0.5">
+                                <Sparkles className="w-2 h-2 fill-indigo-550 text-indigo-550" /> AI
+                              </span>
+                            ) : (
+                              <span className="px-1.5 py-0.2 rounded bg-gray-150 text-gray-650 text-[8px] font-semibold border border-gray-200">
+                                Standard
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteReport(report._id || report.id);
+                          }}
+                          className="text-gray-400 hover:text-rose-600 p-1 cursor-pointer"
+                          title="Delete report"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
 
-                  <div className="mt-2.5 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
-                    <span>
-                      {new Date(report.createdAt || Date.now()).toLocaleDateString()}
-                    </span>
-                    <span className="font-bold text-blue-700">
-                      Score: {report.clinicalReport?.overallScore || report.assessment?.overallScore || 0}%
-                    </span>
-                  </div>
-                </Card>
-              );
-            })}
+                      <div className="mt-2.5 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
+                        <span>
+                          {new Date(report.createdAt || Date.now()).toLocaleDateString()}
+                        </span>
+                        <span className="font-bold text-blue-700">
+                          Score: {report.clinicalReport?.overallScore || report.assessment?.overallScore || 0}%
+                        </span>
+                      </div>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
           </div>
 
           {/* Right Column: Detailed Printable Clinical Report View */}
@@ -411,7 +497,7 @@ export default function Reports() {
                 {/* Strengths & Improvement Areas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Strengths */}
-                  <div className="space-y-3 bg-emerald-50/60 p-4 rounded-xl border border-emerald-100 flex flex-col justify-between">
+                  <div className="space-y-3 bg-emerald-50/60 p-4 rounded-xl border border-emerald-105 flex flex-col justify-between">
                     <div>
                       <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5 mb-3 border-b border-emerald-100 pb-2">
                         <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Key Clinical Strengths
