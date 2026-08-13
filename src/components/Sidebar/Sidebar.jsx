@@ -8,7 +8,8 @@ import {
   FileText,
   Video,
   Glasses,
-  LogOut
+  LogOut,
+  Puzzle
 } from 'lucide-react';
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -19,6 +20,7 @@ export default function Sidebar({ isOpen, onClose }) {
     ? [
         { name: 'Dashboard', path: '/parent-dashboard', icon: LayoutDashboard },
         { name: 'Teaching Videos', path: '/teaching-videos', icon: Video },
+        { name: 'Therapy Activities', path: '/therapy-activities', icon: Puzzle },
       ]
     : [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },

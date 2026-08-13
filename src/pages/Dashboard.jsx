@@ -127,14 +127,6 @@ export default function Dashboard() {
       bgColor: 'bg-white text-gray-800 hover:bg-gray-50 border border-gray-200'
     },
     {
-      id: 'teaching-videos',
-      title: 'Teaching Videos',
-      subtitle: 'Browse therapy video modules',
-      icon: Video,
-      path: '/teaching-videos',
-      bgColor: 'bg-white text-gray-800 hover:bg-gray-50 border border-gray-200'
-    },
-    {
       id: 'vr-assessment',
       title: 'VR Assessment',
       subtitle: 'Launch immersive VR session',

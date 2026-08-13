@@ -13,6 +13,7 @@ const Patients = React.lazy(() => import('./pages/Patients'));
 const Assessment = React.lazy(() => import('./pages/Assessment'));
 const Reports = React.lazy(() => import('./pages/Reports'));
 const TeachingVideos = React.lazy(() => import('./pages/TeachingVideos'));
+const TherapyActivities = React.lazy(() => import('./pages/TherapyActivities'));
 const VRAssessment = React.lazy(() => import('./pages/VRAssessment'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
@@ -37,6 +38,7 @@ export default function App() {
               <Route element={<DashboardLayout />}>
                 <Route path="/parent-dashboard" element={<ParentDashboard />} />
                 <Route path="/teaching-videos" element={<TeachingVideos />} />
+                <Route path="/therapy-activities" element={<TherapyActivities />} />
               </Route>
             </Route>
 

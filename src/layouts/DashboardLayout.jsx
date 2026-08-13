@@ -39,7 +39,8 @@ export default function DashboardLayout() {
     '/vr',
     '/settings',
     '/parent-dashboard',
-    '/teaching-videos'
+    '/teaching-videos',
+    '/therapy-activities'
   ], []);
 
   const prevPathRef = useRef(location.pathname);
