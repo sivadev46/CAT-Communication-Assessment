@@ -45,15 +45,15 @@ export default function Sidebar({ isOpen, onClose }) {
       )}
 
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-200 ease-in-out md:translate-x-0 ${
+        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 flex flex-col transition-transform duration-200 ease-in-out md:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="p-4 border-b border-gray-100 md:hidden flex justify-between items-center">
-          <span className="font-bold text-gray-900">Navigation</span>
+        <div className="p-4 border-b border-gray-100 dark:border-slate-800 md:hidden flex justify-between items-center">
+          <span className="font-bold text-gray-900 dark:text-slate-100">Navigation</span>
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-gray-500 hover:bg-gray-100"
+            className="p-1 rounded-md text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800"
           >
             ✕
           </button>
@@ -72,9 +72,9 @@ export default function Sidebar({ isOpen, onClose }) {
                   return `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isCurrentActive
                       ? isParent
-                        ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-600 pl-2.5'
-                        : 'bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600 pl-2.5'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-semibold border-l-4 border-emerald-600 pl-2.5'
+                        : 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 font-semibold border-l-4 border-blue-600 pl-2.5'
+                      : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-850/60 hover:text-gray-900 dark:hover:text-slate-200'
                   }`;
                 }}
               >
@@ -86,13 +86,13 @@ export default function Sidebar({ isOpen, onClose }) {
         </nav>
 
         {/* Sidebar Footer Logout */}
-        <div className="p-4 border-t border-gray-100 mt-auto">
+        <div className="p-4 border-t border-gray-100 dark:border-slate-800 mt-auto">
           <button
             onClick={handleLogout}
             className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium w-full text-left transition-colors cursor-pointer ${
               isParent
-                ? 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
-                : 'text-gray-600 hover:bg-rose-50 hover:text-rose-600'
+                ? 'text-gray-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-700 dark:hover:text-emerald-400'
+                : 'text-gray-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-600 dark:hover:text-rose-400'
             }`}
           >
             <LogOut className="w-5 h-5 flex-shrink-0" />

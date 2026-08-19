@@ -103,9 +103,30 @@ export default function DashboardLayout() {
 
   const variants = reducedMotion ? fadeVariants : slideVariants;
 
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'light';
+  });
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-800">
-      <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex flex-col font-sans text-gray-800 dark:text-slate-100 transition-colors duration-200">
+      <Navbar
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
       <div className="flex flex-1 overflow-hidden relative">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <main

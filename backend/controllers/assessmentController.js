@@ -121,7 +121,10 @@ export const getAssessment = asyncHandler(async (req, res) => {
 export const getAssessmentsByPatient = asyncHandler(async (req, res) => {
   const { patientId } = req.params;
 
-  const assessments = await Assessment.find({ patient: patientId })
+  const query = patientId === 'all' ? {} : { patient: patientId };
+
+  const assessments = await Assessment.find(query)
+    .populate('patient', 'fullName')
     .populate('clinician', 'fullName email')
     .sort({ assessmentDate: -1 });
 
