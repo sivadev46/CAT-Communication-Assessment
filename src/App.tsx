@@ -11,6 +11,7 @@ const ParentDashboard = React.lazy(() => import('./pages/ParentDashboard'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Patients = React.lazy(() => import('./pages/Patients'));
 const Assessment = React.lazy(() => import('./pages/Assessment'));
+const AssessmentHistory = React.lazy(() => import('./pages/AssessmentHistory'));
 const Reports = React.lazy(() => import('./pages/Reports'));
 const TeachingVideos = React.lazy(() => import('./pages/TeachingVideos'));
 const TherapyActivities = React.lazy(() => import('./pages/TherapyActivities'));
@@ -51,6 +52,7 @@ export default function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/patients" element={<Patients />} />
                 <Route path="/assessment" element={<Assessment />} />
+                <Route path="/assessment-history" element={<AssessmentHistory />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/vr" element={<VRAssessment />} />
                 <Route path="/settings" element={<Settings />} />

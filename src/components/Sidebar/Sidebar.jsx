@@ -9,7 +9,8 @@ import {
   Video,
   Glasses,
   LogOut,
-  Puzzle
+  Puzzle,
+  History
 } from 'lucide-react';
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -26,6 +27,7 @@ export default function Sidebar({ isOpen, onClose }) {
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { name: 'Patients', path: '/patients', icon: Users },
         { name: 'Assessment', path: '/assessment', icon: ClipboardCheck },
+        { name: 'Assessment History', path: '/assessment-history', icon: History },
         { name: 'Reports', path: '/reports', icon: FileText },
         { name: 'VR Assessment', path: '/vr', icon: Glasses },
       ];

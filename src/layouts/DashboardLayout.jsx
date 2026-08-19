@@ -121,7 +121,7 @@ export default function DashboardLayout() {
   }, [theme]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex flex-col font-sans text-gray-800 dark:text-slate-100 transition-colors duration-200">
+    <div className="h-screen overflow-hidden bg-gray-50 dark:bg-slate-950 flex flex-col font-sans text-gray-800 dark:text-slate-100 transition-colors duration-200">
       <Navbar
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         theme={theme}
