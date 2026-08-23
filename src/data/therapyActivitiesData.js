@@ -1,32 +1,32 @@
 import placeholderSvg from '../assets/placeholder.svg';
-import act01Img from '../assets/activities/Maintains direct eye contact during greetings.png';
-import act02Img from '../assets/activities/Tracks speaker during verbal interaction.png';
-import act03Img from '../assets/activities/Initiates Eye contact to request assisstance.png';
-import act04Img from '../assets/activities/Shifts gaze between objects and clinician.png';
-import act05Img from '../assets/activities/Responds to clinician pointing gesture.png';
-import act06Img from '../assets/activities/Initiates shared attention by pointing or showing.png';
-import act07Img from '../assets/activities/Follows clinician gaze direction.png';
-import act08Img from '../assets/activities/Sustains dual focus during structured activities.png';
-import act09Img from '../assets/activities/Follow 1 step simple verbal command.png';
-import act10Img from '../assets/activities/Follow 2 step sequential instructions.png';
-import act11Img from '../assets/activities/Identify common objects.png';
-import act12Img from '../assets/activities/Comprehends yes no.png';
-import act13Img from '../assets/activities/Produces clear single word responses.png';
-import act14Img from '../assets/activities/Combines words to sentences.png';
-import act15Img from '../assets/activities/Use gestures.png';
-import act16Img from '../assets/activities/Articulation.png';
-import act17Img from '../assets/activities/Initiates turn taking.png';
-import act18Img from '../assets/activities/Responds to social greeting.png';
-import act19Img from '../assets/activities/Demostrates turn taking.png';
-import act20Img from '../assets/activities/Display appropriate facial expression.png';
-import act21Img from '../assets/activities/Tolerate communication frustration.png';
+import act01Img from '../assets/activities/Startle response to loud sudden noises.png';
+import act02Img from '../assets/activities/Activity arrested when approached by sound.png';
+import act03Img from '../assets/activities/Often Quieted by Familiar Friendly Voice.png';
+import act04Img from '../assets/activities/Frequently Gives Direction to Other Voices.png';
+import act05Img from '../assets/activities/Appears to Listen to Speaker.png';
+import act06Img from '../assets/activities/Often Looks at Speaker and Responds by Smiling.png';
+import act07Img from '../assets/activities/Response to Playful Activities.png';
+import act08Img from '../assets/activities/Responds to Speech by Looking Directly at the Speaker.png';
+import act09Img from '../assets/activities/Frequently Watches Lips and Mouth of Speaker.png';
+import act10Img from '../assets/activities/Frequent Crying.png';
+import act11Img from '../assets/activities/Regularly Localizes Speaker with Eyes.png';
+import act12Img from '../assets/activities/Frequent Crying2.png';
+import act13Img from '../assets/activities/Random Vocalization Rather than Crying.png';
+import act14Img from '../assets/activities/Vowel-Like Sounds Predominate.png';
+import act15Img from '../assets/activities/Has a Special Cry for Hunger.png';
+import act16Img from '../assets/activities/Develops Vocal Signs at Pleasure.png';
+import act17Img from '../assets/activities/Occasionally Responds to Sound Stimulation.png';
+import act18Img from '../assets/activities/Vowel Like Sounds Predominate.png';
+import act19Img from '../assets/activities/Expresses Pleasure Vocally.png';
 
 export const therapyCategories = [
-  'Eye Contact',
-  'Joint Attention',
-  'Receptive Language',
-  'Expressive Language',
-  'Social Interaction'
+  'Auditory Response',
+  'Auditory Attention',
+  'Social Communication',
+  'Social Interaction',
+  'Visual Attention',
+  'Emotional Expression',
+  'Vocal Communication'
 ];
 
 export const difficultyLevels = [
@@ -39,535 +39,534 @@ export const therapyActivities = [
   // ==================== EYE CONTACT ====================
   {
     id: 'act-01',
-    title: 'Maintains direct eye contact during greetings',
-    category: 'Eye Contact',
+    title: 'Startle response to sudden loud noises',
+    category: 'Auditory Response',
     difficulty: 'Beginner',
     duration: '5 mins',
-    description: 'Use physical proximity, eye-level positioning, and highly motivating greeting toys to establish direct gaze.',
-    goal: 'Increase direct eye contact duration to at least 2 seconds during natural greeting exchanges.',
+    description: 'Observe and support your child’s response to sudden, unexpected sounds in a calm and controlled setting.',
+    goal: 'Increase the child’s ability to remain calm and gradually recover after hearing a sudden loud noise.',
     instructions: [
-      'Position yourself at your child\'s exact eye level before speaking.',
-      'Hold a favorite toy or item near your eyes to draw focus.',
-      'Say a warm greeting (e.g., "Hello [Name]!") and wait for them to look at your face.',
-      'Deliver immediate positive reinforcement when eye contact is established.'
+      'Choose a quiet and familiar environment where your child feels comfortable.',
+      'Introduce a mild, unexpected sound from a safe distance and observe your child’s response.',
+      'Allow your child time to recover without immediately repeating the sound.',
+      'Use a calm voice and reassuring presence to help your child feel safe.',
+      'Gradually repeat the activity with different everyday sounds while keeping the intensity comfortable for your child.'
     ],
     parentTips: [
-      'Avoid pulling or forcing your child\'s head toward you; let them initiate the look.',
-      'Use toys that make a gentle noise if your child is primarily responsive to auditory cues.'
+      'Start with gentle sounds and avoid intentionally frightening your child.',
+      'Give your child enough space and time to recover after an unexpected sound.',
+      'Praise calm recovery and avoid forcing your child to continue if they become distressed.'
     ],
     thingsToRemember: [
-      'Gaze should feel natural and unforced.',
-      'Even brief looks (1 second) are a great starting point for beginners.'
+      'Every child responds differently to sudden sounds.',
+      'The goal is to build comfort and coping skills gradually, not to eliminate the startle response completely.',
+      'Stop the activity if your child becomes significantly distressed.'
     ],
-    relatedAssessment: 'Maintains direct eye contact during greetings',
+    relatedAssessment: 'Startle response to sudden loud noises',
     imagePath: act01Img
   },
   {
     id: 'act-02',
-    title: 'Tracks speaker during verbal interaction',
-    category: 'Eye Contact',
+    title: 'Activity arrested when approached by sound',
+    category: 'Auditory Response',
     difficulty: 'Intermediate',
     duration: '5-10 mins',
-    description: 'Practice visual tracking of the parent\'s face while the parent speaks or sings simple melodies.',
-    goal: 'Maintain visual attention on the speaker\'s face for the duration of a short sentence or phrase.',
+    description: 'Observe whether your child pauses or stops an ongoing activity when they hear a sound approaching from nearby.',
+    goal: 'Increase the child’s ability to notice and respond appropriately when an unexpected or approaching sound occurs.',
     instructions: [
-      'Sit facing your child in a quiet room with minimal visual distractions.',
-      'Start speaking in an animated voice or singing a familiar song.',
-      'Move your head slightly side to side to encourage tracking.',
-      'Pause singing or speaking if they look away, resuming only when they track back.'
+      'Choose a familiar activity your child enjoys in a quiet and comfortable room.',
+      'While your child is engaged in the activity, make a gentle sound from a short distance away.',
+      'Observe whether your child pauses, stops, turns toward the sound, or otherwise acknowledges it.',
+      'Allow your child time to process the sound before repeating the activity.',
+      'Gradually introduce different everyday sounds while keeping the environment comfortable.'
     ],
     parentTips: [
-      'Exaggerate your lip movements and expressions to make your face more visually engaging.',
-      'Keep visual background distractions (TV, tablets) turned off.'
+      'Begin with soft and familiar sounds before introducing less familiar sounds.',
+      'Give your child enough time to notice and process the sound without repeating it immediately.',
+      'Use calm encouragement when your child notices or responds to the sound.'
     ],
     thingsToRemember: [
-      'Look for signs of visual fatigue or sensory overload (blinking, rubbing eyes).',
-      'Give brief breaks between tracking trials.'
+      'Children may respond to sounds in different ways, such as pausing, turning, or looking toward the source.',
+      'Avoid deliberately creating very loud or frightening sounds.',
+      'Keep practice sessions short and provide breaks when needed.'
     ],
-    relatedAssessment: 'Tracks speaker during verbal interaction',
+    relatedAssessment: 'Activity arrested when approached by sound',
     imagePath: act02Img
   },
   {
     id: 'act-03',
-    title: 'Initiates eye contact to request assistance',
-    category: 'Eye Contact',
+    title: 'Often Quieted by Familiar Friendly Voice',
+    category: 'Auditory Response',
     difficulty: 'Intermediate',
     duration: '5-10 mins',
-    description: 'Create communication opportunities by placing desired items in hard-to-open containers.',
-    goal: 'Prompt the child to make eye contact to request help rather than using physical pulling or crying.',
+    description: 'Observe and encourage your child’s ability to calm and settle when they hear a familiar, friendly voice.',
+    goal: 'Increase the child’s ability to recognize and respond calmly to a familiar caregiver’s voice during moments of mild distress or agitation.',
     instructions: [
-      'Place a highly desired toy inside a clear, tightly closed jar.',
-      'Hand the jar to your child and wait for them to attempt to open it.',
-      'When they cannot open it, wait for them to look up at your face for help.',
-      'As soon as they make eye contact, say "Open!" and immediately open the jar.'
+      'Choose a quiet and comfortable environment where your child feels secure.',
+      'When your child becomes mildly unsettled, approach calmly and speak using a familiar, gentle voice.',
+      'Use the child’s name and short, reassuring phrases such as "I am here" or "You are safe."',
+      'Pause and allow your child time to listen and respond to your voice.',
+      'Repeat the activity during different everyday situations while keeping your voice calm and consistent.'
     ],
     parentTips: [
-      'Be patient; wait up to 10 seconds for the gaze to shift to you before prompting.',
-      'If needed, gently touch your own chin to prompt them to look up.'
+      'Use a warm and familiar tone rather than speaking loudly or urgently.',
+      'Keep your words short and simple so your child can focus on the sound of your voice.',
+      'Give your child enough time to process your voice before repeating the prompt.'
     ],
     thingsToRemember: [
-      'This activity is about building independence in social requesting.',
-      'Reinforce the look instantly to build the connection between gaze and reward.'
+      'Some children may respond by becoming quieter, looking toward you, relaxing, or returning to an activity.',
+      'Do not force a response; allow your child to respond at their own pace.',
+      'Keep the activity positive and stop if your child becomes more distressed.'
     ],
-    relatedAssessment: 'Initiates eye contact to request assistance',
+    relatedAssessment: 'Often Quieted by Familiar Friendly Voice',
     imagePath: act03Img
   },
   {
     id: 'act-04',
-    title: 'Shifts gaze between objects and clinician',
-    category: 'Eye Contact',
+    title: 'Frequently Gives Direction to Other Voices',
+    category: 'Auditory Attention',
     difficulty: 'Advanced',
     duration: '10 mins',
-    description: 'Practice three-way (triadic) gaze shifts between a motivating object, the parent, and back to the object.',
-    goal: 'Establish fluid triadic eye gaze patterns during interactive play.',
+    description: 'Practice noticing and orienting toward different voices by observing where the sound comes from and shifting attention between speakers.',
+    goal: 'Improve the child’s ability to recognize different voices and direct their attention toward the person who is speaking.',
     instructions: [
-      'Sit with your child and activate an exciting toy (e.g., a wind-up toy).',
-      'Hold the toy and say "Look!" pointing to it.',
-      'Wait for the child to look at the toy, then look up at you, and then back to the toy.',
-      'Model this gaze shift yourself and celebrate when they replicate the pattern.'
+      'Sit with your child in a quiet room with another familiar person nearby.',
+      'Have one person speak to the child using a calm and familiar voice.',
+      'Allow the child time to listen and observe whether they turn their head, eyes, or body toward the speaker.',
+      'Have the second person speak from a different position and observe whether the child shifts attention toward the new voice.',
+      'Repeat the activity using short phrases and different positions around the child.'
     ],
     parentTips: [
-      'Use toys that have a clear action/stop cycle, like bubbles or wind-up cars.',
-      'Say "Wow!" or show surprised expressions to draw their look back to your face.'
+      'Begin with familiar voices before introducing less familiar speakers.',
+      'Keep background noise low so your child can focus on the voices.',
+      'Give your child several seconds to locate the speaker before repeating their name or prompt.'
     ],
     thingsToRemember: [
-      'Triadic gaze shifts are the foundation of joint attention and social communication.',
-      'Ensure the object is physically aligned to make the shift comfortable.'
+      'Children may show auditory attention by turning their head, looking toward the speaker, or pausing their current activity.',
+      'Allow your child enough time to process and locate each voice.',
+      'Keep the activity relaxed and avoid overwhelming your child with multiple voices at once.'
     ],
-    relatedAssessment: 'Shifts gaze between objects and clinician',
+    relatedAssessment: 'Frequently Gives Direction to Other Voices',
     imagePath: act04Img
   },
-
-  // ==================== JOINT ATTENTION ====================
   {
     id: 'act-05',
-    title: 'Responds to clinician pointing gesture',
-    category: 'Joint Attention',
+    title: 'Appears to Listen to Speaker',
+    category: 'Auditory Attention',
     difficulty: 'Beginner',
     duration: '5 mins',
-    description: 'Encourage your child to follow your index finger point to locate motivating items in the room.',
-    goal: 'Accurately look at an object located at least 5 feet away in response to a pointing gesture.',
+    description: 'Encourage your child to notice and attend to your voice by turning toward you when you speak or call their name.',
+    goal: 'Increase the child’s ability to orient toward and attend to a speaker in response to their voice.',
     instructions: [
-      'Sit next to your child and ensure they are looking at you.',
-      'Say "Look at the [Item]!" while pointing directly at an object across the room.',
-      'Gently nudge their attention toward the target if they do not follow the point.',
-      'Celebrate and reward them immediately when they locate the correct object.'
+      'Sit near your child in a quiet environment where distractions are minimal.',
+      'Call your child’s name or use a simple phrase such as "Look at me!" in a warm, clear voice.',
+      'Pause and give your child a few seconds to turn toward you or show that they are listening.',
+      'If they do not respond, gently repeat their name or move slightly into their line of sight.',
+      'Praise and encourage them immediately when they orient toward you or attend to your voice.'
     ],
     parentTips: [
-      'Start with objects that are close (1-2 feet) and gradually increase distance.',
-      'Use high-interest objects (e.g., balloons, light-up toys) as targets.'
+      'Begin in a quiet environment and gradually practice when there are more background sounds.',
+      'Use an enthusiastic but natural tone of voice to make listening more engaging.',
+      'Keep your phrases short and give your child enough time to respond before repeating.'
     ],
     thingsToRemember: [
-      'Ensure your hand is clearly in their field of vision when you start pointing.',
-      'Pointing is a critical milestone for receptive communication.'
+      'Make sure your child can hear you clearly and that the environment is not overly distracting.',
+      'A response can include turning their head, looking toward you, pausing an activity, or otherwise showing attention to your voice.',
+      'Consistent responses to a speaker’s voice are an important foundation for auditory attention and receptive communication.'
     ],
-    relatedAssessment: 'Responds to clinician pointing gesture',
+    relatedAssessment: 'Appears to Listen to Speaker',
     imagePath: act05Img
   },
   {
     id: 'act-06',
-    title: 'Initiates shared attention by pointing or showing',
-    category: 'Joint Attention',
+    title: 'Often Looks at Speaker and Responds by Smiling',
+    category: 'Social Communication',
     difficulty: 'Intermediate',
-    duration: '10 mins',
-    description: 'Create setups that surprise or interest your child, prompting them to point and share the experience.',
-    goal: 'Spontaneously point or show an object to share interest, accompanied by eye contact.',
+    duration: '5-10 mins',
+    description: 'Encourage your child to look toward a familiar speaker and respond naturally with a smile during warm, engaging interactions.',
+    goal: 'Increase the child’s ability to look toward a speaker and respond with a smile during social interaction.',
     instructions: [
-      'Place a new or unusual item (like a funny hat or balloon) in a visible spot.',
-      'Act busy and wait for your child to notice the item.',
-      'Wait for them to point to it or bring it to you to show you.',
-      'Respond with high enthusiasm: "Oh look! You found the balloon!"'
+      'Sit facing your child in a comfortable, distraction-free setting.',
+      'Use their name or a cheerful phrase to get their attention.',
+      'Smile warmly and use an engaging facial expression while speaking to them.',
+      'Pause and give your child time to look toward you and respond with a smile or other positive expression.',
+      'Respond warmly by smiling, praising, or continuing the interaction when they look toward you and smile.'
     ],
     parentTips: [
-      'Do not jump to label items immediately. Give your child time to show you first.',
-      'Acknowledge any pointing attempt with immediate verbal validation.'
+      'Use familiar games, songs, or playful sounds that naturally encourage social interaction.',
+      'Give your child enough time to respond instead of immediately repeating your prompt.',
+      'Keep interactions enjoyable and follow your child’s interest whenever possible.'
     ],
     thingsToRemember: [
-      'Initiating is harder than responding. Be patient and wait for the child to lead.',
-      'Praise the combination of pointing and looking at you.'
+      'A social response may include looking toward you, smiling, vocalizing, or showing another positive response.',
+      'Focus on natural interaction rather than requiring a specific response every time.',
+      'Praise and reinforce moments when your child looks toward you and responds socially.'
     ],
-    relatedAssessment: 'Initiates shared attention by pointing or showing',
+    relatedAssessment: 'Often Looks at Speaker and Responds by Smiling',
     imagePath: act06Img
   },
   {
     id: 'act-07',
-    title: 'Follows clinician gaze direction',
-    category: 'Joint Attention',
-    difficulty: 'Intermediate',
+    title: 'Response to Playful Activities',
+    category: 'Social Interaction',
+    difficulty: 'Beginner',
     duration: '5-10 mins',
-    description: 'Practice gaze-following without finger points or verbal naming cues.',
-    goal: 'Follow the parent\'s head turn and gaze direction to look at a shared target.',
+    description: 'Encourage your child to engage with you during simple, enjoyable play activities and respond to your playful actions.',
+    goal: 'Increase the child’s ability to participate in shared play by noticing, responding to, and continuing playful interactions with a parent.',
     instructions: [
-      'Sit directly opposite your child and establish eye contact.',
-      'Turn your head dramatically and look at a specific toy next to you.',
-      'Hold your gaze on the toy without pointing or speaking.',
-      'Wait for your child to turn their head and look at the same toy.'
+      'Sit with your child in a comfortable space and choose a simple activity they enjoy.',
+      'Start a playful action such as rolling a ball, stacking blocks, making funny sounds, or playing peekaboo.',
+      'Pause briefly and wait to see how your child responds to the activity.',
+      'Follow their response by continuing the game or imitating their actions.',
+      'Celebrate their participation with smiles, encouraging words, and continued playful interaction.'
     ],
     parentTips: [
-      'Start with very obvious, slow head turns.',
-      'Place a toy that makes sound or moves in the target direction to make it easier initially.'
+      'Choose activities that are familiar, enjoyable, and easy for your child to participate in.',
+      'Pause frequently to give your child opportunities to initiate or respond.',
+      'Follow your child’s interests rather than directing every part of the play.'
     ],
     thingsToRemember: [
-      'This requires the child to understand that your eyes are looking at something specific.',
-      'Practice in a clutter-free environment to avoid confusion.'
+      'Social interaction can include looking, smiling, vocalizing, moving toward you, imitating an action, or taking a turn.',
+      'Keep the activity relaxed and enjoyable rather than expecting a specific response every time.',
+      'Short, repeated play sessions can help build comfort and participation in shared activities.'
     ],
-    relatedAssessment: 'Follows clinician gaze direction',
+    relatedAssessment: 'Response to Playful Activities',
     imagePath: act07Img
   },
   {
     id: 'act-08',
-    title: 'Sustains dual focus during structured activities',
-    category: 'Joint Attention',
+    title: 'Responds to Speech by Looking Directly at the Speaker',
+    category: 'Auditory Attention',
     difficulty: 'Advanced',
-    duration: '10-15 mins',
-    description: 'Engage in collaborative, back-and-forth building or puzzle activities requiring shared focus.',
-    goal: 'Sustain shared attention on a structured task for at least 5 minutes with multiple interactions.',
+    duration: '5-10 mins',
+    description: 'Encourage your child to orient toward the speaker and look at them when spoken to during natural, engaging interactions.',
+    goal: 'Increase the child’s ability to look toward the speaker in response to spoken communication.',
     instructions: [
-      'Set up a simple block building set or puzzle between you.',
-      'Take turns placing blocks or pieces, commenting on each step.',
-      'Use phrases like "My turn," "Your turn," and "Look what we made!"',
-      'Encourage your child to look at the progress of the structure and at you.'
+      'Sit facing your child in a quiet environment with minimal distractions.',
+      'Call your child’s name or use a simple phrase such as "Can you look at me?" in a clear, natural voice.',
+      'Pause and give your child several seconds to respond by looking toward you.',
+      'If they do not respond, gently repeat their name or use an interesting sound to regain their attention.',
+      'When your child looks toward you, respond positively and continue the conversation or activity.'
     ],
     parentTips: [
-      'Keep the task simple enough so the child does not get frustrated with the motor demands.',
-      'Praise their cooperation and shared focus frequently.'
+      'Use natural speech and familiar phrases rather than repeating the same prompt too frequently.',
+      'Reduce background noise and distractions when first practicing this skill.',
+      'Gradually practice during everyday activities and conversations in different settings.'
     ],
     thingsToRemember: [
-      'This builds working memory, turn-taking, and shared goals.',
-      'Collaborative play is the peak of early joint attention development.'
+      'A response may be brief; the goal is to orient toward the speaker when spoken to.',
+      'Give your child enough processing time before providing another prompt.',
+      'Encourage natural social attention without requiring prolonged or continuous eye contact.'
     ],
-    relatedAssessment: 'Sustains dual focus during structured activities',
+    relatedAssessment: 'Responds to Speech by Looking Directly at the Speaker',
     imagePath: act08Img
   },
-
-  // ==================== RECEPTIVE LANGUAGE ====================
   {
     id: 'act-09',
-    title: 'Follows 1-step simple verbal commands',
-    category: 'Receptive Language',
+    title: 'Frequently Watches Lips and Mouth of Speaker',
+    category: 'Visual Attention',
     difficulty: 'Beginner',
     duration: '5 mins',
-    description: 'Practice simple, actionable single-step commands in play contexts.',
-    goal: 'Respond accurately to 1-step commands without physical prompts.',
+    description: 'Encourage your child to notice and visually attend to your lips and mouth during simple, engaging face-to-face interactions.',
+    goal: 'Increase the child’s ability to visually attend to the speaker’s mouth during speech and social interaction.',
     instructions: [
-      'Give a simple command in a clear, friendly voice (e.g., "Give me ball").',
-      'Wait 3-5 seconds for your child to process and execute.',
-      'If they do not respond, model the action or use a gentle gesture.',
-      'Provide praise: "Good job giving me the ball!" when done.'
+      'Sit facing your child in a quiet, comfortable setting.',
+      'Get your child’s attention and speak using short, clear phrases while keeping your face visible.',
+      'Slowly exaggerate natural mouth movements while saying simple sounds or familiar words.',
+      'Pause between words and give your child time to look toward your mouth.',
+      'Smile and praise your child when they visually attend to your mouth during the interaction.'
     ],
     parentTips: [
-      'Keep verbal commands short and clear. Avoid burying the command in long sentences.',
-      'Use commands that are highly relevant to their current play (e.g., "Roll it," "Sit down").'
+      'Choose familiar words, sounds, or songs that naturally capture your child’s interest.',
+      'Make sure your face is well lit and clearly visible without forcing your child to look.',
+      'Keep practice brief and playful so visual attention remains comfortable and engaging.'
     ],
     thingsToRemember: [
-      'Ensure you have their attention before giving the instruction.',
-      'Avoid repeating the command multiple times in rapid succession.'
+      'Visual attention to the mouth can be one way a child gathers information during spoken communication.',
+      'Do not require continuous eye contact or prolonged staring at the mouth.',
+      'Follow your child’s natural attention and reinforce brief moments of visual engagement.'
     ],
-    relatedAssessment: 'Follows 1-step simple verbal commands',
+    relatedAssessment: 'Frequently Watches Lips and Mouth of Speaker',
     imagePath: act09Img
   },
   {
     id: 'act-10',
-    title: 'Follows 2-step sequential instructions',
-    category: 'Receptive Language',
+    title: 'Frequent Crying',
+    category: 'Emotional Expression',
     difficulty: 'Intermediate',
     duration: '5-10 mins',
-    description: 'Build working memory by joining two simple commands in sequence.',
-    goal: 'Execute a 2-step command (e.g., "Pick up block and put in box") in the correct order.',
+    description: 'Help your child recognize, communicate, and respond to emotions in a calm and supportive way during everyday situations.',
+    goal: 'Increase the child’s ability to communicate emotional needs and use simple strategies to express feelings appropriately.',
     instructions: [
-      'Get your child\'s full attention.',
-      'State the two steps clearly: "Get the spoon, then put it in the bowl."',
-      'Allow time for the child to process and perform both actions.',
-      'Praise them specifically for completing both steps in the right order.'
+      'Choose a calm time when your child is comfortable and introduce simple emotion words such as "happy," "sad," "angry," or "upset."',
+      'Use pictures, toys, or simple pretend-play situations to demonstrate different emotions.',
+      'When your child becomes upset, calmly acknowledge their feeling using simple words such as "You are sad" or "You are upset."',
+      'Model an appropriate way to communicate a need, such as pointing, using a gesture, or saying "help" or "more."',
+      'Praise and comfort your child when they communicate their feelings or needs in any appropriate way.'
     ],
     parentTips: [
-      'Use the words "first" and "then" to make the sequence clear (e.g., "First get the book, then give it to Daddy").',
-      'If they forget the second step, gently prompt them: "What is next?"'
+      'Stay calm and use a gentle, reassuring voice when your child is crying.',
+      'Look for possible needs such as hunger, tiredness, discomfort, frustration, or difficulty communicating.',
+      'Teach emotion words and communication strategies during calm moments rather than only when your child is upset.'
     ],
     thingsToRemember: [
-      'Processing two commands takes significantly more cognitive effort.',
-      'Celebrate partial successes and scaffold down if they get stuck.'
+      'Crying is a normal form of communication, especially when a child cannot yet express a need clearly.',
+      'Focus on understanding and responding to the reason for the crying rather than simply stopping the crying.',
+      'If crying is unusually frequent, intense, sudden, or accompanied by signs of illness or significant distress, consider discussing it with a pediatrician or qualified professional.'
     ],
-    relatedAssessment: 'Follows 2-step sequential instructions',
+    relatedAssessment: 'Frequent Crying',
     imagePath: act10Img
   },
   {
     id: 'act-11',
-    title: 'Identifies common objects upon naming',
-    category: 'Receptive Language',
+    title: 'Regularly Localizes Speaker with Eyes',
+    category: 'Auditory Attention',
     difficulty: 'Beginner',
     duration: '5-10 mins',
-    description: 'Select and touch or point to common household objects or animals from an array of options.',
-    goal: 'Identify the named object correctly from a field of 3 items.',
+    description: 'Encourage your child to locate the person speaking by turning their eyes or head toward the source of the voice.',
+    goal: 'Increase the child’s ability to visually locate and orient toward a speaker when they hear their voice.',
     instructions: [
-      'Place 3 common items (e.g., cup, shoe, ball) on a table in front of your child.',
-      'Say, "Show me the cup" or "Touch the ball."',
-      'Wait for the child to point to or pick up the correct item.',
-      'Praise them: "Yes! That is the cup!" and let them play with it.'
+      'Sit near your child in a quiet environment while remaining outside their direct line of sight.',
+      'Call your child’s name or make a gentle, familiar sound from one side.',
+      'Pause and give your child a few seconds to locate the source of the sound.',
+      'If needed, repeat the sound from a slightly different position or move into their visual field.',
+      'Praise your child when they turn their eyes or head toward you and continue the interaction.'
     ],
     parentTips: [
-      'Start with a field of 2 objects if 3 is too challenging.',
-      'Use items they interact with daily to make identification relevant.'
+      'Begin with the speaker positioned close to your child and gradually increase the distance.',
+      'Use a calm, familiar voice and minimize competing background sounds.',
+      'Practice from different positions, such as the side, slightly behind, or across the room.'
     ],
     thingsToRemember: [
-      'Ensure the items are distinct in appearance and category to start.',
-      'This activity checks vocabulary comprehension without requiring speech.'
+      'The child may respond by moving their eyes, turning their head, or orienting their body toward the speaker.',
+      'Give enough time for the child to process the sound before repeating the prompt.',
+      'Keep the activity playful and avoid requiring prolonged eye contact.'
     ],
-    relatedAssessment: 'Identifies common objects upon naming',
+    relatedAssessment: 'Regularly Localizes Speaker with Eyes',
     imagePath: act11Img
   },
   {
     id: 'act-12',
-    title: 'Comprehends basic yes/no questions',
-    category: 'Receptive Language',
+    title: 'Frequent Crying',
+    category: 'Emotional Expression',
     difficulty: 'Intermediate',
     duration: '5 mins',
-    description: 'Practice answering clear yes/no questions using words, head nods, or head shakes.',
-    goal: 'Correctly answer simple yes/no questions about immediate desires or concrete objects.',
+    description: 'Help your child identify and communicate feelings and needs using simple words, gestures, or other comfortable forms of communication.',
+    goal: 'Increase the child’s ability to communicate emotional needs and reduce frustration by using simple, appropriate communication strategies.',
     instructions: [
-      'Hold up a preferred item (e.g., a cookie) and ask, "Do you want cookie?"',
-      'Encourage a nod for "yes" or shake for "no".',
-      'Ask concrete questions about objects, e.g., "Is this a shoe?" while holding a shoe.',
-      'Reinforce correct answers with positive confirmation.'
+      'Choose a calm moment and introduce simple feeling words such as "happy," "sad," "angry," and "upset."',
+      'Use pictures, toys, or pretend-play situations to show different emotions.',
+      'Ask simple questions such as "Are you sad?" or "Do you need help?" and allow your child time to respond.',
+      'Model an appropriate way to communicate a need, such as pointing, using a gesture, or saying "help," "more," or "finished."',
+      'Acknowledge and praise your child when they communicate a feeling or need instead of relying only on crying.'
     ],
     parentTips: [
-      'Accept head nods and shakes as valid responses alongside spoken words.',
-      'Start with questions where the child has a very strong preference (e.g., favorite foods).'
+      'Practice emotion words and communication strategies when your child is calm.',
+      'Pay attention to patterns that may lead to crying, such as tiredness, frustration, or difficulty communicating.',
+      'Accept gestures, facial expressions, sounds, or words as forms of communication.'
     ],
     thingsToRemember: [
-      'Abstract yes/no questions (e.g., "Are you happy?") are much harder than concrete ones.',
-      'Model head nods/shakes alongside your own verbal yes/no answers.'
+      'Crying can communicate many different needs and emotions, so first try to understand what your child is communicating.',
+      'Avoid pressuring your child to name an emotion while they are highly upset.',
+      'If frequent crying is persistent, unusually intense, or seems related to pain or illness, discuss your concerns with a pediatrician or qualified professional.'
     ],
-    relatedAssessment: 'Comprehends basic yes/no questions',
+    relatedAssessment: 'Frequent Crying',
     imagePath: act12Img
   },
-
-  // ==================== EXPRESSIVE LANGUAGE ====================
   {
     id: 'act-13',
-    title: 'Produces clear single-word responses',
-    category: 'Expressive Language',
+    title: 'Random Vocalization Rather than Crying',
+    category: 'Vocal Communication',
     difficulty: 'Beginner',
     duration: '5-10 mins',
-    description: 'Prompt single-word utterances by using motivating pauses and choice selections.',
-    goal: 'Produce a single target word spontaneously or in response to a choice.',
+    description: 'Encourage your child to use spontaneous sounds and vocalizations during enjoyable interactions instead of relying primarily on crying to communicate.',
+    goal: 'Increase purposeful vocalizations during play, social interaction, and everyday communication opportunities.',
     instructions: [
-      'Hold up two items (e.g., apple or banana) and ask, "What do you want?"',
-      'Wait for your child to vocalize a single word representing their choice.',
-      'If they point without speaking, model the word: "Apple," and wait for them to attempt it.',
-      'Immediately hand over the chosen item upon word production.'
+      'Choose a fun activity or toy that naturally interests your child.',
+      'Join the activity and make simple, playful sounds or vocalizations that your child can easily imitate.',
+      'Pause during the activity and give your child time to make a sound or vocalize.',
+      'Respond positively to any purposeful vocalization by continuing the activity or acknowledging their communication.',
+      'Gradually encourage vocalizations to accompany simple requests, greetings, or turn-taking.'
     ],
     parentTips: [
-      'Celebrate any vocal approximation of the target word; clarity improves with practice.',
-      'Use high-frequency target words like "more," "go," "stop," "up," or object names.'
+      'Use sounds, syllables, or simple words that match your child’s current communication level.',
+      'Treat approximations and attempts as meaningful communication rather than expecting perfect pronunciation.',
+      'Use motivating activities and natural pauses to create opportunities for your child to vocalize.'
     ],
     thingsToRemember: [
-      'Create a need for communication; do not anticipate every need without giving them a chance to speak.',
-      'Keep it pressure-free. If they struggle, model and move on.'
+      'Vocal development varies from child to child, so focus on progress rather than comparing responses.',
+      'Do not pressure your child to vocalize when they are frustrated or overwhelmed.',
+      'If your child consistently relies on crying and rarely uses other forms of communication, consider discussing your concerns with a pediatrician or speech-language professional.'
     ],
-    relatedAssessment: 'Produces clear single-word responses',
+    relatedAssessment: 'Random Vocalization Rather than Crying',
     imagePath: act13Img
   },
   {
     id: 'act-14',
-    title: 'Combines words into meaningful phrases',
-    category: 'Expressive Language',
+    title: 'Vowel-Like Sounds Predominate',
+    category: 'Vocal Communication',
     difficulty: 'Intermediate',
-    duration: '10 mins',
-    description: 'Encourage your child to expand single words into 2-3 word phrases during play.',
-    goal: 'Generate 2-3 word phrases (e.g., "More bubble," "Big car," "Want milk") to communicate.',
+    duration: '5-10 mins',
+    description: 'Encourage your child to experiment with a wider variety of speech sounds by modeling simple consonant-vowel combinations during playful interactions.',
+    goal: 'Increase the variety and frequency of consonant-vowel vocalizations during play and everyday communication.',
     instructions: [
-      'When your child says a single word (e.g., "car"), repeat it and add a word: "Big car!"',
-      'Prompt them to repeat the expanded phrase back to you.',
-      'Use carrier phrases during snack time: "I want..." or "More..."',
-      'Provide the reward immediately after they attempt the phrase expansion.'
+      'Choose a favorite toy or activity that naturally captures your child’s attention.',
+      'Model simple sounds such as "ba," "ma," "pa," "da," or "go" while showing the related object or action.',
+      'Pause after modeling the sound and give your child time to attempt a similar vocalization.',
+      'Respond enthusiastically to any attempt and repeat the sound naturally during the activity.',
+      'Gradually introduce different consonant-vowel combinations as your child becomes comfortable with the activity.'
     ],
     parentTips: [
-      'Use visual aids like "sentence strips" (drawings representing: [I want] [bubble]).',
-      'Focus on high-utility action words combined with nouns.'
+      'Choose sounds that are easy to see and hear, and exaggerate your mouth movements naturally.',
+      'Use motivating activities such as bubbles, cars, blocks, or songs to create frequent opportunities for vocal play.',
+      'Accept approximations and partial attempts rather than expecting perfectly formed sounds.'
     ],
     thingsToRemember: [
-      'Praise the effort to combine words, even if articulation is not perfect.',
-      'This transition from single words to phrases is key for functional speech.'
+      'Vowel-like vocalizations are an important part of early vocal development.',
+      'Focus on increasing sound variety rather than correcting every vocalization.',
+      'Keep practice playful and pressure-free, allowing your child to participate at their own pace.'
     ],
-    relatedAssessment: 'Combines words into meaningful phrases',
+    relatedAssessment: 'Vowel-Like Sounds Predominate',
     imagePath: act14Img
   },
   {
     id: 'act-15',
-    title: 'Uses symbolic gestures effectively',
-    category: 'Expressive Language',
+    title: 'Has a Special Cry for Hunger',
+    category: 'Vocal Communication',
     difficulty: 'Beginner',
     duration: '5 mins',
-    description: 'Integrate functional gestures (pointing, waving, open hand, shaking head) into daily routines.',
-    goal: 'Spontaneously use at least 2 functional gestures to communicate needs or greetings.',
+    description: 'Help your child recognize and communicate hunger using consistent sounds, gestures, or simple words during mealtime routines.',
+    goal: 'Increase the child’s ability to use a consistent vocalization or other communication signal to indicate hunger or request food.',
     instructions: [
-      'Model waving "bye-bye" whenever someone leaves the room.',
-      'Model pointing to items out of reach while asking "Do you want that?"',
-      'Teach the "all done" gesture (hands out/waving) at the end of meals.',
-      'Wait for the child to copy or initiate these gestures, and respond immediately.'
+      'Observe and identify the sounds, gestures, or behaviors your child commonly uses when they are hungry.',
+      'During mealtime, name the feeling or need using a simple phrase such as "You are hungry" or "Want food?"',
+      'Pause briefly to give your child an opportunity to use their usual sound, gesture, or word to communicate.',
+      'Respond promptly when your child communicates hunger and acknowledge their attempt with simple language.',
+      'Over time, model a consistent word or sound such as "eat," "food," or "hungry" alongside their existing communication.'
     ],
     parentTips: [
-      'Gestures help reduce frustration for children who are still developing speech.',
-      'Always pair the physical gesture with the spoken word (e.g., wave and say "bye-bye").'
+      'Learn your child’s individual hunger cues and respond consistently.',
+      'Pair simple words with natural routines so your child can connect the sound or word with its meaning.',
+      'Accept vocalizations, gestures, pointing, or words as valid attempts to communicate hunger.'
     ],
     thingsToRemember: [
-      'Gestural communication is a natural bridge to spoken language.',
-      'Ensure everyone in the household uses the same gestures consistently.'
+      'A child may communicate hunger through different sounds or behaviors, and these can change over time.',
+      'Avoid intentionally delaying food when your child clearly needs to eat just to encourage communication.',
+      'The goal is to build functional communication around a natural daily routine, not to require a specific sound.'
     ],
-    relatedAssessment: 'Uses symbolic gestures effectively',
+    relatedAssessment: 'Has a Special Cry for Hunger',
     imagePath: act15Img
   },
   {
     id: 'act-16',
-    title: 'Demonstrates motor speech precision (articulation)',
-    category: 'Expressive Language',
+    title: 'Develops Vocal Signs at Pleasure',
+    category: 'Vocal Communication',
     difficulty: 'Intermediate',
     duration: '5-10 mins',
-    description: 'Practice clear sound production and sound imitation using mirror play and mouth modeling.',
-    goal: 'Accurately imitate target sounds or word syllables with correct mouth positioning.',
+    description: 'Encourage your child to use pleasant vocalizations to express enjoyment, excitement, or interest during engaging social activities.',
+    goal: 'Increase spontaneous vocalizations that communicate pleasure or positive engagement during enjoyable interactions.',
     instructions: [
-      'Sit with your child in front of a mirror so you can both see your faces.',
-      'Model a simple sound with exaggerated lip/tongue movement (e.g., "Ba-ba," "Ma-ma," "Poo-poo").',
-      'Encourage your child to look at your mouth, then look at their own mouth and make the sound.',
-      'Make it fun by making silly faces and motor speech sounds.'
+      'Choose a favorite activity, toy, song, or social game that your child enjoys.',
+      'Join your child and model simple happy sounds or expressions such as "ah," "wow," or "yay" during enjoyable moments.',
+      'Pause during the activity and give your child an opportunity to make their own pleasant vocalization.',
+      'Respond warmly to any vocal sign of enjoyment by smiling, acknowledging the sound, or continuing the activity.',
+      'Repeat the activity regularly so your child has natural opportunities to associate vocalizations with positive experiences.'
     ],
     parentTips: [
-      'Work on sounds in a developmental order (e.g., P, B, M, W are easier than R, S, L).',
-      'Do not constantly correct pronunciation; focus on modeling the correct sound clearly.'
+      'Follow your child’s interests and use activities that naturally produce excitement or enjoyment.',
+      'Accept a wide range of sounds, including squeals, laughs, babbling, and other positive vocalizations.',
+      'Model sounds naturally without requiring your child to copy them exactly.'
     ],
     thingsToRemember: [
-      'Praise the placement of the lips and tongue even if the sound is off.',
-      'Keep sessions brief and play-based.'
+      'Vocal expressions of pleasure can vary widely from child to child.',
+      'Focus on spontaneous communication and shared enjoyment rather than perfect sound production.',
+      'Keep interactions playful, positive, and free from pressure.'
     ],
-    relatedAssessment: 'Demonstrates motor speech precision (articulation)',
+    relatedAssessment: 'Develops Vocal Signs at Pleasure',
     imagePath: act16Img
   },
   {
     id: 'act-17',
-    title: 'Initiates spontaneous verbal turn-taking',
-    category: 'Expressive Language',
+    title: 'Occasionally Responds to Sound Stimulation',
+    category: 'Auditory Response',
     difficulty: 'Advanced',
-    duration: '10 mins',
-    description: 'Engage in conversational games where the child must initiate their turn to keep the play going.',
-    goal: 'Spontaneously initiate a verbal exchange or question during a interactive play sequence.',
+    duration: '5-10 mins',
+    description: 'Encourage your child to notice, orient toward, and respond to different safe everyday sounds through playful listening activities.',
+    goal: 'Increase the child’s consistency in noticing and responding to auditory stimuli in their environment.',
     instructions: [
-      'Start a repetitive verbal play routine (e.g., "Ready, set..." and wait).',
-      'Wait for your child to fill in the blank ("Go!") to initiate the action.',
-      'Ask open-ended questions during play and wait for a response.',
-      'Encourage them to ask you questions, like "Where is it?" during hide-and-seek.'
+      'Choose a quiet setting and make a familiar, gentle sound such as a bell, clap, or shake of a toy.',
+      'Pause and give your child several seconds to notice and respond to the sound.',
+      'Observe whether they turn their head, look toward the sound, pause their activity, or make a vocal response.',
+      'Repeat the activity from different directions while keeping the sound comfortable and easy to hear.',
+      'Praise and acknowledge your child whenever they show a response to the sound.'
     ],
     parentTips: [
-      'Wait in silence! Giving your child "thinking time" (up to 8 seconds) is crucial.',
-      'Show high engagement when they start a turn.'
+      'Start with familiar sounds that are gentle and not startling.',
+      'Allow enough processing time before presenting another sound.',
+      'Gradually introduce different everyday sounds as your child becomes comfortable.'
     ],
     thingsToRemember: [
-      'Spontaneous initiation requires confidence. Keep the atmosphere relaxed and encouraging.',
-      'Do not jump in too quickly to fill the silence.'
+      'Responses to sounds can include turning, looking, pausing, smiling, vocalizing, or moving toward the sound.',
+      'Avoid loud or sudden sounds that could frighten or overwhelm your child.',
+      'If your child consistently does not respond to sounds or their response to sound decreases, discuss this with a pediatrician or hearing professional.'
     ],
-    relatedAssessment: 'Initiates spontaneous verbal turn-taking',
+    relatedAssessment: 'Occasionally Responds to Sound Stimulation',
     imagePath: act17Img
   },
-
-  // ==================== SOCIAL INTERACTION ====================
   {
     id: 'act-18',
-    title: 'Responds appropriately to social greetings & farewells',
-    category: 'Social Interaction',
+    title: 'Vowel Like Sounds Predominate',
+    category: 'Vocal Communication',
     difficulty: 'Beginner',
     duration: '5 mins',
-    description: 'Practice returning greetings and goodbyes using words or gestures during family transitions.',
-    goal: 'Acknowledge and respond to "hello" and "bye-bye" from family members 80% of the time.',
+    description: 'Encourage your child to expand their vocal play by exploring simple consonant-vowel combinations during enjoyable everyday interactions.',
+    goal: 'Increase the variety of vocal sounds by encouraging the child to produce simple consonant-vowel combinations during play and communication.',
     instructions: [
-      'When a family member enters the room, prompt them to say "Hi [Name]!"',
-      'Gently encourage your child to respond by waving or saying "Hi."',
-      'Do the same when someone leaves the house, modeling the goodbye wave.',
-      'Praise the social connection: "That was so nice to say hello!"'
+      'Choose a favorite toy, activity, or song that naturally interests your child.',
+      'Model simple sounds such as "ba," "ma," "pa," "da," or "go" while engaging with the activity.',
+      'Pause after each sound and give your child several seconds to attempt a vocal response.',
+      'Respond positively to any attempt, even if the sound is not an exact match.',
+      'Gradually introduce new consonant-vowel combinations as your child becomes comfortable producing different sounds.'
     ],
     parentTips: [
-      'Use high-energy, friendly tones for greetings and warm, calm tones for farewells.',
-      'Practice with favorite dolls or action figures if real-life transitions are too hectic.'
+      'Use sounds that are simple and easy for your child to observe and imitate.',
+      'Pair vocal sounds with interesting actions, toys, or songs to make practice meaningful.',
+      'Keep the activity playful and avoid repeatedly correcting your child’s pronunciation.'
     ],
     thingsToRemember: [
-      'Social greetings are the building blocks of group entry and acceptance.',
-      'Be consistent across all daily departures and arrivals.'
+      'Vowel-like sounds are a normal part of early vocal development.',
+      'Focus on increasing sound variety and purposeful vocal play rather than perfect pronunciation.',
+      'Give your child enough time to respond and accept approximations as communication attempts.'
     ],
-    relatedAssessment: 'Responds appropriately to social greetings & farewells',
+    relatedAssessment: 'Vowel Like Sounds Predominate',
     imagePath: act18Img
   },
   {
     id: 'act-19',
-    title: 'Demonstrates turn-taking in communication exchanges',
-    category: 'Social Interaction',
+    title: 'Expresses Pleasure Vocally',
+    category: 'Vocal Communication',
     difficulty: 'Intermediate',
-    duration: '10 mins',
-    description: 'Practice interactive conversational turn-taking using a physical token like a talking ball.',
-    goal: 'Perform at least 3 back-and-forth verbal/non-verbal turns in a sequence.',
+    duration: '5-10 mins',
+    description: 'Encourage your child to use vocalizations to express enjoyment, excitement, or satisfaction during fun and motivating activities.',
+    goal: 'Increase spontaneous vocal expressions of pleasure during play and positive social interactions.',
     instructions: [
-      'Sit in a circle or across from each other with a soft ball.',
-      'Roll the ball to your child and ask a simple question: "What toy should we play with?"',
-      'Your child rolls the ball back and answers. Take turns passing the ball and speaking.',
-      'Explain: "Only the person holding the ball talks."'
+      'Choose a favorite toy, game, song, or activity that your child enjoys.',
+      'Join your child and model simple vocal expressions such as "yay," "wow," "ah," or happy sounds when something enjoyable happens.',
+      'Pause during the activity and give your child an opportunity to make their own vocal expression.',
+      'Respond warmly to their vocalization by smiling, acknowledging it, or continuing the enjoyable activity.',
+      'Repeat the activity and allow your child multiple opportunities to express enjoyment through sounds, laughter, or simple words.'
     ],
     parentTips: [
-      'The ball acts as a concrete visual representation of whose turn it is.',
-      'Keep your statements short so the turn transitions quickly.'
+      'Choose activities that naturally make your child excited or happy.',
+      'Accept laughter, squeals, babbling, sounds, and words as possible vocal expressions of pleasure.',
+      'Model vocal expressions naturally without requiring your child to copy them exactly.'
     ],
     thingsToRemember: [
-      'This teaches active listening and helps control conversational interruptions.',
-      'It is excellent preparation for classroom circle-time activities.'
+      'Children may express pleasure through different types of vocalizations.',
+      'Focus on spontaneous and meaningful vocal communication rather than perfect words or sounds.',
+      'Keep the interaction playful, positive, and pressure-free.'
     ],
-    relatedAssessment: 'Demonstrates turn-taking in communication exchanges',
+    relatedAssessment: 'Expresses Pleasure Vocally',
     imagePath: act19Img
-  },
-  {
-    id: 'act-20',
-    title: 'Displays appropriate facial affect during conversation',
-    category: 'Social Interaction',
-    difficulty: 'Intermediate',
-    duration: '10 mins',
-    description: 'Practice matching facial expressions to emotions and conversation topics using mirror and card games.',
-    goal: 'Display a facial expression that matches the emotional tone of the discussion.',
-    instructions: [
-      'Show cards with emotional faces (happy, sad, surprised).',
-      'Practice making those faces together in a mirror.',
-      'Tell a simple story: "The puppy is lost," and model a sad face. Ask your child to show a sad face.',
-      'Then say, "We found the puppy!" and model a big happy smile.'
-    ],
-    parentTips: [
-      'Exaggerate your expressions to make them easy for your child to read and copy.',
-      'Praise them: "Look at your happy smile! You look so happy!"'
-    ],
-    thingsToRemember: [
-      'Facial affect is critical for showing empathy and understanding in conversations.',
-      'Avoid pressure; make it a fun, dramatic roleplay game.'
-    ],
-    relatedAssessment: 'Displays appropriate facial affect during conversation',
-    imagePath: act20Img
-  },
-  {
-    id: 'act-21',
-    title: 'Tolerates communicative frustration or corrections',
-    category: 'Social Interaction',
-    difficulty: 'Advanced',
-    duration: '10 mins',
-    description: 'Help your child build coping mechanisms when they are misunderstood or corrected.',
-    goal: 'Remain calm and attempt a repair strategy when they experience communicative failure.',
-    instructions: [
-      'During play, intentionally misunderstand a request: "Oh, did you want the blue block? (when they asked for red)."',
-      'If they get frustrated, model a calm breath and say, "Let\'s try again. Show me or say it slowly."',
-      'Guide them to use a gesture, pointing, or slow speech to clarify.',
-      'Celebrate their calmness: "Thank you for showing me! I understand now."'
-    ],
-    parentTips: [
-      'Validate their frustration first: "I know it is hard when I don\'t understand."',
-      'Never mock or push the child past their breaking point; keep it a supportive exercise.'
-    ],
-    thingsToRemember: [
-      'Developing emotional regulation during communication breakdowns is a high-level skill.',
-      'Keep the task low-stakes so they can practice coping successfully.'
-    ],
-    relatedAssessment: 'Tolerates communicative frustration or corrections',
-    imagePath: act21Img
   }
 ];
