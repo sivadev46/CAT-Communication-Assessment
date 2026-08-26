@@ -5,17 +5,21 @@ import morgan from 'morgan';
 import { env } from './config/env.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
 
+import path from 'path';
 import authRoutes from './routes/authRoutes.js';
 import patientRoutes from './routes/patientRoutes.js';
 import assessmentRoutes from './routes/assessmentRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import submissionRoutes from './routes/submissionRoutes.js';
 
 const app = express();
 
 // Security HTTP headers
 if (process.env.NODE_ENV === "production") {
-  app.use(helmet());
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  }));
 }
 
 // Enable CORS
@@ -29,9 +33,18 @@ if (env.nodeEnv !== 'test') {
   app.use(morgan('dev'));
 }
 
-// Body Parser Middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body Parser Middleware (with 100mb limit for video payloads)
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ extended: true, limit: '100mb' }));
+
+// Static uploads directory serving with cross-origin and range support
+const uploadsPath = path.join(process.cwd(), 'backend', 'uploads');
+app.use('/uploads', express.static(uploadsPath, {
+  setHeaders: (res) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Accept-Ranges', 'bytes');
+  }
+}));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -49,6 +62,7 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/submissions', submissionRoutes);
 
 // Global 404 handler for unhandled API routes
 app.use('/api/*', (req, res) => {

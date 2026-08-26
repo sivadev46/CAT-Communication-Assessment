@@ -27,8 +27,10 @@ import Card from '../components/Card/Card';
 import Button from '../components/Button/Button';
 import SkeletonLoader from '../components/Loader/SkeletonLoader';
 import RetryButton from '../components/Common/RetryButton';
+import VideoPlayerModal from '../components/Modal/VideoPlayerModal';
 import { dashboardService } from '../services/dashboardService';
 import { assessmentService } from '../services/assessmentService';
+import { submissionService } from '../services/submissionService';
 import { useAuth } from '../context/AuthContext';
 
 export default function Dashboard() {
@@ -47,6 +49,9 @@ export default function Dashboard() {
   const [recentPatients, setRecentPatients] = useState([]);
   const [activityTimeline, setActivityTimeline] = useState([]);
   const [assessments, setAssessments] = useState([]);
+  const [submissions, setSubmissions] = useState([]);
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [chartRange, setChartRange] = useState('7'); // '7', '14', or '30' days
 
   const currentDate = new Date().toLocaleDateString('en-US', {
@@ -60,13 +65,17 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
     try {
-      const [statsRes, patientsRes, timelineRes, assessmentsRes] = await Promise.all([
+      const [statsRes, patientsRes, timelineRes, assessmentsRes, submissionsRes] = await Promise.all([
         dashboardService.getStats(),
         dashboardService.getRecentPatients(),
         dashboardService.getActivityTimeline(),
         assessmentService.getAssessmentsByPatient('all').catch((err) => {
           console.error('Failed to load assessments:', err);
           return { success: true, data: { assessments: [] } };
+        }),
+        submissionService.getSubmissions().catch((err) => {
+          console.error('Failed to load submissions:', err);
+          return { success: true, data: [] };
         }),
       ]);
 
@@ -82,11 +91,20 @@ export default function Dashboard() {
       if (assessmentsRes.success && assessmentsRes.data) {
         setAssessments(assessmentsRes.data.assessments || []);
       }
+      if (submissionsRes.success && submissionsRes.data) {
+        setSubmissions(submissionsRes.data);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleReviewSubmissionCallback = (updatedSub) => {
+    setSubmissions((prev) =>
+      prev.map((s) => (s._id === updatedSub._id ? updatedSub : s))
+    );
   };
 
   useEffect(() => {
@@ -566,6 +584,101 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Grid ROW 3: Patient Practice Recordings */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 flex items-center gap-2">
+              <Video className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <span>Patient Practice Recordings</span>
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-slate-400">
+              Home activities recorded by parents for clinical observation and review
+            </p>
+          </div>
+          <span className="text-xs font-semibold text-gray-600 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2.5 py-1 rounded-lg">
+            {submissions.length} Total Submissions
+          </span>
+        </div>
+
+        {submissions.length === 0 ? (
+          <Card className="text-center py-10 px-4">
+            <Video className="w-8 h-8 text-gray-400 mx-auto mb-2 opacity-50" />
+            <p className="text-xs font-semibold text-gray-700 dark:text-slate-200">No practice recordings submitted yet.</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+              When caregivers practice and submit home videos, they will appear here for clinical review.
+            </p>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {submissions.map((sub) => (
+              <Card
+                key={sub._id || sub.id}
+                className="hover:shadow-md transition-all duration-200 !p-4 flex flex-col justify-between space-y-3"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400 truncate max-w-[170px]">
+                      {sub.patientId?.fullName || 'Patient'}
+                    </span>
+                    {sub.status === 'Reviewed' ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50">
+                        Reviewed
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50">
+                        Pending Review
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="font-semibold text-gray-900 dark:text-slate-100 text-sm leading-snug line-clamp-2">
+                    {sub.activityTitle}
+                  </h3>
+
+                  <div className="text-[11px] text-gray-500 dark:text-slate-400 flex flex-wrap items-center gap-2">
+                    <span>{new Date(sub.sentAt || sub.createdAt).toLocaleDateString()}</span>
+                    <span>•</span>
+                    <span>Duration: {sub.formattedDuration || '0:15'}</span>
+                    <span>•</span>
+                    <span>Caregiver: {sub.parentId?.fullName || 'Parent'}</span>
+                  </div>
+
+                  {sub.notes && (
+                    <p className="text-[11px] text-gray-600 dark:text-slate-300 bg-gray-50 dark:bg-slate-800/60 p-2 rounded-lg italic line-clamp-2">
+                      "{sub.notes}"
+                    </p>
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-gray-100 dark:border-slate-800 flex justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedSubmission(sub);
+                      setIsVideoModalOpen(true);
+                    }}
+                    className="text-xs py-1.5 px-3 flex items-center gap-1.5"
+                  >
+                    <PlayCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                    <span>View Recording</span>
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Video Player Modal for Clinician */}
+      <VideoPlayerModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+        submission={selectedSubmission}
+        isClinicianView={true}
+        onReviewed={handleReviewSubmissionCallback}
+      />
     </div>
   );
 }

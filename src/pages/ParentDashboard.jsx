@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { reportService } from '../services/reportService';
+import { submissionService } from '../services/submissionService';
 import {
   Heart,
   Calendar,
@@ -19,10 +20,15 @@ import {
   ChevronRight,
   User,
   X,
-  Award
+  Award,
+  Play,
+  Clock,
+  Check
 } from 'lucide-react';
 import Loader from '../components/Loader/Loader';
 import Button from '../components/Button/Button';
+import PracticeRecordModal from '../components/Modal/PracticeRecordModal';
+import VideoPlayerModal from '../components/Modal/VideoPlayerModal';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
@@ -30,28 +36,42 @@ export default function ParentDashboard() {
   const navigate = useNavigate();
   const { user, logoutUser } = useAuth();
   const [reports, setReports] = useState([]);
+  const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchSharedReports = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await reportService.getReports();
-        if (res.success && res.data) {
-          setReports(res.data);
-        }
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load shared reports.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Video Recording & Video Player Modals state
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [selectedActivityForRecord, setSelectedActivityForRecord] = useState(null);
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
 
-    fetchSharedReports();
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [reportsRes, submissionsRes] = await Promise.all([
+        reportService.getReports().catch(() => ({ success: true, data: [] })),
+        submissionService.getSubmissions().catch(() => ({ success: true, data: [] })),
+      ]);
+
+      if (reportsRes.success && reportsRes.data) {
+        setReports(reportsRes.data);
+      }
+      if (submissionsRes.success && submissionsRes.data) {
+        setSubmissions(submissionsRes.data);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load parent dashboard data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
   }, []);
 
   // Keyboard accessibility: close modal on Escape key press
@@ -114,11 +134,39 @@ export default function ParentDashboard() {
     day: 'numeric'
   });
 
-  // Extract patient details from latest shared report
+  // Extract patient and doctor details from latest shared report
   const latestReport = reports.length > 0 ? reports[0] : null;
   const childName = latestReport?.assessment?.patient?.fullName || "Your Child";
   const childAge = latestReport?.assessment?.patient?.age ? `${latestReport.assessment.patient.age} years` : "N/A";
   const diagnosis = latestReport?.assessment?.patient?.diagnosis || "Not Specified";
+
+  const doctorName = latestReport?.generatedBy?.fullName || (latestReport?.doctorId ? "Dr. Clinician" : "Dr. Sarah Jenkins");
+  const patientId = latestReport?.patientId || latestReport?.assessment?.patient?._id || latestReport?.assessment?.patient;
+  const reportId = latestReport?._id;
+  const assessmentId = latestReport?.assessment?._id || latestReport?.assessment;
+  const clinicianId = latestReport?.doctorId || latestReport?.generatedBy?._id || latestReport?.generatedBy;
+
+  const recommendedActivityTitle = latestReport?.caregiverReport?.homeStrategies?.[0] || "Interactive Turn-Taking & Naming Game";
+  const recommendedActivityDesc = latestReport?.caregiverReport?.summary || "Practice vocal responses and shared focus during daily routines.";
+
+  const handleStartPracticeRecord = (activity = null) => {
+    setSelectedActivityForRecord(activity || {
+      id: 'act-recommended',
+      title: recommendedActivityTitle,
+      category: 'Home Speech Practice',
+      description: recommendedActivityDesc
+    });
+    setIsRecordModalOpen(true);
+  };
+
+  const handleRecordingSuccess = (newSubmission) => {
+    setSubmissions((prev) => [newSubmission, ...prev.filter(s => s._id !== newSubmission._id)]);
+  };
+
+  const handleViewSubmission = (submission) => {
+    setSelectedSubmission(submission);
+    setIsVideoPlayerOpen(true);
+  };
 
   // Compute dynamic skill compliance based on latest report metrics
   const domainMetrics = latestReport?.clinicalReport?.domainBreakdown || {};
@@ -370,6 +418,56 @@ export default function ParentDashboard() {
                 </div>
               </div>
 
+              {/* Practice & Record Interactive Section */}
+              <div className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                      <Video className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h2 className="text-base font-bold text-slate-900">Practice & Record</h2>
+                      <p className="text-xs text-slate-500">Practice recommended activities and share a recording with your clinician.</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+                    Video Session
+                  </span>
+                </div>
+
+                <div className="p-4 bg-gradient-to-r from-emerald-50/70 via-teal-50/40 to-slate-50 border border-emerald-100/90 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1.5 flex-1">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                      Recommended Activity
+                    </span>
+                    <h4 className="text-sm font-extrabold text-slate-900 leading-tight">
+                      {recommendedActivityTitle}
+                    </h4>
+                    <p className="text-xs text-slate-600 leading-relaxed font-medium line-clamp-2">
+                      {recommendedActivityDesc}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 self-start sm:self-auto flex-shrink-0">
+                    <button
+                      onClick={() => navigate('/teaching-videos')}
+                      className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 shadow-3xs transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <PlayCircle className="w-4 h-4 text-emerald-600" />
+                      <span>Watch Demo</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleStartPracticeRecord()}
+                      className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Video className="w-4 h-4" />
+                      <span>Record Practice</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Latest Report preview card */}
               <div className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -456,6 +554,86 @@ export default function ParentDashboard() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Recent Practice Recordings List */}
+              <div className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div>
+                    <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <Video className="w-5 h-5 text-emerald-600" />
+                      <span>Recent Practice Recordings</span>
+                    </h2>
+                    <p className="text-[11px] text-slate-500">Video submissions shared with your clinician</p>
+                  </div>
+                  <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                    {submissions.length} Total
+                  </span>
+                </div>
+
+                {submissions.length === 0 ? (
+                  <div className="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200 space-y-2">
+                    <Video className="w-8 h-8 text-slate-350 mx-auto opacity-50" />
+                    <h4 className="text-xs font-bold text-slate-700">No Practice Recordings Yet</h4>
+                    <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                      Record your child practicing home activities and submit the video for your doctor's review.
+                    </p>
+                    <button
+                      onClick={() => handleStartPracticeRecord()}
+                      className="mt-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg cursor-pointer transition-colors"
+                    >
+                      Record First Practice
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {submissions.map((sub) => (
+                      <div
+                        key={sub._id || sub.id}
+                        className="p-4 bg-white border border-slate-200 hover:border-emerald-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all hover:bg-emerald-50/10 shadow-3xs"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center flex-shrink-0">
+                            <Play className="w-4 h-4 fill-emerald-600" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-extrabold text-slate-900 leading-tight">
+                              {sub.activityTitle}
+                            </h4>
+                            <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5">
+                              <span>{new Date(sub.sentAt || sub.createdAt).toLocaleDateString()}</span>
+                              <span>•</span>
+                              <span>Duration: {sub.formattedDuration || '0:15'}</span>
+                              <span>•</span>
+                              <span>Clinician: {sub.clinicianId?.fullName || doctorName}</span>
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+                          {sub.status === 'Reviewed' ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <Check className="w-3 h-3 text-emerald-600" />
+                              Reviewed
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                              <Clock className="w-3 h-3 text-blue-600" />
+                              Sent (Pending)
+                            </span>
+                          )}
+                          <button
+                            onClick={() => handleViewSubmission(sub)}
+                            className="px-3 py-1.5 bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-700 text-xs font-bold text-slate-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                          >
+                            <span>View Recording</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
             </div>
@@ -745,6 +923,28 @@ export default function ParentDashboard() {
           </div>
         </div>
       )}
+
+      {/* Practice & Record Video Modal */}
+      <PracticeRecordModal
+        isOpen={isRecordModalOpen}
+        onClose={() => setIsRecordModalOpen(false)}
+        activity={selectedActivityForRecord}
+        childName={childName}
+        patientId={patientId}
+        reportId={reportId}
+        assessmentId={assessmentId}
+        doctorName={doctorName}
+        clinicianId={clinicianId}
+        onSuccess={handleRecordingSuccess}
+      />
+
+      {/* Video Player Modal */}
+      <VideoPlayerModal
+        isOpen={isVideoPlayerOpen}
+        onClose={() => setIsVideoPlayerOpen(false)}
+        submission={selectedSubmission}
+        isClinicianView={false}
+      />
 
       {/* Embedded CSS for printing print: block elements correctly */}
       <style>{`
