@@ -1,17 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Stethoscope, Users, ChevronRight, Activity, Heart, Shield } from 'lucide-react';
+import { Stethoscope, Users, ChevronRight, Activity } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import ChromaMascot from '../components/ChromaMascot';
+
+// Typewriter greetings list (Tamil & English without brackets)
+const GREETINGS = [
+  "வணக்கம்",
+  "Namasthe",
+  "Welcome"
+];
 
 export default function RoleSelection() {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
 
+  // Typewriter effect state
+  const [greetingIndex, setGreetingIndex] = useState(0);
+  const [displayText, setDisplayText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentFullText = GREETINGS[greetingIndex];
+    let typingSpeed = isDeleting ? 40 : 90;
+
+    if (!isDeleting && displayText === currentFullText) {
+      const timeout = setTimeout(() => setIsDeleting(true), 1800);
+      return () => clearTimeout(timeout);
+    } else if (isDeleting && displayText === '') {
+      setIsDeleting(false);
+      setGreetingIndex((prev) => (prev + 1) % GREETINGS.length);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setDisplayText((prev) =>
+        isDeleting
+          ? currentFullText.substring(0, prev.length - 1)
+          : currentFullText.substring(0, prev.length + 1)
+      );
+    }, typingSpeed);
+
+    return () => clearTimeout(timer);
+  }, [displayText, isDeleting, greetingIndex]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-emerald-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-emerald-50 flex flex-col font-sans overflow-x-hidden">
       {/* Top Banner / Nav for logged in users */}
       {isAuthenticated && (
-        <div className="bg-blue-600/10 border-b border-blue-200/50 px-4 py-2.5 text-center text-xs text-blue-800 flex items-center justify-center gap-2">
+        <div className="bg-blue-600/10 border-b border-blue-200/50 px-4 py-2.5 text-center text-xs text-blue-800 flex items-center justify-center gap-2 z-30">
           <span>You are currently signed in as <strong>{user?.fullName || 'Clinician'}</strong>.</span>
           <button 
             onClick={() => navigate('/dashboard')}
@@ -22,152 +59,101 @@ export default function RoleSelection() {
         </div>
       )}
 
-      {/* Main Container */}
-      <div className="flex-1 max-w-6xl w-full mx-auto px-4 py-8 md:py-16 flex flex-col justify-center items-center">
+      {/* Main Split Layout Container */}
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-4 md:py-8 flex flex-col justify-center">
         
-        {/* Hero Header Section */}
-        <div className="text-center max-w-2xl mx-auto mb-10 md:mb-16">
-          {/* Decorative Badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/80 text-blue-700 border border-blue-200 text-xs font-semibold mb-4 animate-fade-in">
-            <Activity className="w-3.5 h-3.5 text-blue-600 animate-pulse" />
-            <span>Healthcare Assessment Platform</span>
-          </div>
-
-          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
-            Communication <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Assessment Tool</span>
-          </h1>
-          <p className="text-base md:text-lg text-slate-600 mt-3 font-medium">
-            AI-powered Communication Assessment Platform
-          </p>
-        </div>
-
-        {/* Hero Healthcare Illustration Section */}
-        <div className="w-full max-w-lg mb-12 md:mb-16 px-4">
-          <svg className="w-full h-auto drop-shadow-lg" viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Background elements */}
-            <circle cx="250" cy="100" r="80" fill="url(#bg-gradient)" fillOpacity="0.1" />
-            <circle cx="120" cy="140" r="30" fill="url(#blue-gradient)" fillOpacity="0.08" />
-            <circle cx="380" cy="60" r="40" fill="url(#green-gradient)" fillOpacity="0.08" />
-            
-            {/* Abstract connected wave/data path */}
-            <path d="M 50,130 C 150,130 100,70 200,70 C 300,70 250,130 350,130 C 450,130 400,70 450,70" stroke="url(#blue-gradient)" strokeWidth="3" strokeLinecap="round" strokeDasharray="4 4" opacity="0.4" />
-            <path d="M 50,130 C 150,130 100,70 200,70 C 300,70 250,130 350,130 C 450,130 400,70 450,70" stroke="url(#blue-gradient)" strokeWidth="3" strokeLinecap="round" opacity="0.1" />
-
-            {/* Glowing nodes */}
-            <circle cx="200" cy="70" r="5" fill="#3b82f6" />
-            <circle cx="350" cy="130" r="5" fill="#10b981" />
-            
-            {/* Medical Shield Center Icon */}
-            <g transform="translate(225, 75)">
-              <rect width="50" height="50" rx="12" fill="white" className="shadow-sm" filter="url(#drop-shadow)" />
-              <Shield className="w-6 h-6 text-blue-600 absolute" style={{ transform: 'translate(13px, 13px)' }} />
-            </g>
-
-            {/* Side Floating Icons */}
-            <g transform="translate(140, 115)" className="animate-bounce" style={{ animationDuration: '3s' }}>
-              <circle cx="15" cy="15" r="15" fill="white" filter="url(#drop-shadow)" />
-              <Activity className="w-4 h-4 text-indigo-500" style={{ transform: 'translate(7px, 7px)' }} />
-            </g>
-            <g transform="translate(325, 45)" className="animate-bounce" style={{ animationDuration: '4s' }}>
-              <circle cx="15" cy="15" r="15" fill="white" filter="url(#drop-shadow)" />
-              <Heart className="w-4 h-4 text-emerald-500" style={{ transform: 'translate(7px, 7px)' }} />
-            </g>
-
-            {/* Definitions */}
-            <defs>
-              <linearGradient id="bg-gradient" x1="170" y1="20" x2="330" y2="180" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#3b82f6" />
-                <stop offset="1" stopColor="#10b981" />
-              </linearGradient>
-              <linearGradient id="blue-gradient" x1="50" y1="130" x2="450" y2="70" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#3b82f6" />
-                <stop offset="1" stopColor="#6366f1" />
-              </linearGradient>
-              <linearGradient id="green-gradient" x1="50" y1="130" x2="450" y2="70" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#10b981" />
-                <stop offset="1" stopColor="#059669" />
-              </linearGradient>
-              <filter id="drop-shadow" x="0" y="0" width="100" height="100" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-                <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.1" />
-              </filter>
-            </defs>
-          </svg>
-        </div>
-
-        {/* Selection Prompt */}
-        <div className="mb-8">
-          <h2 className="text-lg font-bold text-slate-800 tracking-wide uppercase">Who are you?</h2>
-        </div>
-
-        {/* Role Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
-          {/* Card 1: Doctor / Clinician */}
-          <div 
-            onClick={() => navigate('/doctor-login')}
-            className="group relative bg-white/80 backdrop-blur-md rounded-2xl border border-blue-100 p-8 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden"
-          >
-            {/* Top decorative gradient bar */}
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500" />
-            
-            <div>
-              {/* Icon Container */}
-              <div className="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Stethoscope className="w-7 h-7" />
-              </div>
-              
-              <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-                <span>👨‍⚕️ Doctor / Clinician</span>
-              </h3>
-              
-              <p className="text-sm text-slate-600 leading-relaxed mb-8">
-                Manage patients, conduct communication assessments, generate reports, and monitor clinical progress.
-              </p>
-            </div>
-
-            <button 
-              className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors shadow-xs hover:shadow-md flex items-center justify-center gap-2 group-hover:gap-3 cursor-pointer"
-            >
-              <span>Continue as Doctor</span>
-              <ChevronRight className="w-4 h-4 transition-transform duration-200" />
-            </button>
+          {/* LEFT SIDE: Big 3D Shruthi Mascot Video */}
+          <div className="lg:col-span-6 flex items-center justify-center relative min-h-[420px] md:min-h-[600px] lg:min-h-[680px] w-full">
+            <ChromaMascot />
           </div>
 
-          {/* Card 2: Parent / Caregiver */}
-          <div 
-            onClick={() => navigate('/parent-login')}
-            className="group relative bg-white/80 backdrop-blur-md rounded-2xl border border-emerald-100 p-8 shadow-sm hover:shadow-xl hover:border-emerald-300 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden"
-          >
-            {/* Top decorative gradient bar */}
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500" />
+          {/* RIGHT SIDE: Typewriter Greetings, Heading & Role Selection */}
+          <div className="lg:col-span-6 flex flex-col justify-center items-start space-y-6 px-2 md:px-6">
+            
+            {/* Healthcare Platform Badge */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-100/90 text-blue-700 border border-blue-200 text-xs font-semibold shadow-xs">
+              <Activity className="w-4 h-4 text-blue-600 animate-pulse" />
+              <span>Healthcare Assessment Platform</span>
+            </div>
 
+            {/* Typewriter Greeting Loop (Tamil / English) */}
+            <div className="min-h-[60px] md:min-h-[72px] flex items-center">
+              <h2 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600 tracking-tight leading-tight flex items-center gap-1">
+                <span>{displayText}</span>
+                <span className="w-1.5 h-10 md:h-12 bg-blue-600 animate-ping inline-block ml-1 rounded-full" />
+              </h2>
+            </div>
+
+            {/* Heading: Communication Assessment Tool */}
             <div>
-              {/* Icon Container */}
-              <div className="w-14 h-14 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Users className="w-7 h-7" />
-              </div>
-
-              <h3 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-                <span>👨‍👩‍👧 Parent / Caregiver</span>
-              </h3>
-
-              <p className="text-sm text-slate-600 leading-relaxed mb-8">
-                Track your child's progress, view caregiver reports, access home activities, and learning resources.
+              <h1 className="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-snug">
+                Communication <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Assessment Tool</span>
+              </h1>
+              <p className="text-base md:text-lg text-slate-600 mt-2 font-medium">
+                AI-powered assessment platform for clinicians and caregivers.
               </p>
             </div>
 
-            <button 
-              className="w-full bg-emerald-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-emerald-700 transition-colors shadow-xs hover:shadow-md flex items-center justify-center gap-2 group-hover:gap-3 cursor-pointer"
-            >
-              <span>Continue as Parent</span>
-              <ChevronRight className="w-4 h-4 transition-transform duration-200" />
-            </button>
+            {/* Selection Prompt */}
+            <div className="pt-2">
+              <h3 className="text-xs font-bold text-slate-500 tracking-wider uppercase">Select your portal to continue:</h3>
+            </div>
+
+            {/* Role Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+              
+              {/* Doctor / Clinician Card */}
+              <div 
+                onClick={() => navigate('/doctor-login')}
+                className="group relative bg-white/90 backdrop-blur-md rounded-2xl border border-blue-100 p-6 shadow-xs hover:shadow-lg hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden"
+              >
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500" />
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <Stethoscope className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-lg font-bold text-slate-900 mb-1">👨‍⚕️ Doctor / Clinician</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                    Manage patients, conduct assessments & view reports.
+                  </p>
+                </div>
+                <button className="w-full bg-blue-600 text-white font-semibold py-2.5 px-3 text-xs rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5 group-hover:gap-2 cursor-pointer">
+                  <span>Doctor Portal</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Parent / Caregiver Card */}
+              <div 
+                onClick={() => navigate('/parent-login')}
+                className="group relative bg-white/90 backdrop-blur-md rounded-2xl border border-emerald-100 p-6 shadow-xs hover:shadow-lg hover:border-emerald-300 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden"
+              >
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500" />
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-lg font-bold text-slate-900 mb-1">👨‍👩‍👧 Parent / Caregiver</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                    Track progress, access home activities & resources.
+                  </p>
+                </div>
+                <button className="w-full bg-emerald-600 text-white font-semibold py-2.5 px-3 text-xs rounded-xl hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1.5 group-hover:gap-2 cursor-pointer">
+                  <span>Parent Portal</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+            </div>
+
           </div>
 
         </div>
 
         {/* Footer */}
-        <div className="mt-16 text-center text-xs text-slate-400">
+        <div className="mt-8 text-center text-xs text-slate-400">
           <p>© {new Date().getFullYear()} Communication Assessment Tool. All rights reserved.</p>
         </div>
 
