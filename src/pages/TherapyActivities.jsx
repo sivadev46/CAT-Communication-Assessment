@@ -13,14 +13,19 @@ import {
   TrendingUp,
   Brain,
   MessageSquare,
-  AlertCircle
+  AlertCircle,
+  Video
 } from 'lucide-react';
 import Header from '../components/Header/Header';
 import Card from '../components/Card/Card';
 import Button from '../components/Button/Button';
+import PracticeRecordModal from '../components/Modal/PracticeRecordModal';
+import { reportService } from '../services/reportService';
+import { useAuth } from '../context/AuthContext';
 import { therapyActivities, therapyCategories, difficultyLevels } from '../data/therapyActivitiesData';
 
 export default function TherapyActivities() {
+  const { user } = useAuth();
   // Session storage state initialization
   const [searchQuery, setSearchQuery] = useState(() => {
     return sessionStorage.getItem('therapyActivities_searchQuery') || '';
@@ -33,6 +38,18 @@ export default function TherapyActivities() {
   });
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [parentReportContext, setParentReportContext] = useState(null);
+
+  useEffect(() => {
+    if (user?.role === 'parent') {
+      reportService.getReports().then((res) => {
+        if (res.success && res.data && res.data.length > 0) {
+          setParentReportContext(res.data[0]);
+        }
+      }).catch(() => {});
+    }
+  }, [user]);
 
   // Sync state to session storage
   useEffect(() => {
@@ -501,14 +518,26 @@ export default function TherapyActivities() {
                 </button>
               </div>
 
-              {/* Action close button */}
-              <Button
-                variant="outline"
-                onClick={() => setSelectedActivity(null)}
-                className="text-xs py-2 px-4 cursor-pointer hover:bg-gray-100 border-gray-300 text-gray-700"
-              >
-                Close View
-              </Button>
+              {/* Action buttons */}
+              <div className="flex items-center gap-2">
+                {user?.role === 'parent' && (
+                  <button
+                    onClick={() => setIsRecordModalOpen(true)}
+                    className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Video className="w-4 h-4" />
+                    <span>Record Practice</span>
+                  </button>
+                )}
+
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedActivity(null)}
+                  className="text-xs py-2 px-4 cursor-pointer hover:bg-gray-100 border-gray-300 text-gray-700"
+                >
+                  Close View
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -557,6 +586,21 @@ export default function TherapyActivities() {
             />
           </div>
         </div>
+      )}
+
+      {/* Practice Record Modal */}
+      {selectedActivity && (
+        <PracticeRecordModal
+          isOpen={isRecordModalOpen}
+          onClose={() => setIsRecordModalOpen(false)}
+          activity={selectedActivity}
+          childName={parentReportContext?.assessment?.patient?.fullName || "Your Child"}
+          patientId={parentReportContext?.patientId || parentReportContext?.assessment?.patient?._id || parentReportContext?.assessment?.patient}
+          reportId={parentReportContext?._id}
+          assessmentId={parentReportContext?.assessment?._id || parentReportContext?.assessment}
+          doctorName={parentReportContext?.generatedBy?.fullName || "Dr. Sarah Jenkins"}
+          clinicianId={parentReportContext?.doctorId || parentReportContext?.generatedBy?._id || parentReportContext?.generatedBy}
+        />
       )}
     </div>
   );

@@ -1,266 +1,164 @@
 export const videoCategories = [
   'All',
-  'Eye Contact',
-  'Joint Attention',
+  'Auditory Attention',
+  'Early Communication',
+  'Social Communication',
   'Receptive Language',
   'Expressive Language',
-  'Social Interaction',
 ];
 
 export const mockVideos = [
   {
     id: 'vid-01',
-    title: 'Facilitating Sustained Eye Contact During Conversation',
-    category: 'Eye Contact',
-    duration: '04:15',
+    title: 'Activity Arrested When Approached by a Sound',
+    category: 'Auditory Attention',
+    duration: '00:08',
     difficulty: 'Beginner',
-    description: 'Techniques for encouraging direct gaze during greetings and simple question-and-answer interactions.',
+    description: 'Techniques for helping the learner notice, pause, and respond appropriately when an activity is interrupted by an environmental or spoken sound.',
     objectives: [
-      'Learn positioning strategies to align at eye level with the learner.',
-      'Utilize visual focal points and positive reinforcement.',
-      'Recognize over-stimulation cues and implement sensory pauses.'
+      'Learn strategies to capture and maintain attention when a sound occurs.',
+      'Encourage the learner to pause the current activity and orient toward the source of the sound.',
+      'Recognize signs of auditory overload and provide appropriate sensory pauses.'
     ],
-    tags: ['Sustained Gaze', 'Social Greeting', 'Turn-Taking'],
-    youtubeUrl: 'https://youtu.be/gucPYNUqecI?si=8_uQ20G2IPVbNiLf',
-    youtubeVideoId: '8_uQ20G2IPVbNiLf',
-    author: 'Dr. Sarah Jenkins, CCC-SLP'
+    tags: ['Auditory Attention', 'Sound Awareness', 'Response to Sound'],
+    youtubeUrl: 'https://youtu.be/KxSc9aIK3CY?si=7WSQGeRuDLv283AH',
+    youtubeVideoId: 'KxSc9aIK3CY',
+    author: 'NIEPMD'
   },
   {
     id: 'vid-02',
-    title: 'Naturalistic Gaze Prompting in Everyday Play',
-    category: 'Eye Contact',
-    duration: '05:30',
+    title: 'Appears to Listen to Speaker',
+    category: 'Auditory Attention',
+    duration: '00:08',
     difficulty: 'Intermediate',
-    description: 'Integrating eye contact prompts into play routines without causing anxiety or pressure.',
+    description: 'Strategies for helping the learner attend to and demonstrate awareness of a person who is speaking.',
     objectives: [
-      'Bring preferred objects near eyes before releasing them.',
-      'Use playful pauses to prompt natural eye contact.',
-      'Build gaze duration gradually from 1 second to 3+ seconds.'
+      'Encourage the learner to orient toward the speaker when spoken to.',
+      'Use simple verbal cues and engaging interactions to support listening attention.',
+      'Gradually increase the learner’s ability to maintain attention while listening.'
     ],
-    tags: ['Joint Attention', 'Play Engagement'],
-    youtubeUrl: 'https://youtu.be/jsLZm8QXw-k?si=baJ37lkwRM3oJN92',
-    youtubeVideoId: 'baJ37lkwRM3oJN92',
-    author: 'Mark Davis, Pediatric SLP'
+    tags: ['Listening Attention', 'Speaker Awareness', 'Auditory Attention'],
+    youtubeUrl: 'https://youtu.be/Xh5UMNC-cL0?si=D6uPWGsLZdaDDGq7',
+    youtubeVideoId: 'Xh5UMNC-cL0',
+    author: 'NIEPMD'
   },
   {
     id: 'vid-03',
-    title: 'Joint Attention: Gaze Following & Pointing',
-    category: 'Joint Attention',
-    duration: '06:10',
-    difficulty: 'Beginner',
-    description: 'How to guide learners to follow finger points and shared focal objects in the room.',
+    title: 'Localises Speaker with Eyes',
+    category: 'Auditory Attention',
+    duration: '00:08',
+    difficulty: 'Intermediate',
+    description: 'Strategies for helping the learner visually locate and orient toward the person speaking.',
     objectives: [
-      'Master the "Look at that!" pointing technique.',
-      'Establish triadic attention between clinician, learner, and item.',
-      'Use vocal inflection to draw shared focus.'
+      'Encourage the learner to turn their eyes toward the speaker when spoken to.',
+      'Use simple verbal and visual cues to support speaker localisation.',
+      'Gradually increase the learner’s consistency in visually locating the speaker.'
     ],
-    tags: ['Point Following', 'Shared Interest', 'Receptive Cueing'],
-    youtubeUrl: 'https://youtu.be/hySdewG7krE?si=Ic05fIAF8CQkbnEM',
-    youtubeVideoId: 'Ic05fIAF8CQkbnEM',
-    author: 'Dr. Emily Chen, Clinical Director'
+    tags: ['Speaker Localisation', 'Visual Attention', 'Auditory Attention'],
+    youtubeUrl: 'https://youtu.be/RCRhrbtq3z8?si=IeChTcDdbQ1arSgh',
+    youtubeVideoId: 'RCRhrbtq3z8',
+    author: 'NIEPMD'
   },
   {
     id: 'vid-04',
-    title: 'Building Shared Focus through Storybook Reading',
-    category: 'Joint Attention',
-    duration: '04:45',
+    title: 'Frequent Crying',
+    category: 'Emotional Regulation',
+    duration: '00:08',
     difficulty: 'Intermediate',
-    description: 'Using high-contrast picture books to develop prolonged joint attention during reading time.',
+    description: 'Strategies for understanding and responding to frequent crying while supporting emotional regulation and communication.',
     objectives: [
-      'Select high-engagement sensory picture books.',
-      'Pause on key images to invite joint pointing.',
-      'Combine auditory naming with physical page-touching.'
+      'Identify common triggers that may contribute to frequent crying.',
+      'Use calm, consistent responses to support emotional regulation.',
+      'Introduce simple communication strategies to help the learner express needs and feelings.'
     ],
-    tags: ['Book Engagement', 'Receptive Naming'],
-    youtubeUrl: 'https://youtu.be/CxMJ3m-NyW8?si=sTzSaZn8FIE_2i1S',
-    youtubeVideoId: 'sTzSaZn8FIE_2i1S',
-    author: 'Laura Adams, MS, CCC-SLP'
+    tags: ['Emotional Regulation', 'Crying', 'Communication'],
+    youtubeUrl: 'https://youtu.be/mUUnO3X3Kgs?si=q8FySxgd8KMgfVhl',
+    youtubeVideoId: 'mUUnO3X3Kgs',
+    author: 'NIEPMD'
   },
   {
     id: 'vid-05',
-    title: '1-Step and 2-Step Command Comprehension',
-    category: 'Receptive Language',
-    duration: '05:00',
+    title: 'Looks at the Speaker and Responds by Smiling',
+    category: 'Social Communication',
+    duration: '00:08',
     difficulty: 'Beginner',
-    description: 'Scaffolding verbal instructions with visual gesture prompts for enhanced listening comprehension.',
+    description: 'Strategies for encouraging the learner to look toward a speaker and respond naturally with a smile during social interactions.',
     objectives: [
-      'Structure concise verbal commands (e.g. "Pick up ball, put in box").',
-      'Fade physical prompts systematically.',
-      'Evaluate response latency and comprehension accuracy.'
+      'Encourage the learner to orient their gaze toward the speaker.',
+      'Use positive social interactions to encourage smiling as a response.',
+      'Support consistent eye gaze and social responses during simple interactions.'
     ],
-    tags: ['Instruction Following', 'Auditory Processing'],
-    youtubeUrl: 'https://youtu.be/3XGNP_SzcI8?si=iayP8gNza_t1C8HN',
-    youtubeVideoId: 'iayP8gNza_t1C8HN',
-    author: 'Robert Vance, Lead Speech Pathologist'
+    tags: ['Social Response', 'Eye Gaze', 'Smiling'],
+    youtubeUrl: 'https://youtu.be/1lCt40djJrI?si=fuM0OiWUBa2t1wcW',
+    youtubeVideoId: '1lCt40djJrI',
+    author: 'NIEPMD'
   },
   {
     id: 'vid-06',
-    title: 'Object Identification & Receptive Naming',
-    category: 'Receptive Language',
-    duration: '03:55',
+    title: 'Often Quieted by Familiar Voice',
+    category: 'Auditory Attention',
+    duration: '00:08',
     difficulty: 'Beginner',
-    description: 'Interactive drills for identifying household items, animals, and common tools upon request.',
+    description: 'Strategies for using a familiar voice to capture attention, provide reassurance, and support calm engagement during interactions.',
     objectives: [
-      'Arrange 3-card array choices for clear decision making.',
-      'Reinforce correct object selections with immediate praise.',
-      'Expand vocabulary arrays progressively.'
+      'Use a familiar voice to gain and maintain the learner’s attention.',
+      'Encourage the learner to respond calmly to familiar vocal cues.',
+      'Recognize signs of distress and use familiar verbal reassurance appropriately.'
     ],
-    tags: ['Receptive Vocabulary', 'Choice Making'],
-    youtubeUrl: 'https://youtu.be/NO-nVC2hlFQ?si=5yVAuex2xp7BDG7L',
-    youtubeVideoId: '5yVAuex2xp7BDG7L',
-    author: 'Dr. Sarah Jenkins, CCC-SLP'
+    tags: ['Familiar Voice', 'Auditory Attention', 'Calming Response'],
+    youtubeUrl: 'https://youtu.be/85rH54jqJLM?si=Cjw-pucS-JGPSo0r',
+    youtubeVideoId: '85rH54jqJLM',
+    author: 'NIEPMD'
   },
   {
     id: 'vid-07',
-    title: 'Auditory Memory & Sequential Comprehension',
-    category: 'Receptive Language',
-    duration: '07:20',
-    difficulty: 'Advanced',
-    description: 'Advanced clinical exercises for improving multi-step auditory processing and memory recall.',
+    title: 'Responds to Speech by Looking Directly at Speaker’s Face',
+    category: 'Social Communication',
+    duration: '00:08',
+    difficulty: 'Beginner',
+    description: 'Strategies for encouraging the learner to orient toward and visually attend to the speaker’s face when spoken to.',
     objectives: [
-      'Introduce 3-step sequential auditory tasks.',
-      'Incorporate brief delay periods before task execution.',
-      'Track comprehension retention across sessions.'
+      'Encourage the learner to look toward the speaker’s face when hearing speech.',
+      'Use natural verbal and visual cues to support orientation toward the speaker.',
+      'Gradually increase consistency of visual attention during spoken interactions.'
     ],
-    tags: ['Auditory Working Memory', 'Complex Tasks'],
-    youtubeUrl: 'https://youtu.be/wxLYzpVA3PE?si=2nw-lJV9Z2dJpttR',
-    youtubeVideoId: '2nw-lJV9Z2dJpttR',
-    author: 'Dr. Emily Chen, Clinical Director'
+    tags: ['Speaker Orientation', 'Face Looking', 'Social Communication'],
+    youtubeUrl: 'https://youtu.be/TJWlQywfbQo?si=QvS5H-rDGNWLFXVb',
+    youtubeVideoId: 'TJWlQywfbQo',
+    author: 'NIEPMD'
   },
   {
     id: 'vid-08',
-    title: 'Melodic Intonation & Single Word Retrieval',
-    category: 'Expressive Language',
-    duration: '06:40',
+    title: 'Response to Loud Sudden Noise',
+    category: 'Auditory Attention',
+    duration: '00:08',
     difficulty: 'Intermediate',
-    description: 'Using pitch and rhythm patterns to unlock verbal word production in expressive aphasia.',
+    description: 'Strategies for supporting appropriate attention and responses when the learner encounters sudden or loud sounds.',
     objectives: [
-      'Tapping rhythmically to assist syllable initiation.',
-      'Transitioning from hummed melodies to spoken phrases.',
-      'Practicing essential functional words (water, help, yes/no).'
+      'Help the learner notice and orient toward sudden sounds.',
+      'Use gradual sound exposure to support comfortable auditory responses.',
+      'Recognize signs of auditory discomfort and provide appropriate sensory pauses.'
     ],
-    tags: ['Word Retrieval', 'Vocal Pitch', 'Syllable Staging'],
-    youtubeUrl: 'https://youtu.be/yDvCheioePM?si=VXrJ3u2WuMFlx0pe',
-    youtubeVideoId: 'VXrJ3u2WuMFlx0pe',
-    author: 'Rachel Taylor, Neurological SLP'
+    tags: ['Sound Response', 'Auditory Attention', 'Sound Awareness'],
+    youtubeUrl: 'https://youtu.be/tSqHEyWPZSI?si=ZUdE17SDP2aQ29qU',
+    youtubeVideoId: 'tSqHEyWPZSI',
+    author: 'NIEPMD'
   },
   {
     id: 'vid-09',
-    title: 'Expanding Single Words to 2-3 Word Phrases',
-    category: 'Expreshttps://www.youtube.com/watch?v=HkSmBylT11wsive Language',
-    duration: '05:15',
-    difficulty: 'Intermediate',
-    description: 'Scaffolding single-noun utterances into carrier phrases (e.g., "want apple", "big bus").',
-    objectives: [
-      'Utilize sentence strip visual helpers.',
-      'Model carrier phrases with clear articulation.',
-      'Encourage self-correction and verbal repetition.'
-    ],
-    tags: ['Phrase Building', 'Expressive Syntax'],
-    youtubeUrl: 'https://youtu.be/TafF1osHJF8?si=iHWDfOGmvzSkLG48',
-    youtubeVideoId: 'iHWDfOGmvzSkLG48',
-    author: 'Mark Davis, Pediatric SLP'
-  },
-  {
-    id: 'vid-10',
-    title: 'Augmentative & Alternative Communication (AAC) Basics',
-    category: 'Expressive Language',
-    duration: '08:00',
-    difficulty: 'Advanced',
-    description: 'Combining picture exchange cards and speech-generating devices for non-verbal learners.',
-    objectives: [
-      'Set up intuitive picture communication boards.',
-      'Prompt icon touching paired with verbal modeling.',
-      'Transition from single icons to full sentence strings.'
-    ],
-    tags: ['AAC Devices', 'Symbolic Communication'],
-    youtubeUrl: 'https://youtu.be/sy3kS5vXtRk?si=nikx45xcH-aJy01X',
-    youtubeVideoId: 'nikx45xcH-aJy01X',
-    author: 'Dr. Sarah Jenkins, CCC-SLP'
-  },
-  {
-    id: 'vid-11',
-    title: 'Conversational Turn-Taking & Pause Management',
-    category: 'Social Interaction',
-    duration: '05:45',
+    title: 'Special Cry for Hunger',
+    category: 'Early Communication',
+    duration: '00:08',
     difficulty: 'Beginner',
-    description: 'Guiding learners through interactive back-and-forth dialogue exchanges.',
+    description: 'Strategies for recognizing hunger-related vocal cues and responding appropriately to support early communication of basic needs.',
     objectives: [
-      'Use a physical turn-taking token (talking stick).',
-      'Enforce 3-second wait times before speaking.',
-      'Acknowledge partner responses with head nods.'
+      'Recognize vocal cues that may indicate hunger or a need for feeding.',
+      'Respond consistently to hunger-related communication cues.',
+      'Support the development of clearer ways to communicate basic needs.'
     ],
-    tags: ['Turn Taking', 'Pragmatics', 'Active Listening'],
-    youtubeUrl: 'https://youtu.be/Sm1dl3n5U_U?si=twFZAVaGsQaCMGBY',
-    youtubeVideoId: 'twFZAVaGsQaCMGBY',
-    author: 'Laura Adams, MS, CCC-SLP'
-  },
-  {
-    id: 'vid-12',
-    title: 'Recognizing & Responding to Emotional Cues',
-    category: 'Social Interaction',
-    duration: '06:30',
-    difficulty: 'Intermediate',
-    description: 'Teaching learners to identify happy, sad, or confused facial expressions in peer groups.',
-    objectives: [
-      'Utilize emotion photo flashcards during interactions.',
-      'Practice empathetic response phrases.',
-      'Roleplay common playground and group scenarios.'
-    ],
-    tags: ['Emotion Recognition', 'Empathy', 'Social Response'],
-    youtubeUrl: 'https://youtu.be/2eS17VuNlGc?si=TwIUbX5e8KzXKleF',
-    youtubeVideoId: 'TwIUbX5e8KzXKleF',
-    author: 'Dr. Emily Chen, Clinical Director'
-  },
-  {
-    id: 'vid-13',
-    title: 'Initiating Conversations with Peers',
-    category: 'Social Interaction',
-    duration: '04:50',
-    difficulty: 'Intermediate',
-    description: 'Step-by-step strategies for teaching learners how to greet peers and start shared play activities.',
-    objectives: [
-      'Practice 3 standard conversation starters.',
-      'Pair greetings with appropriate personal space distance.',
-      'Reinforce successful social approaches.'
-    ],
-    tags: ['Social Initiation', 'Peer Interaction'],
-    youtubeUrl: 'https://youtu.be/n0oUX9U5qTE?si=6f5hzoZQWmfbC5LF',
-    youtubeVideoId: '6f5hzoZQWmfbC5LF',
-    author: 'Robert Vance, Lead Speech Pathologist'
-  },
-  {
-    id: 'vid-14',
-    title: 'Overcoming Word Retrieval Hesitation in Group Therapy',
-    category: 'Expressive Language',
-    duration: '07:10',
-    difficulty: 'Advanced',
-    description: 'Group dynamics and supportive techniques when patients experience sudden word-finding blocks.',
-    objectives: [
-      'Teach circumlocution strategies (describing shape, color, or function).',
-      'Create a low-pressure group response environment.',
-      'Use peer scaffolding effectively.'
-    ],
-    tags: ['Group Therapy', 'Word Finding', 'Circumlocution'],
-    youtubeUrl: 'https://youtu.be/bSOGSDGmNt4?si=pa0V6QLKMLwPBocB',
-    youtubeVideoId: 'pa0V6QLKMLwPBocB',
-    author: 'Rachel Taylor, Neurological SLP'
-  },
-  {
-    id: 'vid-15',
-    title: 'Joint Attention Calibration in Multi-Person Settings',
-    category: 'Joint Attention',
-    duration: '05:50',
-    difficulty: 'Advanced',
-    description: 'Managing shared focus when 3 or more participants are engaged in a shared task.',
-    objectives: [
-      'Maintain central focal object positioning.',
-      'Distribute gaze prompts evenly across group participants.',
-      'Track multi-directional joint attention switches.'
-    ],
-    tags: ['Group Focus', 'Triadic Attention'],
-    youtubeUrl: 'https://youtu.be/iN09CEMmKIQ?si=OvD_1MA3izKYB7X6',
-    youtubeVideoId: 'OvD_1MA3izKYB7X6',
-    author: 'Mark Davis, Pediatric SLP'
+    tags: ['Hunger Cues', 'Early Communication', 'Basic Needs'],
+    youtubeUrl: 'https://youtu.be/OKWWB51LcBk?si=1R2gowd5FM1BeaDU',
+    youtubeVideoId: 'OKWWB51LcBk',
+    author: 'NIEPMD'
   }
 ];

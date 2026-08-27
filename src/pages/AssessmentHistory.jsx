@@ -39,6 +39,7 @@ export default function AssessmentHistory() {
 
   const [assessments, setAssessments] = useState([]);
   const [reports, setReports] = useState([]);
+  const [dateRange, setDateRange] = useState('all');
 
   const fetchHistoryData = async () => {
     setLoading(true);
@@ -69,10 +70,29 @@ export default function AssessmentHistory() {
     fetchHistoryData();
   }, []);
 
-  // Filter completed assessments
+  // Filter completed assessments with date range limits
   const completedAssessments = useMemo(() => {
-    return assessments.filter((ass) => ass.status === 'Completed');
-  }, [assessments]);
+    let result = assessments.filter((ass) => ass.status === 'Completed');
+
+    if (dateRange !== 'all') {
+      const now = new Date();
+      let cutoffDate = new Date();
+      if (dateRange === '7days') {
+        cutoffDate.setDate(now.getDate() - 7);
+      } else if (dateRange === '30days') {
+        cutoffDate.setDate(now.getDate() - 30);
+      } else if (dateRange === '3months') {
+        cutoffDate.setMonth(now.getMonth() - 3);
+      }
+
+      result = result.filter((ass) => {
+        const assDate = new Date(ass.assessmentDate || ass.createdAt);
+        return assDate >= cutoffDate;
+      });
+    }
+
+    return result;
+  }, [assessments, dateRange]);
 
   // Create a map of assessment ID to report ID
   const assessmentReportMap = useMemo(() => {
@@ -91,15 +111,20 @@ export default function AssessmentHistory() {
     return completedAssessments
       .slice(0, 8)
       .reverse() // Chronological order: oldest to newest
-      .map((ass) => ({
-        id: ass._id,
-        patientName: ass.patient?.fullName || 'Patient',
-        score: ass.overallPercentage || ass.overallScore || 0,
-        date: new Date(ass.assessmentDate || ass.createdAt).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric'
-        })
-      }));
+      .map((ass) => {
+        const rawScore = ass.overallPercentage || (ass.overallScore ? (ass.overallScore > 100 ? (ass.overallScore / 5) : ass.overallScore) : 0);
+        const percentageScore = Math.min(100, Math.max(0, Math.round(rawScore)));
+        return {
+          id: ass._id,
+          name: ass.patient?.fullName || 'Patient',
+          patientName: ass.patient?.fullName || 'Patient',
+          score: percentageScore,
+          date: new Date(ass.assessmentDate || ass.createdAt).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+          })
+        };
+      });
   }, [completedAssessments]);
 
   // Skills profile donut chart data (Present vs Growing skills)
@@ -142,6 +167,43 @@ export default function AssessmentHistory() {
     } else {
       navigate('/reports');
     }
+  };
+
+  // Calculate improvement trend relative to previous completed assessment
+  const getAssessmentTrend = (currentAss) => {
+    const patientId = currentAss.patient?._id || currentAss.patient;
+    if (!patientId) return null;
+
+    // Find all completed assessments for the same patient
+    const patientAsses = assessments.filter(
+      ass => ass.status === 'Completed' && (ass.patient?._id === patientId || ass.patient === patientId)
+    );
+
+    // Sort chronologically (oldest to newest)
+    const sorted = [...patientAsses].sort((a, b) => {
+      const dateA = new Date(a.assessmentDate || a.createdAt);
+      const dateB = new Date(b.assessmentDate || b.createdAt);
+      return dateA - dateB;
+    });
+
+    const currentIndex = sorted.findIndex(ass => ass._id === currentAss._id);
+    if (currentIndex <= 0) return null;
+
+    const prevAss = sorted[currentIndex - 1];
+    const currentScore = currentAss.overallPercentage || (currentAss.overallScore ? (currentAss.overallScore > 100 ? (currentAss.overallScore / 5) : currentAss.overallScore) : 0);
+    const prevScore = prevAss.overallPercentage || (prevAss.overallScore ? (prevAss.overallScore > 100 ? (prevAss.overallScore / 5) : prevAss.overallScore) : 0);
+
+    const diff = currentScore - prevScore;
+    const roundedDiff = Math.round(diff * 10) / 10;
+
+    return {
+      diff: roundedDiff,
+      text: roundedDiff > 0 
+        ? `↑ ${roundedDiff}% improvement` 
+        : roundedDiff < 0 
+        ? `↓ ${Math.abs(roundedDiff)}% decrease` 
+        : `→ No change`
+    };
   };
 
   // Custom tooltips
@@ -202,18 +264,35 @@ export default function AssessmentHistory() {
   return (
     <div className="space-y-8 pb-12">
       {/* Page Header */}
-      <div className="flex flex-col gap-1 pb-2">
-        <div className="flex items-center gap-1 text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">
-          <span>Workspace</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-blue-600 dark:text-blue-450">Assessment history</span>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-gray-150 dark:border-slate-800/80">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1 text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">
+            <span>Workspace</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <span className="text-blue-600 dark:text-blue-455">Assessment history</span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-slate-100 tracking-tight mt-1">
+            Assessment history
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-slate-400">
+            Track progress across each patient's care journey.
+          </p>
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-slate-100 tracking-tight mt-1">
-          Assessment history
-        </h1>
-        <p className="text-sm text-gray-500 dark:text-slate-400">
-          Track progress across each patient's care journey.
-        </p>
+
+        {/* Range Selector */}
+        <div className="flex items-center gap-2 text-xs">
+          <span className="font-semibold text-gray-550 dark:text-slate-400">Filter Range:</span>
+          <select
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value)}
+            className="p-2 border border-gray-300 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+          >
+            <option value="all">All Time</option>
+            <option value="7days">Last 7 Days</option>
+            <option value="30days">Last 30 Days</option>
+            <option value="3months">Last 3 Months</option>
+          </select>
+        </div>
       </div>
 
       {/* Analytics Row */}
@@ -227,7 +306,7 @@ export default function AssessmentHistory() {
           
           <div className="flex-1 w-full h-[260px] flex items-center justify-center">
             {scoreDistributionData.length === 0 ? (
-              <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">No completed assessment scores available.</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 font-medium w-full h-full flex items-center justify-center bg-gray-50/50 dark:bg-slate-900/20 rounded-xl border border-dashed border-gray-200 dark:border-slate-800">No completed assessments in this period.</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={scoreDistributionData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
@@ -251,7 +330,7 @@ export default function AssessmentHistory() {
 
           <div className="flex-1 w-full h-[260px] flex flex-col md:flex-row items-center justify-center gap-6">
             {skillsProfileData.length === 0 ? (
-              <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">No behavioral/skill measurements available.</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 font-medium w-full h-full flex items-center justify-center bg-gray-50/50 dark:bg-slate-900/20 rounded-xl border border-dashed border-gray-200 dark:border-slate-800">No behavioral/skill measurements available in this period.</p>
             ) : (
               <>
                 <div className="w-[180px] h-[180px] flex-shrink-0">
@@ -355,9 +434,14 @@ export default function AssessmentHistory() {
                     });
 
                     const reportId = assessmentReportMap[ass._id];
+                    const currentScore = Math.round(ass.overallPercentage || (ass.overallScore ? (ass.overallScore > 100 ? (ass.overallScore / 5) : ass.overallScore) : 0));
 
                     return (
-                      <tr key={ass._id} className="hover:bg-gray-50/40 dark:hover:bg-slate-900/30 transition-colors">
+                      <tr 
+                        key={ass._id} 
+                        onClick={() => handleViewReport(ass._id)}
+                        className="hover:bg-gray-50/40 dark:hover:bg-slate-900/30 transition-colors cursor-pointer"
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50 shadow-2xs">
@@ -380,13 +464,30 @@ export default function AssessmentHistory() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-gray-900 dark:text-slate-200">
-                              {ass.overallPercentage || ass.overallScore}%
-                            </span>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-250 dark:border-emerald-900/50">
-                              Completed
-                            </span>
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold text-gray-900 dark:text-slate-200">
+                                {currentScore}%
+                              </span>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-250 dark:border-emerald-900/50">
+                                Completed
+                              </span>
+                            </div>
+                            {(() => {
+                              const trend = getAssessmentTrend(ass);
+                              if (!trend) return null;
+                              return (
+                                <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${
+                                  trend.diff > 0 
+                                    ? 'text-emerald-600 dark:text-emerald-400' 
+                                    : trend.diff < 0 
+                                    ? 'text-rose-600 dark:text-rose-455' 
+                                    : 'text-slate-450 dark:text-slate-500'
+                                }`}>
+                                  {trend.text}
+                                </span>
+                              );
+                            })()}
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -414,8 +515,11 @@ export default function AssessmentHistory() {
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <Button
                             variant="outline"
-                            onClick={() => handleViewReport(ass._id)}
-                            className="text-xs py-1.5 px-3 flex items-center gap-1.5 ml-auto hover:gap-2 transition-all"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewReport(ass._id);
+                            }}
+                            className="text-xs py-1.5 px-3 flex items-center gap-1.5 ml-auto hover:gap-2 transition-all cursor-pointer"
                           >
                             <span>{reportId ? 'View Report' : 'Generate Report'}</span>
                             <ArrowRight className="w-3.5 h-3.5" />
