@@ -15,22 +15,33 @@ import {
 
 export default function Sidebar({ isOpen, onClose }) {
   const { user, logoutUser } = useAuth();
-  const isParent = user?.role === 'parent';
+  const role = user?.role || 'therapist';
+  const isParent = role === 'parent';
+  const isAdmin = role === 'admin';
 
-  const navItems = isParent
-    ? [
-        { name: 'Dashboard', path: '/parent-dashboard', icon: LayoutDashboard },
-        { name: 'Teaching Videos', path: '/teaching-videos', icon: Video },
-        { name: 'Therapy Activities', path: '/therapy-activities', icon: Puzzle },
-      ]
-    : [
-        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-        { name: 'Patients', path: '/patients', icon: Users },
-        { name: 'Assessment', path: '/assessment', icon: ClipboardCheck },
-        { name: 'Assessment History', path: '/assessment-history', icon: History },
-        { name: 'Reports', path: '/reports', icon: FileText },
-        { name: 'VR Assessment', path: '/vr', icon: Glasses },
-      ];
+  let navItems = [];
+
+  if (isAdmin) {
+    navItems = [
+      { name: 'Admin Dashboard', path: '/admin-dashboard', icon: LayoutDashboard },
+      { name: 'Manage Modules', path: '/admin-modules', icon: Puzzle },
+      { name: 'Manage Activities', path: '/admin-activities', icon: ClipboardCheck },
+      { name: 'Manage Users', path: '/admin-users', icon: Users },
+    ];
+  } else if (isParent) {
+    navItems = [
+      { name: 'My Child', path: '/parent-dashboard', icon: LayoutDashboard },
+      { name: 'Assessments', path: '/assessment', icon: ClipboardCheck },
+      { name: 'Reports', path: '/reports', icon: FileText },
+    ];
+  } else {
+    navItems = [
+      { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+      { name: 'Patients', path: '/patients', icon: Users },
+      { name: 'Assessments', path: '/assessment', icon: ClipboardCheck },
+      { name: 'Reports', path: '/reports', icon: FileText },
+    ];
+  }
 
   const handleLogout = async () => {
     await logoutUser();

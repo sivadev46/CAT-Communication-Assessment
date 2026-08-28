@@ -24,12 +24,29 @@ import Modal from '../components/Modal/Modal';
 import SkeletonLoader from '../components/Loader/SkeletonLoader';
 import RetryButton from '../components/Common/RetryButton';
 import { patientService } from '../services/patientService';
+import { calculateAge, generatePatientIdCode } from '../utils/ageUtils';
+import ParentReviewManager from '../components/Therapist/ParentReviewManager';
 
 export default function Patients() {
+  const [activeTab, setActiveTab] = useState('patients'); // 'patients' | 'reviews'
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Submissions state for Parent Session Reviews
+  const [parentSubmissions, setParentSubmissions] = useState([
+    {
+      id: 'sub-101',
+      patientName: 'Aarav Kumar',
+      patientIdCode: 'CAT-2026-00124',
+      activityTitle: 'Startle response to loud sudden noises',
+      selectedRange: '50–80%',
+      videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+      status: 'pending_review',
+      submittedAt: new Date().toISOString(),
+    },
+  ]);
 
   // Pagination, Search, Filter & Sort States
   const [searchQuery, setSearchQuery] = useState(() => {
@@ -75,7 +92,7 @@ export default function Patients() {
   const [formData, setFormData] = useState({
     fullName: '',
     patientId: '',
-    age: '',
+    dateOfBirth: '',
     gender: 'Male',
     diagnosis: '',
     guardianName: '',
@@ -137,8 +154,8 @@ export default function Patients() {
   const handleOpenAdd = () => {
     setFormData({
       fullName: '',
-      patientId: '',
-      age: '',
+      patientId: generatePatientIdCode(),
+      dateOfBirth: '',
       gender: 'Male',
       diagnosis: '',
       guardianName: '',
@@ -540,31 +557,34 @@ export default function Patients() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-gray-700 mb-1">Patient ID / MRN (Optional)</label>
+              <label className="block font-semibold text-gray-700 mb-1">Patient ID Code</label>
               <input
                 type="text"
-                placeholder="e.g. PAT-9041 (Auto-generated if empty)"
-                value={formData.patientId}
-                onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-                className="w-full p-2.5 border border-gray-300 rounded-lg text-xs text-gray-850 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                readOnly
+                value={formData.patientId || generatePatientIdCode()}
+                className="w-full p-2.5 border border-gray-300 rounded-lg text-xs bg-gray-50 font-mono font-bold text-gray-800"
               />
             </div>
             <div>
-              <label className="block font-semibold text-gray-700 mb-1">Age *</label>
+              <label className="block font-semibold text-gray-700 mb-1">Date of Birth (DOB) *</label>
               <input
-                type="text"
+                type="date"
                 required
-                placeholder="e.g. 5 or 4.5"
-                value={formData.age}
-                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                value={formData.dateOfBirth}
+                onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                 className="w-full p-2.5 border border-gray-300 rounded-lg text-xs text-gray-850 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              {formData.dateOfBirth && (
+                <span className="text-[10px] font-bold text-blue-600 mt-1 inline-block">
+                  Calculated Age: {calculateAge(formData.dateOfBirth).formatted}
+                </span>
+              )}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-gray-700 mb-1">Gender</label>
+              <label className="block font-semibold text-gray-700 mb-1">Gender *</label>
               <select
                 value={formData.gender}
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
@@ -572,8 +592,7 @@ export default function Patients() {
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
-                <option value="Non-binary">Non-binary</option>
-                <option value="Other">Other</option>
+                <option value="Others">Others</option>
               </select>
             </div>
             <div>

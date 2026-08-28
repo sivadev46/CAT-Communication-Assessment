@@ -13,10 +13,10 @@ const Patients = React.lazy(() => import('./pages/Patients'));
 const Assessment = React.lazy(() => import('./pages/Assessment'));
 const AssessmentHistory = React.lazy(() => import('./pages/AssessmentHistory'));
 const Reports = React.lazy(() => import('./pages/Reports'));
-const TeachingVideos = React.lazy(() => import('./pages/TeachingVideos'));
-const TherapyActivities = React.lazy(() => import('./pages/TherapyActivities'));
-const VRAssessment = React.lazy(() => import('./pages/VRAssessment'));
-const Settings = React.lazy(() => import('./pages/Settings'));
+const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
+const AdminModules = React.lazy(() => import('./pages/AdminModules'));
+const AdminActivities = React.lazy(() => import('./pages/AdminActivities'));
+const AdminUsers = React.lazy(() => import('./pages/AdminUsers'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 export default function App() {
@@ -33,29 +33,28 @@ export default function App() {
             <Route path="/" element={<RoleSelection />} />
             <Route path="/doctor-login" element={<DoctorLogin />} />
             <Route path="/parent-login" element={<ParentLogin />} />
-
-            {/* Protected Parent Dashboard Route */}
-            <Route element={<ProtectedRoute allowedRoles={['parent']} />}>
-              <Route element={<DashboardLayout />}>
-                <Route path="/parent-dashboard" element={<ParentDashboard />} />
-                <Route path="/teaching-videos" element={<TeachingVideos />} />
-                <Route path="/therapy-activities" element={<TherapyActivities />} />
-              </Route>
-            </Route>
-
-            {/* Legacy /login redirects to new doctor-login for ProtectedRoute compatibility */}
             <Route path="/login" element={<Navigate to="/doctor-login" replace />} />
 
-            {/* Protected Dashboard Routes for Doctor/Clinician */}
-            <Route element={<ProtectedRoute allowedRoles={['Clinician', 'doctor', 'Admin']} />}>
+            {/* Protected Routes for All Roles */}
+            <Route element={<ProtectedRoute allowedRoles={['parent', 'Clinician', 'doctor', 'therapist', 'Admin', 'admin']} />}>
               <Route element={<DashboardLayout />}>
+                {/* Parent Portal */}
+                <Route path="/parent-dashboard" element={<ParentDashboard />} />
+                
+                {/* Therapist / Clinician Portal */}
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/patients" element={<Patients />} />
-                <Route path="/assessment" element={<Assessment />} />
                 <Route path="/assessment-history" element={<AssessmentHistory />} />
+
+                {/* Common Assessment & Reports (Role-Aware) */}
+                <Route path="/assessment" element={<Assessment />} />
                 <Route path="/reports" element={<Reports />} />
-                <Route path="/vr" element={<VRAssessment />} />
-                <Route path="/settings" element={<Settings />} />
+
+                {/* Admin Portal */}
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/admin-modules" element={<AdminModules />} />
+                <Route path="/admin-activities" element={<AdminActivities />} />
+                <Route path="/admin-users" element={<AdminUsers />} />
               </Route>
             </Route>
 
@@ -67,5 +66,3 @@ export default function App() {
     </AuthProvider>
   );
 }
-
-
