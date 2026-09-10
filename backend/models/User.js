@@ -24,8 +24,14 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['Admin', 'Clinician', 'doctor', 'parent'],
+      enum: ['Admin', 'Clinician', 'doctor', 'parent', 'learner'],
       default: 'Clinician',
+    },
+    learnerId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
     },
     profileImage: {
       type: String,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Stethoscope, Heart, ChevronRight, Activity, Play, Sparkles, Volume2 } from 'lucide-react';
+import { Stethoscope, Heart, GraduationCap, ChevronRight, Activity, Play, Sparkles, Volume2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import ChromaMascot from '../components/ChromaMascot';
 import logoNiepmd from '../assets/logo_niepmd.jpg';
@@ -335,6 +335,27 @@ export default function RoleSelection() {
                     </div>
                     <button className="w-full bg-purple-700 hover:bg-purple-800 text-white font-extrabold py-3 px-3 text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md">
                       <span>Parent Portal</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Learner / Student Card */}
+                  <div 
+                    onClick={() => navigate('/learner-login')}
+                    className="group relative bg-white rounded-2xl border-2 border-purple-200 p-6 shadow-lg shadow-purple-900/5 hover:border-purple-700 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-purple-700" />
+                    <div>
+                      <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-800 border border-purple-300 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-xs">
+                        <GraduationCap className="w-6 h-6" />
+                      </div>
+                      <h4 className="text-lg font-extrabold text-purple-950 mb-1">🎓 Learner Portal</h4>
+                      <p className="text-xs text-purple-900 leading-relaxed mb-4 font-medium">
+                        Practice, learn, and track your communication progress.
+                      </p>
+                    </div>
+                    <button className="w-full bg-purple-700 hover:bg-purple-800 text-white font-extrabold py-3 px-3 text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md">
+                      <span>Learner Login</span>
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>

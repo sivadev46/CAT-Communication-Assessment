@@ -10,7 +10,42 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register a new user (Clinician/Admin)
+// Helper to generate next unique Learner ID (Format: LRN-YYYY-0001, LRN-YYYY-0002, etc.)
+const generateLearnerId = async () => {
+  const currentYear = new Date().getFullYear();
+  const prefix = `LRN-${currentYear}-`;
+
+  const regex = new RegExp(`^LRN-${currentYear}-(\\d+)$`);
+  const learners = await User.find({ learnerId: { $regex: regex } })
+    .select('learnerId')
+    .lean();
+
+  let maxNum = 0;
+  for (const l of learners) {
+    if (l.learnerId) {
+      const match = l.learnerId.match(regex);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) {
+          maxNum = num;
+        }
+      }
+    }
+  }
+
+  const nextNum = maxNum + 1;
+  let candidateId = `${prefix}${String(nextNum).padStart(4, '0')}`;
+
+  let counter = nextNum;
+  while (await User.findOne({ learnerId: candidateId })) {
+    counter++;
+    candidateId = `${prefix}${String(counter).padStart(4, '0')}`;
+  }
+
+  return candidateId;
+};
+
+// @desc    Register a new user (Clinician/Admin/Parent/Learner)
 // @route   POST /api/auth/register
 // @access  Public
 export const register = asyncHandler(async (req, res) => {
@@ -26,14 +61,26 @@ export const register = asyncHandler(async (req, res) => {
     });
   }
 
+  // Automatically generate unique learnerId if registering a learner
+  let learnerId = undefined;
+  if (role === 'learner') {
+    learnerId = await generateLearnerId();
+  }
+
   // Create user
-  const user = await User.create({
+  const userData = {
     fullName,
     email,
     password,
     role: role || 'Clinician',
     profileImage: profileImage || '',
-  });
+  };
+
+  if (learnerId) {
+    userData.learnerId = learnerId;
+  }
+
+  const user = await User.create(userData);
 
   const token = generateToken(user._id);
 
@@ -47,6 +94,7 @@ export const register = asyncHandler(async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
+        learnerId: user.learnerId,
         profileImage: user.profileImage,
         createdAt: user.createdAt,
       },
@@ -90,6 +138,7 @@ export const login = asyncHandler(async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
+        learnerId: user.learnerId,
         profileImage: user.profileImage,
         createdAt: user.createdAt,
       },
@@ -111,6 +160,7 @@ export const getProfile = asyncHandler(async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
+        learnerId: user.learnerId,
         profileImage: user.profileImage,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -123,7 +173,7 @@ export const getProfile = asyncHandler(async (req, res) => {
 // @route   PUT /api/auth/profile
 // @access  Private
 export const updateProfile = asyncHandler(async (req, res) => {
-  const { fullName, profileImage, password } = req.body;
+  const { fullName, profileImage, password, learnerId } = req.body;
   const user = await User.findById(req.user._id).select('+password');
 
   if (!user) {
@@ -136,6 +186,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   if (fullName) user.fullName = fullName;
   if (profileImage !== undefined) user.profileImage = profileImage;
+  if (learnerId !== undefined) user.learnerId = learnerId.trim();
   if (password) user.password = password;
 
   await user.save();
@@ -149,6 +200,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
+        learnerId: user.learnerId,
         profileImage: user.profileImage,
         updatedAt: user.updatedAt,
       },

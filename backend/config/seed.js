@@ -38,6 +38,26 @@ export const seedDatabase = async () => {
       console.log(`[Seed] Parent user ${parent.email} already exists.`);
     }
 
+    // 1c. Check and Seed Learner User
+    let learner = await User.findOne({ email: 'learner@cat.com' });
+
+    if (!learner) {
+      console.log('[Seed] Default learner user missing. Creating default learner user...');
+
+      learner = await User.create({
+        fullName: 'Alex Carter',
+        email: 'learner@cat.com',
+        password: 'Password123!',
+        role: 'learner',
+        learnerId: 'LRN-2026-0001',
+        profileImage: '',
+      });
+
+      console.log(`[Seed] Successfully created default learner user: ${learner.email} (${learner.role})`);
+    } else {
+      console.log(`[Seed] Learner user ${learner.email} already exists.`);
+    }
+
     // 2. Check and Seed Sample Patients
     const patientCount = await Patient.countDocuments();
     if (patientCount === 0) {

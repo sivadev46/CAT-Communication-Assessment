@@ -21,6 +21,8 @@ export default function ProtectedRoute({ allowedRoles }) {
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
     if (user?.role === 'parent') {
       return <Navigate to="/parent-dashboard" replace />;
+    } else if (user?.role === 'learner') {
+      return <Navigate to="/learner-dashboard" replace />;
     } else {
       return <Navigate to="/dashboard" replace />;
     }
