@@ -115,27 +115,27 @@ export default function ParentLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0E] text-white flex items-center justify-center p-4 md:p-8 font-sans selection:bg-emerald-500 selection:text-black">
-      <div className="bg-[#121218] rounded-2xl border border-[#27273A] shadow-2xl overflow-hidden max-w-4xl w-full grid grid-cols-1 md:grid-cols-2">
+    <div className="min-h-screen bg-[#ffffb3] text-slate-900 flex items-center justify-center p-4 md:p-8 font-sans selection:bg-purple-600 selection:text-white">
+      <div className="bg-white rounded-2xl border-2 border-purple-200 shadow-2xl overflow-hidden max-w-4xl w-full grid grid-cols-1 md:grid-cols-2">
         
         {/* Left Side: NIEPMD Branding */}
-        <div className="hidden md:flex flex-col justify-between bg-[#1A1A24] p-10 relative border-r border-[#27273A]">
+        <div className="hidden md:flex flex-col justify-between bg-purple-50/60 p-10 relative border-r-2 border-purple-100">
           <div className="flex items-center gap-3">
-            <img src={logoNiepmd} alt="NIEPMD" className="w-10 h-10 object-contain rounded bg-white p-0.5" />
-            <span className="font-extrabold text-white text-lg tracking-tight">CAT Family Portal</span>
+            <img src={logoNiepmd} alt="NIEPMD" className="w-10 h-10 object-contain rounded-xl bg-white p-0.5 border border-purple-200" />
+            <span className="font-black text-purple-950 text-lg tracking-tight">CAT Family Portal</span>
           </div>
 
           <div className="my-8 text-center space-y-4">
-            <div className="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
+            <div className="w-20 h-20 rounded-2xl bg-purple-100 border border-purple-300 text-purple-800 flex items-center justify-center mx-auto shadow-xs">
               <Heart className="w-10 h-10" />
             </div>
-            <h3 className="text-xl font-bold text-white">Caregiver Portal</h3>
-            <p className="text-xs text-gray-300 leading-relaxed max-w-xs mx-auto">
+            <h3 className="text-xl font-extrabold text-purple-950">Caregiver Portal</h3>
+            <p className="text-xs text-purple-900 leading-relaxed max-w-xs mx-auto font-medium">
               Track your child’s speech progress, participate in standardized assessment sessions, record videos for therapist review, and view child reports.
             </p>
           </div>
 
-          <div className="text-[11px] text-gray-400 text-center">
+          <div className="text-[11px] text-purple-800 text-center font-bold">
             NIEPMD Official Parent & Caregiver Portal
           </div>
         </div>
@@ -146,33 +146,33 @@ export default function ParentLogin() {
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-emerald-400 transition-colors font-semibold mb-6 cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs text-purple-900 hover:text-purple-700 transition-colors font-bold mb-6 cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Role Selection</span>
             </button>
 
             <div className="mb-6">
-              <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs uppercase tracking-wider mb-1">
-                <Heart className="w-4 h-4 text-emerald-400 fill-emerald-400" />
+              <div className="flex items-center gap-1.5 text-purple-700 font-extrabold text-xs uppercase tracking-wider mb-1">
+                <Heart className="w-4 h-4 text-purple-700 fill-purple-700" />
                 <span>Parent Access</span>
               </div>
-              <h2 className="text-2xl font-extrabold text-white">Parent Sign In</h2>
-              <p className="text-xs text-gray-400 mt-1">Access your linked child's developmental assessment</p>
+              <h2 className="text-2xl font-black text-purple-950">Parent Sign In</h2>
+              <p className="text-xs text-purple-800 mt-1 font-medium">Access your linked child's developmental assessment</p>
             </div>
 
             {error && (
-              <div className="mb-5 p-3 bg-red-950/60 border border-red-800 text-red-300 rounded-xl text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-400" />
+              <div className="mb-5 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs flex items-center gap-2 font-medium">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" />
                 <span>{error}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-300 mb-1.5">Email Address</label>
+                <label className="block text-xs font-bold text-purple-950 mb-1.5">Email Address</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-purple-400">
                     <Mail className="w-4 h-4" />
                   </span>
                   <input
@@ -181,15 +181,15 @@ export default function ParentLogin() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="parent@cat.com"
-                    className="w-full pl-10 pr-4 py-3 bg-[#1A1A24] border border-[#27273A] focus:border-emerald-500 rounded-xl text-xs text-white outline-none"
+                    className="w-full pl-10 pr-4 py-3 bg-purple-50/40 border border-purple-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-100 rounded-xl text-xs text-purple-950 font-medium outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-300 mb-1.5">Password</label>
+                <label className="block text-xs font-bold text-purple-950 mb-1.5">Password</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-purple-400">
                     <Lock className="w-4 h-4" />
                   </span>
                   <input
@@ -198,12 +198,12 @@ export default function ParentLogin() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-3 bg-[#1A1A24] border border-[#27273A] focus:border-emerald-500 rounded-xl text-xs text-white outline-none"
+                    className="w-full pl-10 pr-10 py-3 bg-purple-50/40 border border-purple-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-100 rounded-xl text-xs text-purple-950 font-medium outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-500 hover:text-white"
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-purple-400 hover:text-purple-700"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -213,7 +213,7 @@ export default function ParentLogin() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 mt-2 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 mt-2 bg-purple-700 hover:bg-purple-800 text-white font-extrabold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {loading ? (
                   <>
@@ -229,7 +229,7 @@ export default function ParentLogin() {
               </button>
             </form>
 
-            <div className="mt-6 text-center text-xs text-gray-400">
+            <div className="mt-6 text-center text-xs text-purple-900 font-medium">
               <span>New Parent? </span>
               <button
                 type="button"
@@ -237,16 +237,16 @@ export default function ParentLogin() {
                   setIsRegisterOpen(true);
                   setRegisterError(null);
                 }}
-                className="font-bold text-emerald-400 hover:underline cursor-pointer"
+                className="font-extrabold text-purple-700 hover:underline cursor-pointer"
               >
                 Create Account with Patient ID
               </button>
             </div>
           </div>
 
-          <div className="mt-8 pt-4 border-t border-[#27273A] text-center text-[11px] text-gray-400">
-            <span className="font-semibold text-gray-300">Default Demo Credentials:</span>
-            <div className="mt-1 font-mono text-emerald-400">parent@cat.com • Password123!</div>
+          <div className="mt-8 pt-4 border-t border-purple-100 text-center text-[11px] text-purple-800">
+            <span className="font-semibold text-purple-950">Default Demo Credentials:</span>
+            <div className="mt-1 font-mono text-purple-700 font-bold">parent@cat.com • Password123!</div>
           </div>
         </div>
 

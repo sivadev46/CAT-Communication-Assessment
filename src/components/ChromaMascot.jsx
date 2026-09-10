@@ -26,7 +26,7 @@ export default function ChromaMascot() {
     if (!ctx) return;
 
     if (video.videoWidth && video.videoHeight) {
-      // Focus crop on Shruthi character in center of landscape video
+      // Focus crop on Vani character in center of landscape video
       // Crop source: middle 45% width, full height to make her dramatically larger!
       const cropW = video.videoWidth * 0.45;
       const cropH = video.videoHeight * 0.95;
@@ -175,40 +175,41 @@ export default function ChromaMascot() {
       {/* Main Canvas rendering transparent 3D Mascot with high scaling */}
       <div className="relative w-full h-full flex items-center justify-center">
         {/* Soft background aura glow */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/30 via-indigo-400/25 to-emerald-400/25 rounded-full blur-3xl transform scale-95 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 via-amber-300/20 to-purple-400/20 rounded-full blur-3xl transform scale-95 pointer-events-none" />
 
         <canvas
           ref={canvasRef}
-          className="w-auto h-[480px] md:h-[650px] lg:h-[750px] max-h-[85vh] drop-shadow-[0_30px_60px_rgba(30,58,138,0.35)] relative z-10 transition-transform duration-300 transform hover:scale-[1.02]"
+          className="w-auto h-[480px] md:h-[650px] lg:h-[750px] max-h-[85vh] drop-shadow-[0_20px_40px_rgba(126,34,206,0.25)] relative z-10 transition-transform duration-300 transform hover:scale-[1.02]"
         />
 
         {/* Floating Sound Status Badge / Quick Unmute Indicator */}
         {isLoaded && (
           <button
             onClick={toggleSound}
-            className="absolute bottom-2 left-4 z-20 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-blue-200/80 shadow-md text-xs font-semibold text-slate-700 hover:text-blue-600 transition-all cursor-pointer group"
+            className="absolute bottom-2 left-4 z-20 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-purple-200 shadow-md text-xs font-semibold text-purple-950 hover:text-purple-700 transition-all cursor-pointer group"
           >
             {isMuted ? (
               <>
-                <VolumeX className="w-4 h-4 text-amber-500 animate-pulse" />
-                <span className="text-amber-700">Click anywhere to enable sound</span>
+                <VolumeX className="w-4 h-4 text-purple-600 animate-pulse" />
+                <span className="text-purple-800">Click anywhere to enable sound</span>
               </>
             ) : (
               <>
                 <Volume2 className="w-4 h-4 text-emerald-600" />
-                <span className="text-emerald-700">Audio Active</span>
+                <span className="text-emerald-700">Vani Audio Active</span>
               </>
             )}
           </button>
         )}
 
         {!isLoaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 backdrop-blur-xs rounded-3xl z-20">
-            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3" />
-            <span className="text-sm font-bold text-slate-700">Loading Shruthi Mascot...</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 backdrop-blur-xs rounded-3xl z-20">
+            <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-3" />
+            <span className="text-sm font-bold text-purple-950">Loading Vani Mascot...</span>
           </div>
         )}
       </div>
     </div>
   );
 }
+
