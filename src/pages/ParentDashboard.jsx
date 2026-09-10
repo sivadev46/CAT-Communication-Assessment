@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { reportService } from '../services/reportService';
+import { submissionService } from '../services/submissionService';
 import {
   Heart,
   Calendar,
@@ -19,7 +20,9 @@ import {
   ChevronRight,
   User,
   X,
-  Award
+  Award,
+  Share2,
+  Loader2
 } from 'lucide-react';
 import Loader from '../components/Loader/Loader';
 import Button from '../components/Button/Button';
@@ -32,8 +35,146 @@ export default function ParentDashboard() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedReport, setSelectedReport] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
+  const [playbackUrl, setPlaybackUrl] = useState('');
+  const [isPlaybackModalOpen, setIsPlaybackModalOpen] = useState(false);
+
+  // Recording states
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [mediaStream, setMediaStream] = useState(null);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [recordingState, setRecordingState] = useState('idle'); // 'idle' | 'recording' | 'preview' | 'error'
+  const [videoBlobUrl, setVideoBlobUrl] = useState(null);
+  const [videoBlob, setVideoBlob] = useState(null);
+  const [permissionError, setPermissionError] = useState(null);
+  const [recordingTimer, setRecordingTimer] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const liveVideoRef = useRef(null);
+
+  const fetchSubmissions = async () => {
+    try {
+      const res = await submissionService.getSubmissions();
+      if (res.success) {
+        setSubmissions(res.data);
+      }
+    } catch (err) {
+      console.error('Failed to load shared practice recordings:', err);
+    }
+  };
+
+  const startCamera = async () => {
+    setPermissionError(null);
+    setRecordingState('idle');
+    setRecordingTimer(0);
+    if (videoBlobUrl) {
+      URL.revokeObjectURL(videoBlobUrl);
+      setVideoBlobUrl(null);
+      setVideoBlob(null);
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480 },
+        audio: true
+      });
+      setMediaStream(stream);
+      if (liveVideoRef.current) {
+        liveVideoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      console.error('Permission denied or camera error:', err);
+      setPermissionError('Camera or microphone permission was denied. Please allow access in your browser settings to record your practice.');
+      setRecordingState('error');
+    }
+  };
+
+  const startRecording = () => {
+    if (!mediaStream) return;
+    
+    // Fallbacks for MediaRecorder codecs
+    const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+    let recorder;
+    try {
+      recorder = new MediaRecorder(mediaStream, options);
+    } catch (e) {
+      try {
+        recorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
+      } catch (e2) {
+        recorder = new MediaRecorder(mediaStream);
+      }
+    }
+
+    const chunks = [];
+    recorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) {
+        chunks.push(e.data);
+      }
+    };
+
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      const blobUrl = URL.createObjectURL(blob);
+      setVideoBlob(blob);
+      setVideoBlobUrl(blobUrl);
+      setRecordingState('preview');
+      
+      // Stop stream tracks to turn off camera light
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        setMediaStream(null);
+      }
+    };
+
+    recorder.start(1000); // chunk every second
+    setMediaRecorder(recorder);
+    setRecordingState('recording');
+    setRecordingTimer(0);
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+  };
+
+  const closeRecordingModal = () => {
+    setIsRecordModalOpen(false);
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+      setMediaStream(null);
+    }
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+    if (videoBlobUrl) {
+      URL.revokeObjectURL(videoBlobUrl);
+      setVideoBlobUrl(null);
+      setVideoBlob(null);
+    }
+    setRecordingState('idle');
+    setUploadError(null);
+  };
+
+  useEffect(() => {
+    let interval = null;
+    if (recordingState === 'recording') {
+      interval = setInterval(() => {
+        setRecordingTimer((prev) => {
+          if (prev >= 180) { // 3 minutes limit
+            stopRecording();
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [recordingState, mediaRecorder]);
 
   useEffect(() => {
     const fetchSharedReports = async () => {
@@ -52,6 +193,7 @@ export default function ParentDashboard() {
     };
 
     fetchSharedReports();
+    fetchSubmissions();
   }, []);
 
   // Keyboard accessibility: close modal on Escape key press
@@ -116,6 +258,41 @@ export default function ParentDashboard() {
 
   // Extract patient details from latest shared report
   const latestReport = reports.length > 0 ? reports[0] : null;
+  const recommendedActivity = latestReport?.caregiverReport?.homeStrategies?.[0] || "Conversation Practice";
+
+  const [uploadError, setUploadError] = useState(null);
+
+  const handleSendToDoctor = async () => {
+    if (!videoBlob) return;
+    setIsSubmitting(true);
+    setUploadError(null);
+    try {
+      const uploadRes = await submissionService.uploadVideo(videoBlob);
+      if (uploadRes.success && uploadRes.videoUrl) {
+        const submissionData = {
+          patientId: latestReport.assessment?.patient?._id || latestReport.assessment?.patient || latestReport.patientId,
+          clinicianId: latestReport.generatedBy?._id || latestReport.generatedBy || latestReport.doctorId,
+          assessmentId: latestReport.assessment?._id || null,
+          reportId: latestReport._id || null,
+          activityName: recommendedActivity,
+          videoUrl: uploadRes.videoUrl,
+          duration: recordingTimer
+        };
+        const submitRes = await submissionService.createSubmission(submissionData);
+        if (submitRes.success) {
+          setRecordingState('success');
+          fetchSubmissions();
+        }
+      }
+    } catch (err) {
+      console.error('Failed to send recording:', err);
+      setUploadError(err.response?.data?.message || "We couldn't share your recording right now. Please try again.");
+      setRecordingState('upload-error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const childName = latestReport?.assessment?.patient?.fullName || "Your Child";
   const childAge = latestReport?.assessment?.patient?.age ? `${latestReport.assessment.patient.age} years` : "N/A";
   const diagnosis = latestReport?.assessment?.patient?.diagnosis || "Not Specified";
@@ -411,6 +588,123 @@ export default function ParentDashboard() {
                   </div>
                 )}
               </div>
+
+              {/* Practice & Record Card */}
+              {latestReport && (
+                <div className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-105 pb-3">
+                    <div>
+                      <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <Video className="w-5 h-5 text-emerald-600" />
+                        <span>Practice & Record</span>
+                      </h2>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Practice recommended activities and share a recording with your clinician.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-emerald-550/[0.03] border border-emerald-100 rounded-xl flex flex-col md:flex-row md:items-center gap-4 justify-between">
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">Recommended Task</span>
+                      <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <Award className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Practice: {recommendedActivity}</span>
+                      </h4>
+                      <p className="text-[11px] text-slate-550 leading-relaxed max-w-lg mt-1 font-medium">
+                        Follow the home activity recommended in your latest assessment and record a brief video (max 3 minutes) of the practice session.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate('/teaching-videos')}
+                        className="text-xs py-1.5 px-3 flex items-center gap-1 cursor-pointer font-bold border-slate-200"
+                      >
+                        <PlayCircle className="w-3.5 h-3.5" />
+                        <span>Watch Demo</span>
+                      </Button>
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          setIsRecordModalOpen(true);
+                          startCamera();
+                        }}
+                        className="text-xs py-1.5 px-3 flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 border-emerald-600 text-white cursor-pointer font-bold"
+                      >
+                        <Video className="w-3.5 h-3.5" />
+                        <span>Record Practice</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Recent Recordings List */}
+              {submissions.length > 0 && (
+                <div className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs space-y-4">
+                  <div>
+                    <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-emerald-600" />
+                      <span>Recent Recordings</span>
+                    </h2>
+                    <p className="text-[11px] text-slate-500">Practice videos shared with your clinician</p>
+                  </div>
+
+                  <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
+                    {submissions.map((sub) => {
+                      const dateStr = new Date(sub.createdAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      });
+                      const min = Math.floor(sub.duration / 60);
+                      const sec = sub.duration % 60;
+                      const durationStr = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+
+                      return (
+                        <div
+                          key={sub._id}
+                          className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-4"
+                        >
+                          <div>
+                            <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 leading-snug">
+                              <Video className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>{sub.activityName}</span>
+                            </h4>
+                            <p className="text-[10px] text-slate-455 mt-1 font-semibold">
+                              {dateStr} • Duration: {durationStr}
+                            </p>
+                            <div className="mt-1.5 flex items-center gap-1">
+                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md ${
+                                sub.status === 'Reviewed'
+                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                  : 'bg-blue-100 text-blue-800 border border-blue-200'
+                              }`}>
+                                Status: {sub.status === 'Reviewed' ? 'Reviewed' : `Sent to ${sub.clinicianId?.fullName || 'Clinician'}`}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5">
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                setPlaybackUrl(sub.videoUrl);
+                                setIsPlaybackModalOpen(true);
+                              }}
+                              className="text-[10px] py-1.5 px-2.5 font-bold cursor-pointer border-slate-200 text-slate-700 bg-white"
+                            >
+                              Play Video
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Shared Reports History List */}
               <div id="reports" className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-xs space-y-4">
@@ -742,6 +1036,280 @@ export default function ParentDashboard() {
               </Button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Record Practice Modal */}
+      {isRecordModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans"
+        >
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <div className="flex items-center gap-2">
+                <Video className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-105">
+                  Record Practice Session
+                </h3>
+              </div>
+              <button
+                onClick={closeRecordingModal}
+                className="text-slate-400 hover:text-slate-650 p-1 rounded-lg hover:bg-slate-50 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 flex-1 flex flex-col items-center justify-center space-y-4 overflow-y-auto">
+              {recordingState === 'success' ? (
+                /* Success State */
+                <div className="flex flex-col items-center justify-center py-6 text-center space-y-4 w-full">
+                  <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50 shadow-md">
+                    <CheckCircle className="w-10 h-10" />
+                  </div>
+                  <div className="space-y-1.5 max-w-sm">
+                    <h4 className="text-base font-extrabold text-slate-900 dark:text-slate-105">
+                      Recording Sent Successfully
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                      Your practice recording has been securely shared with <strong className="text-slate-800 dark:text-slate-200">{latestReport?.generatedBy?.fullName || "your clinician"}</strong>.
+                    </p>
+                  </div>
+                </div>
+              ) : recordingState === 'upload-error' ? (
+                /* Upload Error State */
+                <div className="flex flex-col items-center justify-center py-6 text-center space-y-4 w-full">
+                  <div className="w-16 h-16 rounded-full bg-rose-50 dark:bg-rose-955/20 text-rose-650 dark:text-rose-400 flex items-center justify-center border border-rose-100 dark:border-rose-900/35 shadow-md">
+                    <AlertCircle className="w-10 h-10" />
+                  </div>
+                  <div className="space-y-1.5 max-w-sm">
+                    <h4 className="text-base font-extrabold text-slate-900 dark:text-slate-105">
+                      Unable to Send Recording
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                      {uploadError || "We couldn't share your recording right now. Please try again."}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* Normal Body */
+                <>
+                  {/* Recommended Activity Notice */}
+                  <div className="bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-100/50 dark:border-emerald-900/35 p-3 rounded-xl w-full text-xs text-slate-700 dark:text-slate-300 font-medium">
+                    <strong>Activity:</strong> {recommendedActivity}
+                  </div>
+
+                  {/* Error state */}
+                  {permissionError && (
+                    <div className="p-3 bg-rose-50 dark:bg-rose-955/20 border border-rose-200 dark:border-rose-900/40 text-rose-750 dark:text-rose-400 rounded-xl text-xs flex items-start gap-2 w-full font-semibold">
+                      <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <span>{permissionError}</span>
+                    </div>
+                  )}
+
+                  {/* Recording / Preview area */}
+                  <div className="w-full aspect-video bg-slate-950 rounded-xl overflow-hidden relative border border-slate-800 flex items-center justify-center">
+                    
+                    {/* Live Stream View */}
+                    {(recordingState === 'idle' || recordingState === 'recording') && (
+                      <video 
+                        ref={liveVideoRef}
+                        autoPlay 
+                        playsInline 
+                        muted
+                        className="w-full h-full object-cover transform -scale-x-100"
+                      />
+                    )}
+
+                    {/* Preview View */}
+                    {recordingState === 'preview' && videoBlobUrl && (
+                      <video 
+                        src={videoBlobUrl}
+                        controls
+                        className="w-full h-full object-contain"
+                      />
+                    )}
+
+                    {/* Loading state indicator */}
+                    {isSubmitting && (
+                      <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center gap-2.5 text-white z-20">
+                        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+                        <span className="text-xs font-bold font-sans">Uploading video recording...</span>
+                      </div>
+                    )}
+
+                    {/* Timer overlay */}
+                    {recordingState === 'recording' && (
+                      <div className="absolute bottom-4 left-4 px-2.5 py-1 bg-rose-600 text-white rounded-md text-[10px] font-extrabold flex items-center gap-1.5 animate-pulse z-10">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                        <span>
+                          {(() => {
+                            const min = Math.floor(recordingTimer / 60);
+                            const sec = recordingTimer % 60;
+                            return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+                          })()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Modal Footer Controls */}
+            <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-wrap justify-between items-center gap-3">
+              {recordingState === 'success' ? (
+                <Button
+                  variant="primary"
+                  onClick={closeRecordingModal}
+                  className="text-xs py-1.5 px-6 bg-emerald-600 hover:bg-emerald-700 border-emerald-600 text-white cursor-pointer font-bold ml-auto"
+                >
+                  Done
+                </Button>
+              ) : recordingState === 'upload-error' ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setRecordingState('preview');
+                      setUploadError(null);
+                    }}
+                    className="text-xs border-slate-250 cursor-pointer"
+                  >
+                    Back to Preview
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={handleSendToDoctor}
+                    disabled={isSubmitting}
+                    className="text-xs py-1.5 px-4 bg-emerald-600 hover:bg-emerald-700 border-emerald-600 text-white cursor-pointer font-bold"
+                  >
+                    Retry
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={closeRecordingModal}
+                    className="text-xs border-slate-250 cursor-pointer"
+                  >
+                    Close
+                  </Button>
+
+                  <div className="flex items-center gap-2">
+                    {recordingState === 'idle' && !permissionError && (
+                      <Button
+                        variant="primary"
+                        onClick={startRecording}
+                        className="text-xs py-1.5 px-3 flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-705 border-emerald-600 text-white cursor-pointer font-bold"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-white" />
+                        <span>Start Recording</span>
+                      </Button>
+                    )}
+
+                    {recordingState === 'recording' && (
+                      <Button
+                        variant="primary"
+                        onClick={stopRecording}
+                        className="text-xs py-1.5 px-3 flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 border-rose-650 text-white cursor-pointer font-bold"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                        <span>Stop Recording</span>
+                      </Button>
+                    )}
+
+                    {recordingState === 'preview' && (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setRecordingState('idle');
+                            startCamera();
+                          }}
+                          className="text-xs py-1.5 px-3 cursor-pointer border-slate-250"
+                        >
+                          Re-record
+                        </Button>
+                        <Button
+                          variant="primary"
+                          onClick={handleSendToDoctor}
+                          disabled={isSubmitting}
+                          className="text-xs py-1.5 px-3 flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 border-emerald-600 text-white cursor-pointer font-bold"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                          <span>Send to Doctor</span>
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Playback Modal */}
+      {isPlaybackModalOpen && playbackUrl && (
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsPlaybackModalOpen(false);
+              setPlaybackUrl('');
+            }
+          }}
+          className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans"
+        >
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-xl overflow-hidden flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <div className="flex items-center gap-2">
+                <Video className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-105">
+                  Shared Practice Recording
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setIsPlaybackModalOpen(false);
+                  setPlaybackUrl('');
+                }}
+                className="text-slate-400 hover:text-slate-650 p-1 rounded-lg hover:bg-slate-50 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Video Body */}
+            <div className="p-5 aspect-video bg-slate-950 flex items-center justify-center">
+              <video 
+                src={playbackUrl}
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsPlaybackModalOpen(false);
+                  setPlaybackUrl('');
+                }}
+                className="text-xs border-slate-250 cursor-pointer"
+              >
+                Close
+              </Button>
+            </div>
           </div>
         </div>
       )}

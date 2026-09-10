@@ -12,7 +12,9 @@ import {
   Share2,
   PlayCircle,
   ChevronRight,
-  Calendar
+  Calendar,
+  X,
+  AlertCircle
 } from 'lucide-react';
 import {
   AreaChart,
@@ -29,6 +31,7 @@ import SkeletonLoader from '../components/Loader/SkeletonLoader';
 import RetryButton from '../components/Common/RetryButton';
 import { dashboardService } from '../services/dashboardService';
 import { assessmentService } from '../services/assessmentService';
+import { submissionService } from '../services/submissionService';
 import { useAuth } from '../context/AuthContext';
 
 export default function Dashboard() {
@@ -48,6 +51,9 @@ export default function Dashboard() {
   const [activityTimeline, setActivityTimeline] = useState([]);
   const [assessments, setAssessments] = useState([]);
   const [chartRange, setChartRange] = useState('7'); // '7', '14', or '30' days
+  const [submissions, setSubmissions] = useState([]);
+  const [playbackUrl, setPlaybackUrl] = useState('');
+  const [isPlaybackModalOpen, setIsPlaybackModalOpen] = useState(false);
 
   const currentDate = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -60,7 +66,7 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
     try {
-      const [statsRes, patientsRes, timelineRes, assessmentsRes] = await Promise.all([
+      const [statsRes, patientsRes, timelineRes, assessmentsRes, submissionsRes] = await Promise.all([
         dashboardService.getStats(),
         dashboardService.getRecentPatients(),
         dashboardService.getActivityTimeline(),
@@ -68,6 +74,10 @@ export default function Dashboard() {
           console.error('Failed to load assessments:', err);
           return { success: true, data: { assessments: [] } };
         }),
+        submissionService.getSubmissions().catch((err) => {
+          console.error('Failed to load submissions:', err);
+          return { success: true, data: [] };
+        })
       ]);
 
       if (statsRes.success && statsRes.data) {
@@ -82,10 +92,25 @@ export default function Dashboard() {
       if (assessmentsRes.success && assessmentsRes.data) {
         setAssessments(assessmentsRes.data.assessments || []);
       }
+      if (submissionsRes.success && submissionsRes.data) {
+        setSubmissions(submissionsRes.data);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load dashboard data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleReviewSubmission = async (id) => {
+    try {
+      const res = await submissionService.reviewSubmission(id);
+      if (res.success) {
+        setSubmissions(submissions.map(sub => sub._id === id ? { ...sub, status: 'Reviewed' } : sub));
+      }
+    } catch (err) {
+      console.error('Failed to review submission:', err);
+      alert('Error updating review status.');
     }
   };
 
@@ -566,6 +591,145 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Patient Practice Recordings Section */}
+      <div className="space-y-4 pt-4">
+        <div>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 flex items-center gap-2">
+            <Video className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <span>Patient Practice Recordings</span>
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-slate-400">Review practice video uploads shared by parents</p>
+        </div>
+
+        {submissions.length === 0 ? (
+          <Card className="text-center py-10 px-4">
+            <Video className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+            <p className="text-xs font-semibold text-gray-700 dark:text-slate-200">No practice recordings shared yet.</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">When parents record and share recommended home activities, they will appear here.</p>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {submissions.map((sub) => {
+              const patientName = sub.patientId?.fullName || 'Patient';
+              const dateStr = new Date(sub.createdAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              });
+              const min = Math.floor(sub.duration / 60);
+              const sec = sub.duration % 60;
+              const durationStr = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+
+              return (
+                <Card 
+                  key={sub._id}
+                  className="hover:shadow-md transition-all duration-200 !p-4 flex flex-col justify-between gap-4 border border-gray-200 dark:border-slate-800"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-gray-900 dark:text-slate-200 text-sm">{patientName}</h3>
+                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-semibold">Activity: {sub.activityName}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 font-medium">
+                        Date: {dateStr} • Duration: {durationStr}
+                      </p>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      sub.status === 'Reviewed' 
+                        ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-450 border border-emerald-200 dark:border-emerald-900/30'
+                        : 'bg-blue-50 dark:bg-blue-955/20 text-blue-700 dark:text-blue-405 border border-blue-200 dark:border-blue-900/30'
+                    }`}>
+                      {sub.status}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-end items-center gap-2 pt-2 border-t border-gray-150 dark:border-slate-800/80">
+                    {sub.status === 'Sent' && (
+                      <Button
+                        variant="outline"
+                        onClick={() => handleReviewSubmission(sub._id)}
+                        className="py-1 px-3 text-xs"
+                      >
+                        Mark as Reviewed
+                      </Button>
+                    )}
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        setPlaybackUrl(sub.videoUrl);
+                        setIsPlaybackModalOpen(true);
+                      }}
+                      className="py-1 px-3 text-xs flex items-center gap-1 bg-blue-600 hover:bg-blue-705 border-blue-600 text-white cursor-pointer font-bold"
+                    >
+                      <PlayCircle className="w-3.5 h-3.5" />
+                      <span>Play Video</span>
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Playback Modal */}
+      {isPlaybackModalOpen && playbackUrl && (
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsPlaybackModalOpen(false);
+              setPlaybackUrl('');
+            }
+          }}
+          className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans"
+        >
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-xl overflow-hidden flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900">
+              <div className="flex items-center gap-2">
+                <Video className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                  Shared Practice Recording
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setIsPlaybackModalOpen(false);
+                  setPlaybackUrl('');
+                }}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-50 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Video Body */}
+            <div className="p-5 aspect-video bg-slate-950 flex items-center justify-center">
+              <video 
+                src={playbackUrl}
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsPlaybackModalOpen(false);
+                  setPlaybackUrl('');
+                }}
+                className="text-xs border-slate-250 cursor-pointer"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

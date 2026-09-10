@@ -5,11 +5,13 @@ import morgan from 'morgan';
 import { env } from './config/env.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
 
+import path from 'path';
 import authRoutes from './routes/authRoutes.js';
 import patientRoutes from './routes/patientRoutes.js';
 import assessmentRoutes from './routes/assessmentRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import submissionRoutes from './routes/submissionRoutes.js';
 
 const app = express();
 
@@ -43,12 +45,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Static files serving for media uploads
+app.use('/uploads', express.static(path.join(process.cwd(), 'backend', 'public', 'uploads')));
+
 // API Routes Mounting
 app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/submissions', submissionRoutes);
 
 // Global 404 handler for unhandled API routes
 app.use('/api/*', (req, res) => {
