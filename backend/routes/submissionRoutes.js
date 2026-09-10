@@ -1,35 +1,21 @@
 import express from 'express';
 import {
+  uploadVideo,
   createSubmission,
   getSubmissions,
-  getSubmissionById,
-  reviewSubmission,
-  deleteSubmission,
-  streamRecording,
+  reviewSubmission
 } from '../controllers/submissionController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { authorize } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
-// Public/direct media streaming route
-router.get('/stream/:filename', streamRecording);
-
-// Require authentication for all submission management routes
+// Apply auth protect middleware
 router.use(protect);
 
-router
-  .route('/')
-  .post(authorize('parent', 'Admin'), createSubmission)
-  .get(getSubmissions);
-
-router
-  .route('/:id')
-  .get(getSubmissionById)
-  .delete(deleteSubmission);
-
-router
-  .route('/:id/review')
-  .patch(authorize('Clinician', 'doctor', 'Admin'), reviewSubmission);
+router.post('/upload-video', authorize('parent'), uploadVideo);
+router.post('/', authorize('parent'), createSubmission);
+router.get('/', getSubmissions);
+router.put('/:id/review', authorize('Admin', 'Clinician', 'doctor'), reviewSubmission);
 
 export default router;

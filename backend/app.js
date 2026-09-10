@@ -56,6 +56,9 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Static files serving for media uploads
+app.use('/uploads', express.static(path.join(process.cwd(), 'backend', 'public', 'uploads')));
+
 // API Routes Mounting
 app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);

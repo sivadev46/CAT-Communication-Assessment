@@ -12,7 +12,9 @@ export const connectDB = async () => {
   } catch (error) {
     console.warn(`[Database Warning] Standard MongoDB connection failed (${error.message}). Initializing MongoMemoryServer fallback...`);
     try {
-      mongoMemoryInstance = await MongoMemoryServer.create();
+      mongoMemoryInstance = await MongoMemoryServer.create({
+        instance: { launchTimeout: 60000 }
+      });
       const mongoUri = mongoMemoryInstance.getUri();
       const conn = await mongoose.connect(mongoUri);
       console.log(`[Database] MongoMemoryServer Connected successfully at: ${conn.connection.host}`);
