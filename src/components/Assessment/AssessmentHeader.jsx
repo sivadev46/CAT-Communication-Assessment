@@ -1,70 +1,80 @@
 import React from 'react';
-import { Sparkles, ArrowLeft } from 'lucide-react';
-import ProgressBar from '../ProgressBar/ProgressBar';
+import { ArrowLeft, X } from 'lucide-react';
 
 export default function AssessmentHeader({
-  moduleTitle = 'Pre-Intentional Communication Tool',
-  ageRange = '0–3 months',
+  moduleName = 'Pre-Intentional Communication Tool',
+  activityTitle = 'Startle response to loud sudden noises',
   currentStep = 1,
   totalSteps = 21,
   onBack,
   onExit,
 }) {
-  const percentage = Math.round((currentStep / totalSteps) * 100);
+  const completionPercentage = Math.round((currentStep / totalSteps) * 100);
 
   return (
-    <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-3">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-              title="Back"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-          )}
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-md">
-                COMMUNICATION ASSESSMENT TOOL
-              </span>
-              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-md">
-                {ageRange}
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-slate-100 mt-1">
-              {moduleTitle}
-            </h1>
+    <div className="bg-[#121218] border border-[#27273A] p-4 sm:p-5 rounded-2xl shadow-md space-y-3">
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          {/* 1. TOP TITLE */}
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#FFE600] bg-[#FFE600]/10 border border-[#FFE600]/30 px-2.5 py-0.5 rounded-md">
+              COMMUNICATION ASSESSMENT TOOL
+            </span>
           </div>
+
+          {/* 2. MODULE NAME */}
+          <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-tight">
+            {moduleName}
+          </h2>
+
+          {/* 3. ACTIVITY NAME */}
+          <p className="text-sm font-semibold text-[#FFE600] flex items-center gap-2">
+            <span>Activity {currentStep}:</span>
+            <span className="text-gray-200 font-medium">{activityTitle}</span>
+          </p>
         </div>
 
-        <div className="flex items-center justify-between sm:justify-end gap-4">
-          <div className="text-right">
-            <span className="text-sm font-semibold text-gray-500 dark:text-slate-400">
-              Activity <strong className="text-gray-900 dark:text-slate-100">{currentStep}</strong> of {totalSteps}
-            </span>
-            <div className="text-xs font-bold text-blue-600 dark:text-blue-400">{percentage}% completed</div>
-          </div>
+        {/* Exit / Action controls */}
+        <div className="flex items-center gap-2 shrink-0">
+          {onBack && currentStep > 1 && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="p-2 rounded-xl text-gray-300 hover:text-white bg-[#1A1A24] border border-[#27273A] hover:border-[#FFE600] transition-colors cursor-pointer"
+              title="Previous Activity"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+          )}
           {onExit && (
             <button
+              type="button"
               onClick={onExit}
-              className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-gray-300 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+              className="px-3 py-1.5 rounded-xl text-xs font-bold text-gray-300 hover:text-white bg-[#1A1A24] border border-[#27273A] hover:border-[#FFE600] transition-colors flex items-center gap-1.5 cursor-pointer"
             >
-              Save & Exit
+              <X className="w-3.5 h-3.5 text-red-400" />
+              <span>Exit</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Dynamic Progress Bar */}
-      <ProgressBar
-        progress={percentage}
-        height="h-3"
-        color="bg-gradient-to-r from-blue-500 to-indigo-600"
-        animated={true}
-      />
+      {/* ASSESSMENT COMPLETION PROGRESS BAR */}
+      <div className="space-y-1.5 pt-1">
+        <div className="flex justify-between text-xs font-bold text-gray-300">
+          <span className="text-gray-400">ASSESSMENT COMPLETION</span>
+          <span className="text-[#FFE600]">
+            Activity {currentStep} of {totalSteps} ({completionPercentage}%)
+          </span>
+        </div>
+
+        <div className="w-full bg-[#1A1A24] border border-[#27273A] h-2.5 rounded-full overflow-hidden">
+          <div
+            className="bg-[#FFE600] h-full transition-all duration-300 rounded-full shadow-[0_0_8px_rgba(255,230,0,0.5)]"
+            style={{ width: `${completionPercentage}%` }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

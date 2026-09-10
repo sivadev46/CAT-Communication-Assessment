@@ -396,3 +396,17 @@ ON CONFLICT (module_id, activity_number) DO UPDATE SET
   instruction = EXCLUDED.instruction,
   image_url = EXCLUDED.image_url,
   video_url = EXCLUDED.video_url;
+
+-- 3. SEED SAMPLE PATIENT (For Parent Portal linking demo)
+INSERT INTO public.patients
+(id, patient_id_code, full_name, date_of_birth, gender)
+VALUES
+(
+  'p1000000-0000-0000-0000-000000000124',
+  'CAT-2026-00124',
+  'Aarav Kumar',
+  '2026-05-12',
+  'Male'
+)
+ON CONFLICT (patient_id_code) DO NOTHING;
+

@@ -40,6 +40,8 @@ export default function Sidebar({ isOpen, onClose }) {
       { name: 'Patients', path: '/patients', icon: Users },
       { name: 'Assessments', path: '/assessment', icon: ClipboardCheck },
       { name: 'Reports', path: '/reports', icon: FileText },
+      { name: 'Manage Modules', path: '/admin-modules', icon: Puzzle },
+      { name: 'Manage Activities', path: '/admin-activities', icon: ClipboardCheck },
     ];
   }
 

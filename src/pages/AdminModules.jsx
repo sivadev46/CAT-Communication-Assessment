@@ -1,94 +1,10 @@
-import React, { useState } from 'react';
-import { Layers, Lock, Unlock, Plus, Edit3, CheckCircle, Save } from 'lucide-react';
-import Card from '../components/Card/Card';
-import Button from '../components/Button/Button';
+import React, { useState, useEffect } from 'react';
+import { Layers, Lock, Unlock, Plus, Edit3, Save, CheckCircle, AlertCircle } from 'lucide-react';
 import Modal from '../components/Modal/Modal';
-
-const INITIAL_MODULES = [
-  {
-    id: 'm1',
-    moduleNumber: 1,
-    name: 'Pre-Intentional Communication Tool',
-    subtitle: 'Early Auditory & Social Response Behaviors',
-    ageRange: '0–3 months',
-    description: 'Evaluates foundational auditory responsiveness, social engagement, vocalization patterns, and reflex/orienting behaviors in infants aged 0 to 3 months.',
-    activityCount: 21,
-    status: 'published', // 'published' | 'locked' | 'draft'
-  },
-  {
-    id: 'm2',
-    moduleNumber: 2,
-    name: 'Intentional Communication Tool',
-    subtitle: 'Gaze Shift, Pointing & Early Gestures',
-    ageRange: '3–6 months',
-    description: 'Evaluates emerging intentional communication, gaze shifting, reaching, and early vocal imitations.',
-    activityCount: 30,
-    status: 'locked',
-  },
-  {
-    id: 'm3',
-    moduleNumber: 3,
-    name: 'Early Symbolic Communication',
-    subtitle: 'Babbling & Functional Gestures',
-    ageRange: '6–9 months',
-    description: 'Evaluates canonical babbling, gesture comprehension, and shared attention during structured play.',
-    activityCount: 30,
-    status: 'locked',
-  },
-  {
-    id: 'm4',
-    moduleNumber: 4,
-    name: 'First Words & Receptive Vocabulary',
-    subtitle: 'Single Word Production & Receptive Naming',
-    ageRange: '9–12 months',
-    description: 'Evaluates first functional words, following single commands, and identifying familiar objects.',
-    activityCount: 30,
-    status: 'locked',
-  },
-  {
-    id: 'm5',
-    moduleNumber: 5,
-    name: 'Early Word Combinations',
-    subtitle: '2-Word Phrases & Semantic Relations',
-    ageRange: '12–18 months',
-    description: 'Evaluates vocabulary expansion, 2-word phrase combinations, and expressive gestures.',
-    activityCount: 30,
-    status: 'locked',
-  },
-  {
-    id: 'm6',
-    moduleNumber: 6,
-    name: 'Complex Sentence Structures',
-    subtitle: 'Grammatical Development & Storytelling',
-    ageRange: '18–24 months',
-    description: 'Evaluates 3+ word sentences, grammatical morphemes, and early narrative skills.',
-    activityCount: 30,
-    status: 'locked',
-  },
-  {
-    id: 'm7',
-    moduleNumber: 7,
-    name: 'Pragmatics & Peer Interaction',
-    subtitle: 'Conversational Turn-taking & Social Play',
-    ageRange: '24–36 months',
-    description: 'Evaluates pragmatic turn-taking, topic maintenance, and social engagement with peers.',
-    activityCount: 30,
-    status: 'locked',
-  },
-  {
-    id: 'm8',
-    moduleNumber: 8,
-    name: 'Advanced Speech & Language Mechanics',
-    subtitle: 'Phonological Processing & Executive Function',
-    ageRange: '36+ months',
-    description: 'Evaluates advanced articulation, phonological processing, and complex problem solving.',
-    activityCount: 30,
-    status: 'locked',
-  },
-];
+import { catSupabaseService } from '../services/catSupabase';
 
 export default function AdminModules() {
-  const [modules, setModules] = useState(INITIAL_MODULES);
+  const [modules, setModules] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedModule, setSelectedModule] = useState(null);
 
@@ -100,55 +16,60 @@ export default function AdminModules() {
     status: 'published',
   });
 
+  const loadModules = async () => {
+    const data = await catSupabaseService.getPublishedModules();
+    setModules(data);
+  };
+
+  useEffect(() => {
+    loadModules();
+  }, []);
+
   const handleOpenEdit = (mod) => {
     setSelectedModule(mod);
     setFormData({
       name: mod.name,
-      subtitle: mod.subtitle,
-      ageRange: mod.ageRange,
-      description: mod.description,
-      status: mod.status,
+      subtitle: mod.subtitle || '',
+      ageRange: mod.age_range || mod.ageRange || '',
+      description: mod.description || '',
+      status: mod.status || 'published',
     });
     setIsAddModalOpen(true);
   };
 
-  const handleToggleLock = (id) => {
-    setModules((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, status: m.status === 'locked' ? 'published' : 'locked' } : m
-      )
-    );
-  };
-
-  const handleSaveModule = (e) => {
+  const handleSaveModule = async (e) => {
     e.preventDefault();
+    const newMod = {
+      id: selectedModule ? selectedModule.id : `m-${Date.now()}`,
+      module_number: selectedModule ? selectedModule.module_number : modules.length + 1,
+      name: formData.name,
+      subtitle: formData.subtitle,
+      age_range: formData.ageRange,
+      description: formData.description,
+      status: formData.status,
+      display_order: selectedModule ? selectedModule.display_order : modules.length + 1,
+    };
+
     if (selectedModule) {
-      setModules((prev) =>
-        prev.map((m) => (m.id === selectedModule.id ? { ...m, ...formData } : m))
-      );
+      setModules((prev) => prev.map((m) => (m.id === selectedModule.id ? newMod : m)));
     } else {
-      const newMod = {
-        id: `m${modules.length + 1}`,
-        moduleNumber: modules.length + 1,
-        activityCount: 0,
-        ...formData,
-      };
       setModules((prev) => [...prev, newMod]);
     }
+
     setIsAddModalOpen(false);
     setSelectedModule(null);
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12 text-white font-sans">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#121218] p-6 rounded-2xl border border-[#27273A] shadow-xl">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100 flex items-center gap-2">
-            <Layers className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2">
+            <Layers className="w-7 h-7 text-[#FFE600]" />
             Manage Assessment Modules
           </h1>
-          <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">
-            Configure the 8 clinical assessment modules, age brackets, and lock/unlock status.
+          <p className="text-sm text-gray-300 mt-1">
+            Create and edit clinical assessment modules. Module names dynamically populate the assessment UI.
           </p>
         </div>
 
@@ -158,10 +79,10 @@ export default function AdminModules() {
             setFormData({ name: '', subtitle: '', ageRange: '', description: '', status: 'published' });
             setIsAddModalOpen(true);
           }}
-          className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
+          className="px-5 py-3 rounded-xl bg-[#FFE600] hover:bg-[#FACC15] text-black font-extrabold text-xs shadow-lg transition-all flex items-center gap-2 cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
-          + Add Module
+          <Plus className="w-4 h-4 text-black" />
+          <span>+ Add Module</span>
         </button>
       </div>
 
@@ -171,22 +92,18 @@ export default function AdminModules() {
           return (
             <div
               key={mod.id}
-              className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
-                isUnlocked
-                  ? 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 shadow-sm'
-                  : 'bg-gray-50/80 dark:bg-slate-950/60 border-gray-200 dark:border-slate-850 opacity-80'
-              }`}
+              className="p-5 rounded-2xl border border-[#27273A] bg-[#121218] shadow-xl flex flex-col justify-between space-y-4 hover:border-[#FFE600] transition-colors"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">
-                    MODULE {mod.moduleNumber}
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md bg-[#FFE600]/10 text-[#FFE600] border border-[#FFE600]/30">
+                    MODULE {mod.module_number || mod.moduleNumber}
                   </span>
                   <span
-                    className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full ${
+                    className={`inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-full ${
                       isUnlocked
-                        ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
-                        : 'bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-slate-400'
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                        : 'bg-gray-800 text-gray-400 border border-gray-700'
                     }`}
                   >
                     {isUnlocked ? <Unlock className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
@@ -194,30 +111,24 @@ export default function AdminModules() {
                   </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100">
+                <h3 className="text-lg font-extrabold text-white leading-snug">
                   {mod.name}
                 </h3>
-                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                  Age Range: {mod.ageRange} • {mod.activityCount} Activities
+                <p className="text-xs font-bold text-[#FFE600]">
+                  Age Range: {mod.age_range || mod.ageRange}
                 </p>
-                <p className="text-xs text-gray-600 dark:text-slate-400 line-clamp-3">
+                <p className="text-xs text-gray-300 leading-relaxed line-clamp-3">
                   {mod.description}
                 </p>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
-                <button
-                  onClick={() => handleToggleLock(mod.id)}
-                  className="text-xs font-semibold text-gray-600 dark:text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
-                >
-                  {isUnlocked ? 'Lock Module' : 'Unlock Module'}
-                </button>
+              <div className="pt-3 border-t border-[#27273A] flex items-center justify-end">
                 <button
                   onClick={() => handleOpenEdit(mod)}
-                  className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 text-gray-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#1A1A24] hover:bg-[#27273A] border border-[#27273A] text-gray-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Edit3 className="w-3.5 h-3.5" />
-                  Edit
+                  <Edit3 className="w-3.5 h-3.5 text-[#FFE600]" />
+                  <span>Edit Module</span>
                 </button>
               </div>
             </div>
@@ -231,56 +142,48 @@ export default function AdminModules() {
         onClose={() => setIsAddModalOpen(false)}
         title={selectedModule ? 'Edit Module' : 'Add New Module'}
       >
-        <form onSubmit={handleSaveModule} className="p-4 sm:p-6 space-y-4">
+        <form onSubmit={handleSaveModule} className="p-5 space-y-4 bg-[#121218] text-white text-xs">
           <div>
-            <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
-              Module Name
-            </label>
+            <label className="block text-gray-300 font-bold mb-1">Module Name *</label>
             <input
               type="text"
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"
+              className="w-full px-3.5 py-2.5 bg-[#1A1A24] border border-[#27273A] rounded-xl text-white outline-none focus:border-[#FFE600]"
               placeholder="e.g. Pre-Intentional Communication Tool"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
-              Subtitle
-            </label>
+            <label className="block text-gray-300 font-bold mb-1">Subtitle</label>
             <input
               type="text"
               value={formData.subtitle}
               onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"
+              className="w-full px-3.5 py-2.5 bg-[#1A1A24] border border-[#27273A] rounded-xl text-white outline-none focus:border-[#FFE600]"
               placeholder="e.g. Early Auditory & Social Response Behaviors"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
-                Age Range
-              </label>
+              <label className="block text-gray-300 font-bold mb-1">Age Range *</label>
               <input
                 type="text"
                 required
                 value={formData.ageRange}
                 onChange={(e) => setFormData({ ...formData, ageRange: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"
+                className="w-full px-3.5 py-2.5 bg-[#1A1A24] border border-[#27273A] rounded-xl text-white outline-none focus:border-[#FFE600]"
                 placeholder="e.g. 0–3 months"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
-                Status
-              </label>
+              <label className="block text-gray-300 font-bold mb-1">Status</label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"
+                className="w-full px-3.5 py-2.5 bg-[#1A1A24] border border-[#27273A] rounded-xl text-white outline-none focus:border-[#FFE600]"
               >
                 <option value="published">Published (Unlocked)</option>
                 <option value="locked">Locked</option>
@@ -290,29 +193,27 @@ export default function AdminModules() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
-              Description
-            </label>
+            <label className="block text-gray-300 font-bold mb-1">Description</label>
             <textarea
               rows={3}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"
+              className="w-full px-3.5 py-2.5 bg-[#1A1A24] border border-[#27273A] rounded-xl text-white outline-none focus:border-[#FFE600]"
               placeholder="Clinical description of module scope..."
             />
           </div>
 
-          <div className="pt-4 flex justify-end gap-3">
+          <div className="pt-3 border-t border-[#27273A] flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setIsAddModalOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-slate-300 border border-gray-300 dark:border-slate-700"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-gray-300 bg-[#1A1A24] border border-[#27273A]"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md"
+              className="px-6 py-2.5 rounded-xl bg-[#FFE600] hover:bg-[#FACC15] text-black font-extrabold text-xs shadow-md"
             >
               Save Module
             </button>

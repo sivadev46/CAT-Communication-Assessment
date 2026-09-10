@@ -1,89 +1,66 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Video, Square, RefreshCw, CheckCircle2, Play, AlertTriangle } from 'lucide-react';
-import Button from '../Button/Button';
-import { supabase, isSupabaseConfigured } from '../../services/supabaseClient';
+import { Video, Square, Play, RotateCcw, CheckCircle2, Trash2, AlertCircle, Loader2 } from 'lucide-react';
+import { catSupabaseService } from '../../services/catSupabase';
 
 export default function ParentMediaRecorder({
   patientId,
   activityId,
+  selectedRange,
   onRecordingComplete,
   onCancel,
 }) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [recordedBlob, setRecordedBlob] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [permissionError, setPermissionError] = useState(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const mediaRecorderRef = useRef(null);
   const videoChunksRef = useRef([]);
-  const timerRef = useRef(null);
-  const videoPreviewRef = useRef(null);
-  const liveStreamRef = useRef(null);
+  const timerIntervalRef = useRef(null);
+  const previewVideoRef = useRef(null);
 
   useEffect(() => {
     return () => {
-      stopTracks();
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl);
     };
-  }, [previewUrl]);
-
-  const stopTracks = () => {
-    if (liveStreamRef.current) {
-      liveStreamRef.current.getTracks().forEach((track) => track.stop());
-      liveStreamRef.current = null;
-    }
-  };
+  }, [videoPreviewUrl]);
 
   const startRecording = async () => {
-    setPermissionError(null);
-    videoChunksRef.current = [];
-    setRecordedBlob(null);
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(null);
-    }
-
+    setErrorMsg(null);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      liveStreamRef.current = stream;
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      videoChunksRef.current = [];
 
-      if (videoPreviewRef.current) {
-        videoPreviewRef.current.srcObject = stream;
-      }
-
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
           videoChunksRef.current.push(event.data);
         }
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorderRef.current.onstop = () => {
         const blob = new Blob(videoChunksRef.current, { type: 'video/webm' });
         setRecordedBlob(blob);
         const url = URL.createObjectURL(blob);
-        setPreviewUrl(url);
-        stopTracks();
+        setVideoPreviewUrl(url);
+
+        // Stop camera tracks
+        stream.getTracks().forEach((track) => track.stop());
       };
 
-      mediaRecorder.start();
+      mediaRecorderRef.current.start();
       setIsRecording(true);
       setRecordingTime(0);
 
-      timerRef.current = setInterval(() => {
+      timerIntervalRef.current = setInterval(() => {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     } catch (err) {
-      console.error('Camera/Microphone permission denied or unsupported:', err);
-      setPermissionError('Camera/microphone access was denied or is not supported by your browser.');
+      console.error('Error accessing camera/microphone:', err);
+      setErrorMsg('Could not access camera or microphone. Please check browser permissions.');
     }
   };
 
@@ -91,171 +68,158 @@ export default function ParentMediaRecorder({
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     }
   };
 
   const handleReRecord = () => {
+    if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl);
     setRecordedBlob(null);
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(null);
-    }
+    setVideoPreviewUrl(null);
+    setRecordingTime(0);
     startRecording();
   };
 
-  const formatTimer = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
-
-  const handleUploadAndSubmit = async () => {
+  const handleSubmitSessionVideo = async () => {
     if (!recordedBlob) return;
+
     setIsUploading(true);
+    setErrorMsg(null);
 
     try {
-      let finalPath = `parent_${patientId}_act_${activityId}_${Date.now()}.webm`;
-      let publicUrl = previewUrl;
+      const videoRecord = await catSupabaseService.uploadParentVideoBlob(
+        patientId,
+        activityId,
+        recordedBlob,
+        recordingTime,
+        selectedRange
+      );
 
-      if (isSupabaseConfigured && supabase) {
-        const { data, error } = await supabase.storage
-          .from('parent-sessions')
-          .upload(finalPath, recordedBlob, {
-            contentType: 'video/webm',
-            upsert: true,
-          });
-
-        if (error) {
-          console.warn('Supabase storage upload error:', error);
-        } else if (data?.path) {
-          finalPath = data.path;
-          const { data: urlData } = supabase.storage.from('parent-sessions').getPublicUrl(finalPath);
-          if (urlData?.publicUrl) publicUrl = urlData.publicUrl;
-        }
+      if (onRecordingComplete) {
+        onRecordingComplete(videoRecord);
       }
-
-      onRecordingComplete({
-        videoPath: finalPath,
-        videoUrl: publicUrl,
-        durationSeconds: recordingTime,
-      });
     } catch (err) {
-      console.error('Failed to submit recording:', err);
-      onRecordingComplete({
-        videoPath: `local_recording_${Date.now()}.webm`,
-        videoUrl: previewUrl,
-        durationSeconds: recordingTime,
-      });
+      console.error('Error submitting video:', err);
+      setErrorMsg('Failed to upload session video. Please try again.');
     } finally {
       setIsUploading(false);
     }
   };
 
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
-    <div className="bg-slate-900 text-white p-4 sm:p-6 rounded-2xl shadow-md space-y-4">
+    <div className="bg-[#121218] border border-[#27273A] rounded-2xl p-4 sm:p-5 space-y-4 text-white">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-bold flex items-center gap-2">
-          <Video className="w-5 h-5 text-rose-400" />
-          Record Assessment Session
-        </h3>
-        {isRecording && (
-          <span className="inline-flex items-center gap-2 text-xs font-semibold bg-rose-500/20 text-rose-300 px-3 py-1 rounded-full border border-rose-500/30 animate-pulse">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-            Recording {formatTimer(recordingTime)}
+        <div className="flex items-center gap-2 text-[#FFE600] font-bold text-xs sm:text-sm">
+          <Video className="w-4 h-4" />
+          <span>Parent Session Recording</span>
+        </div>
+        {recordingTime > 0 && (
+          <span className="text-xs font-mono font-bold bg-[#1A1A24] px-3 py-1 rounded-md border border-[#27273A] text-gray-200">
+            ⏱ {formatTime(recordingTime)}
           </span>
         )}
       </div>
 
-      {permissionError && (
-        <div className="bg-rose-950/60 border border-rose-800 text-rose-200 text-xs p-3 rounded-xl flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-400 mt-0.5" />
-          <div>{permissionError}</div>
+      {errorMsg && (
+        <div className="p-3 bg-red-950/60 border border-red-800 text-red-300 text-xs rounded-xl flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>{errorMsg}</span>
         </div>
       )}
 
-      {/* Video Viewport */}
-      <div className="aspect-video w-full rounded-xl bg-slate-950 overflow-hidden relative border border-slate-800 flex items-center justify-center">
-        {!isRecording && !previewUrl && (
-          <div className="text-center p-6 space-y-3">
-            <Video className="w-12 h-12 text-slate-600 mx-auto" />
-            <p className="text-xs text-slate-400 max-w-xs mx-auto">
-              Click Start Recording below to capture a short video of your child performing this activity at home.
-            </p>
-          </div>
-        )}
-
-        {/* Live Camera Feed */}
-        <video
-          ref={videoPreviewRef}
-          autoPlay
-          playsInline
-          muted
-          className={`w-full h-full object-cover ${isRecording ? 'block' : 'hidden'}`}
-        />
-
-        {/* Recorded Video Playback */}
-        {previewUrl && !isRecording && (
-          <video src={previewUrl} controls className="w-full h-full object-contain bg-black" />
-        )}
-      </div>
-
-      {/* Recording Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-        {!isRecording && !previewUrl && (
-          <button
-            type="button"
-            onClick={startRecording}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Video className="w-4 h-4" />
-            Start Recording
-          </button>
-        )}
-
-        {isRecording && (
+      {/* Recording in Progress State */}
+      {isRecording && (
+        <div className="p-6 bg-[#1A1A24] border border-red-500/50 rounded-xl text-center space-y-4 animate-pulse">
+          <div className="w-4 h-4 bg-red-500 rounded-full mx-auto animate-ping" />
+          <p className="text-sm font-bold text-white">Recording Parent Session...</p>
           <button
             type="button"
             onClick={stopRecording}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2 mx-auto cursor-pointer"
           >
             <Square className="w-4 h-4 fill-white" />
-            Stop Recording
+            <span>Stop Recording</span>
           </button>
-        )}
+        </div>
+      )}
 
-        {previewUrl && !isRecording && (
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+      {/* Preview Recorded Video State */}
+      {!isRecording && videoPreviewUrl && (
+        <div className="space-y-3">
+          <div className="relative aspect-video bg-black rounded-xl overflow-hidden border border-[#27273A]">
+            <video
+              ref={previewVideoRef}
+              src={videoPreviewUrl}
+              controls
+              className="w-full h-full object-contain"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <button
               type="button"
               onClick={handleReRecord}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-[#1A1A24] hover:bg-[#27273A] text-gray-300 font-bold text-xs border border-[#27273A] flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Re-record
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Re-record</span>
             </button>
+
             <button
               type="button"
-              onClick={handleUploadAndSubmit}
+              onClick={handleSubmitSessionVideo}
               disabled={isUploading}
-              className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-[#FFE600] hover:bg-[#FACC15] text-black font-bold text-xs shadow-md flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
             >
-              <CheckCircle2 className="w-4 h-4" />
-              {isUploading ? 'Uploading Video...' : 'Attach Recorded Video'}
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-black" />
+                  <span>Uploading Video...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Submit Session Video</span>
+                </>
+              )}
             </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {onCancel && !isRecording && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="text-xs text-slate-400 hover:text-slate-200 transition-colors ml-auto"
-          >
-            Skip Recording
-          </button>
-        )}
-      </div>
+      {/* Initial State (Not recording, no video yet) */}
+      {!isRecording && !videoPreviewUrl && (
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <p className="text-xs text-gray-400">
+            Record a short video demonstration for your therapist to review.
+          </p>
+          <div className="flex items-center gap-2">
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="px-3 py-2 rounded-xl bg-[#1A1A24] text-gray-400 hover:text-white text-xs font-semibold"
+              >
+                Cancel
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={startRecording}
+              className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-colors cursor-pointer"
+            >
+              <Video className="w-4 h-4" />
+              <span>Start Recording</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

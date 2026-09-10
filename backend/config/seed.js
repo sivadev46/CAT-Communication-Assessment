@@ -22,6 +22,22 @@ export const seedDatabase = async () => {
       console.log(`[Seed] Clinician user ${clinician.email} already exists.`);
     }
 
+    // 1b. Check and Seed Parent User
+    let parent = await User.findOne({ email: 'parent@cat.com' });
+    if (!parent) {
+      console.log('[Seed] Default parent user missing. Creating default parent user...');
+      parent = await User.create({
+        fullName: 'Jane Doe',
+        email: 'parent@cat.com',
+        password: 'Password123!',
+        role: 'parent',
+        profileImage: '',
+      });
+      console.log(`[Seed] Successfully created default parent user: ${parent.email} (${parent.role})`);
+    } else {
+      console.log(`[Seed] Parent user ${parent.email} already exists.`);
+    }
+
     // 2. Check and Seed Sample Patients
     const patientCount = await Patient.countDocuments();
     if (patientCount === 0) {

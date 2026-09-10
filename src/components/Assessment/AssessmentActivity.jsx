@@ -1,29 +1,48 @@
-import React, { useState } from 'react';
-import { Play, ArrowRight, CheckCircle, Video } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Play, ArrowRight, ArrowLeft, CheckCircle, Video, Maximize2, X } from 'lucide-react';
 import AssessmentScale from './AssessmentScale';
 import AssessmentVideoModal from './AssessmentVideoModal';
 import ParentMediaRecorder from './ParentMediaRecorder';
 
 export default function AssessmentActivity({
   activity,
+  moduleName = 'Pre-Intentional Communication Tool',
   patientId,
   selectedRange,
   onRangeChange,
   onSubmit,
+  onPrevious,
+  isFirstStep = false,
+  isLastStep = false,
   isParentRole = false,
   isSubmitting = false,
 }) {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [isImageFullscreenOpen, setIsImageFullscreenOpen] = useState(false);
   const [recordSessionToggle, setRecordSessionToggle] = useState(false);
   const [videoRecordingData, setVideoRecordingData] = useState(null);
 
+  // Close image lightbox on ESC key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isImageFullscreenOpen) {
+        setIsImageFullscreenOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isImageFullscreenOpen]);
+
   if (!activity) {
     return (
-      <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800">
-        <p className="text-gray-500">Loading activity details...</p>
+      <div className="p-8 text-center bg-[#121218] rounded-2xl border border-[#27273A] text-gray-400">
+        Loading activity details...
       </div>
     );
   }
+
+  const videoUrl = activity.video_url || activity.youtubeUrl || '';
+  const imageUrl = activity.image_url || activity.imagePath || '';
 
   const handleSubmitActivity = () => {
     if (!selectedRange) return;
@@ -35,88 +54,81 @@ export default function AssessmentActivity({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-4 sm:p-6 lg:p-8 shadow-sm space-y-6">
-      {/* Activity Category Badge & Title */}
-      <div className="space-y-2">
-        {activity.category && (
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">
-            {activity.category}
-          </span>
+    <div className="bg-[#121218] border border-[#27273A] rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col justify-between max-h-[calc(100vh-140px)] min-h-[540px] space-y-4">
+      {/* 4. ACTIVITY IMAGE CONTAINER (Main visual focus) */}
+      <div className="relative rounded-xl overflow-hidden bg-[#0A0A0E] border border-[#27273A] flex items-center justify-center p-2 min-h-[220px] max-h-[300px] group">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={activity.title || 'Activity Image'}
+            className="max-h-[280px] w-auto max-w-full object-contain rounded-lg shadow-md"
+          />
+        ) : (
+          <div className="py-12 text-center text-gray-500 text-xs">
+            [ NIEPMD Activity Demonstration Image ]
+          </div>
         )}
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-slate-100">
-          {activity.title}
-        </h2>
-        {activity.description && (
-          <p className="text-sm text-gray-600 dark:text-slate-400">
-            {activity.description}
-          </p>
+
+        {/* ⛶ Full Screen Button on Image */}
+        {imageUrl && (
+          <button
+            type="button"
+            onClick={() => setIsImageFullscreenOpen(true)}
+            className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-black/70 hover:bg-black text-[#FFE600] text-xs font-bold border border-[#FFE600]/40 shadow-lg backdrop-blur-xs flex items-center gap-1.5 transition-all cursor-pointer hover:scale-105"
+            title="View Full Screen Image"
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+            <span>⛶ Full Screen</span>
+          </button>
         )}
       </div>
 
-      <hr className="border-gray-100 dark:border-slate-800" />
-
-      {/* NIEPMD Activity Image */}
-      <div className="space-y-3">
-        <div className="relative rounded-2xl overflow-hidden bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 flex items-center justify-center p-2 sm:p-4 max-h-[380px]">
-          {activity.image_url || activity.imagePath ? (
-            <img
-              src={activity.image_url || activity.imagePath}
-              alt={activity.title}
-              className="max-h-[340px] w-auto max-w-full object-contain rounded-xl"
-            />
-          ) : (
-            <div className="py-16 text-center text-gray-400">
-              [NIEPMD Activity Image Placeholder]
-            </div>
-          )}
-        </div>
-
-        {/* Watch Video Button */}
-        <div className="flex items-center justify-between">
+      {/* 5. WATCH VIDEO BUTTON (Directly below image) */}
+      <div className="flex items-center justify-between px-1">
+        {videoUrl ? (
           <button
             type="button"
             onClick={() => setIsVideoModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-semibold transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FFE600] hover:bg-[#FACC15] text-black text-xs font-extrabold shadow-md transition-colors cursor-pointer"
           >
-            <Play className="w-4 h-4 fill-blue-600 dark:fill-blue-400" />
-            Watch Video
+            <Play className="w-4 h-4 fill-black" />
+            <span>▶ Watch Video</span>
           </button>
-          {!activity.video_url && !activity.youtubeUrl && (
-            <span className="text-xs text-gray-400 italic">Video not available yet</span>
-          )}
-        </div>
+        ) : (
+          <span className="text-xs text-gray-500 italic">No video demonstration configured</span>
+        )}
+
+        {/* Optional parent recording status badge */}
+        {isParentRole && videoRecordingData && (
+          <span className="text-xs text-[#FFE600] font-bold flex items-center gap-1 bg-[#FFE600]/10 px-2.5 py-1 rounded-md border border-[#FFE600]/30">
+            <CheckCircle className="w-3.5 h-3.5" /> Video Recorded
+          </span>
+        )}
       </div>
 
-      <hr className="border-gray-100 dark:border-slate-800" />
-
-      {/* Response Scale Options */}
+      {/* 6. FOUR SCALE OPTIONS */}
       <AssessmentScale
         selectedValue={selectedRange}
         onChange={onRangeChange}
       />
 
-      {/* Parent Optional Video Recording */}
+      {/* Parent Optional Recording Section */}
       {isParentRole && (
-        <div className="pt-2 space-y-4">
-          <div className="p-4 bg-slate-50 dark:bg-slate-850/60 rounded-xl border border-gray-200 dark:border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Video className="w-5 h-5 text-rose-500" />
-              <div>
-                <span className="text-sm font-semibold text-gray-800 dark:text-slate-200">
-                  Record this session?
-                </span>
-                <p className="text-xs text-gray-500 dark:text-slate-400">
-                  Upload a short video for your therapist to review.
-                </p>
-              </div>
+        <div className="space-y-3 pt-1">
+          <div className="p-3 bg-[#1A1A24] rounded-xl border border-[#27273A] flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Video className="w-4 h-4 text-rose-500" />
+              <span className="text-xs font-bold text-gray-200">
+                Record this session?
+              </span>
             </div>
             <button
               type="button"
               onClick={() => setRecordSessionToggle(!recordSessionToggle)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                 recordSessionToggle
                   ? 'bg-rose-600 text-white'
-                  : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-300'
+                  : 'bg-[#27273A] text-gray-300 hover:text-white'
               }`}
             >
               {recordSessionToggle ? 'ON' : 'OFF'}
@@ -127,45 +139,52 @@ export default function AssessmentActivity({
             <ParentMediaRecorder
               patientId={patientId}
               activityId={activity.id}
+              selectedRange={selectedRange}
               onRecordingComplete={(recData) => {
                 setVideoRecordingData(recData);
               }}
               onCancel={() => setRecordSessionToggle(false)}
             />
           )}
-
-          {videoRecordingData && (
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs rounded-xl flex items-center justify-between">
-              <span className="flex items-center gap-2 font-medium">
-                <CheckCircle className="w-4 h-4 text-emerald-600" />
-                Video recording attached ({videoRecordingData.durationSeconds || 0}s)
-              </span>
-              <button
-                type="button"
-                onClick={() => setVideoRecordingData(null)}
-                className="text-rose-600 hover:underline font-semibold"
-              >
-                Remove
-              </button>
-            </div>
-          )}
         </div>
       )}
 
-      {/* Submit & Continue Button */}
-      <div className="pt-4 flex justify-end">
+      {/* 7. PREVIOUS & SUBMIT / CONTINUE BUTTONS (Bottom) */}
+      <div className="pt-2 flex items-center justify-between border-t border-[#27273A]">
+        {/* ← Previous Button */}
+        <button
+          type="button"
+          onClick={onPrevious}
+          disabled={isFirstStep || isSubmitting}
+          className={`px-5 py-3 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border ${
+            !isFirstStep && !isSubmitting
+              ? 'bg-[#1A1A24] hover:bg-[#27273A] text-white border-[#27273A] hover:border-[#FFE600] cursor-pointer'
+              : 'bg-[#121218] text-gray-600 border-[#1A1A24] cursor-not-allowed opacity-50'
+          }`}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>← Previous</span>
+        </button>
+
+        {/* Submit & Continue / Complete Assessment Button */}
         <button
           type="button"
           onClick={handleSubmitActivity}
           disabled={!selectedRange || isSubmitting}
-          className={`px-6 py-3.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-md cursor-pointer ${
+          className={`px-6 py-3 rounded-xl font-extrabold text-xs transition-all flex items-center gap-2 shadow-lg cursor-pointer ${
             selectedRange && !isSubmitting
-              ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 hover:scale-[1.01]'
-              : 'bg-gray-200 dark:bg-slate-800 text-gray-400 dark:text-slate-600 cursor-not-allowed'
+              ? 'bg-[#FFE600] hover:bg-[#FACC15] text-black shadow-[#FFE600]/20 hover:scale-[1.02]'
+              : 'bg-[#27273A] text-gray-500 cursor-not-allowed'
           }`}
         >
-          <span>{isSubmitting ? 'Saving...' : 'Submit & Continue'}</span>
-          <ArrowRight className="w-4 h-4" />
+          <span>
+            {isSubmitting
+              ? 'Saving...'
+              : isLastStep
+              ? 'Complete Assessment'
+              : 'Submit & Continue →'}
+          </span>
+          {!isLastStep && <ArrowRight className="w-4 h-4" />}
         </button>
       </div>
 
@@ -173,9 +192,35 @@ export default function AssessmentActivity({
       <AssessmentVideoModal
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
-        videoUrl={activity.video_url || activity.youtubeUrl}
+        videoUrl={videoUrl}
         title={activity.title}
       />
+
+      {/* FULL SCREEN IMAGE LIGHTBOX MODAL */}
+      {isImageFullscreenOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-4 animate-fade-in">
+          <div className="relative max-w-5xl w-full h-full flex flex-col items-center justify-center">
+            <button
+              type="button"
+              onClick={() => setIsImageFullscreenOpen(false)}
+              className="absolute top-4 right-4 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer z-10"
+              title="Close Full Screen (ESC)"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <img
+              src={imageUrl}
+              alt={activity.title}
+              className="max-h-[85vh] max-w-[95vw] object-contain rounded-xl shadow-2xl"
+            />
+
+            <p className="mt-4 text-xs font-bold text-[#FFE600] bg-black/60 px-4 py-2 rounded-full border border-[#FFE600]/30 text-center">
+              {activity.title}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

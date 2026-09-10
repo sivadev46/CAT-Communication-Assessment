@@ -285,6 +285,11 @@ CREATE POLICY "Insert video submissions" ON public.parent_video_submissions FOR 
 CREATE POLICY "Therapist update video submissions" ON public.parent_video_submissions FOR UPDATE USING (
   EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND (role = 'therapist' OR role = 'admin'))
 );
+CREATE POLICY "Delete video submissions" ON public.parent_video_submissions FOR DELETE USING (
+  parent_profile_id = auth.uid()
+  OR
+  EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND (role = 'therapist' OR role = 'admin'))
+);
 
 -- Patient Progress Policies
 CREATE POLICY "View progress" ON public.patient_progress FOR SELECT USING (true);
@@ -305,3 +310,46 @@ CREATE POLICY "View reports" ON public.reports FOR SELECT USING (
 CREATE POLICY "Create reports" ON public.reports FOR INSERT WITH CHECK (
   EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND (role = 'therapist' OR role = 'admin'))
 );
+
+-- ============================================================
+-- STORAGE BUCKETS SETUP & STORAGE RLS POLICIES
+-- ============================================================
+
+-- Create buckets
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('assessment-media', 'assessment-media', true)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('parent-sessions', 'parent-sessions', false)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage Policies for assessment-media (Public read, admin write)
+CREATE POLICY "Assessment media public read" ON storage.objects
+  FOR SELECT USING (bucket_id = 'assessment-media');
+
+CREATE POLICY "Assessment media admin upload" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'assessment-media' AND
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- Storage Policies for parent-sessions (Authenticated read/write for owner, therapist, admin)
+CREATE POLICY "Parent session upload" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'parent-sessions' AND
+    auth.uid() IS NOT NULL
+  );
+
+CREATE POLICY "Parent session view" ON storage.objects
+  FOR SELECT USING (
+    bucket_id = 'parent-sessions' AND
+    auth.uid() IS NOT NULL
+  );
+
+CREATE POLICY "Parent session delete" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'parent-sessions' AND
+    auth.uid() IS NOT NULL
+  );
+
