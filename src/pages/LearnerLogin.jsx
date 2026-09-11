@@ -18,6 +18,7 @@ import {
   Sparkles,
   Award,
 } from 'lucide-react';
+import LearnerAvatar from '../components/Common/LearnerAvatar';
 import logoNiepmd from '../assets/logo_niepmd.jpg';
 
 export default function LearnerLogin() {
@@ -157,8 +158,8 @@ export default function LearnerLogin() {
           </div>
 
           <div className="my-8 text-center space-y-4">
-            <div className="w-20 h-20 rounded-2xl bg-purple-100 border border-purple-300 text-purple-800 flex items-center justify-center mx-auto shadow-xs">
-              <GraduationCap className="w-10 h-10" />
+            <div className="w-24 h-24 rounded-3xl bg-purple-100/80 border-2 border-purple-200 flex items-center justify-center mx-auto shadow-sm overflow-hidden p-2">
+              <LearnerAvatar className="w-20 h-20" />
             </div>
             <h3 className="text-xl font-extrabold text-purple-950">Learner Portal</h3>
             <p className="text-xs text-purple-900 leading-relaxed max-w-xs mx-auto font-medium">
@@ -176,7 +177,7 @@ export default function LearnerLogin() {
           <div>
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/role-selection')}
               className="inline-flex items-center gap-1.5 text-xs text-purple-900 hover:text-purple-700 transition-colors font-bold mb-6 cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />

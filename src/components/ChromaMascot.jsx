@@ -12,7 +12,7 @@ export default function ChromaMascot() {
   const [isMuted, setIsMuted] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
-  // Chroma key algorithm with smart character crop & zoom
+  // Chroma key algorithm with smart character crop & zoom for Shruthi
   const processFrame = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -26,8 +26,7 @@ export default function ChromaMascot() {
     if (!ctx) return;
 
     if (video.videoWidth && video.videoHeight) {
-      // Focus crop on Vani character in center of landscape video
-      // Crop source: middle 45% width, full height to make her dramatically larger!
+      // Focus crop on Shruthi mascot in center of video
       const cropW = video.videoWidth * 0.45;
       const cropH = video.videoHeight * 0.95;
       const cropX = (video.videoWidth - cropW) / 2;
@@ -77,14 +76,12 @@ export default function ChromaMascot() {
     const attemptPlay = async () => {
       setIsLoaded(true);
       try {
-        // Try playing unmuted first
         video.muted = false;
         await video.play();
         setIsMuted(false);
         setAutoplayBlocked(false);
       } catch (err) {
         console.warn("Unmuted autoplay restricted by browser policy. Falling back to muted autoplay:", err);
-        // Fallback to muted autoplay if browser blocks audio
         video.muted = true;
         setIsMuted(true);
         setAutoplayBlocked(true);
@@ -196,7 +193,7 @@ export default function ChromaMascot() {
             ) : (
               <>
                 <Volume2 className="w-4 h-4 text-emerald-600" />
-                <span className="text-emerald-700">Vani Audio Active</span>
+                <span className="text-emerald-700">Shruthi Audio Active</span>
               </>
             )}
           </button>
@@ -205,11 +202,13 @@ export default function ChromaMascot() {
         {!isLoaded && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 backdrop-blur-xs rounded-3xl z-20">
             <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-3" />
-            <span className="text-sm font-bold text-purple-950">Loading Vani Mascot...</span>
+            <span className="text-sm font-bold text-purple-950">Loading Shruthi Mascot...</span>
           </div>
         )}
       </div>
     </div>
   );
 }
+
+
 

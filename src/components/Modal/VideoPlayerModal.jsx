@@ -3,7 +3,7 @@ import {
   Play,
   X,
   MessageSquare,
-  Stethoscope,
+  UserCheck,
   AlertCircle,
   LoaderCircle,
   CheckCircle,
@@ -220,7 +220,7 @@ export default function VideoPlayerModal({
           {currentSubmission.status === 'Reviewed' ? (
             <div className="bg-blue-50/40 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 p-4 rounded-xl space-y-1.5">
               <h4 className="text-xs font-bold text-blue-900 dark:text-blue-300 flex items-center gap-1.5">
-                <Stethoscope className="w-3.5 h-3.5 text-blue-600" />
+                <UserCheck className="w-3.5 h-3.5 text-blue-600" />
                 <span>Clinician Feedback & Guidance</span>
               </h4>
               <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
@@ -236,7 +236,7 @@ export default function VideoPlayerModal({
           ) : isClinicianView ? (
             <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
               <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                <Stethoscope className="w-3.5 h-3.5 text-emerald-600" />
+                <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Clinician Review & Feedback</span>
               </h4>
 

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, AlertCircle, Loader2, ArrowLeft, Mail, Lock, Stethoscope, Eye, EyeOff, ShieldCheck, X } from 'lucide-react';
+import { LogIn, AlertCircle, Loader2, ArrowLeft, Mail, Lock, Eye, EyeOff, X } from 'lucide-react';
+import DoctorScrubsAvatar from '../components/Common/DoctorScrubsAvatar';
 import logoNiepmd from '../assets/logo_niepmd.jpg';
 
 export default function DoctorLogin() {
@@ -96,7 +97,7 @@ export default function DoctorLogin() {
     <div className="min-h-screen bg-[#ffffb3] text-slate-900 flex items-center justify-center p-4 md:p-8 font-sans selection:bg-purple-600 selection:text-white">
       <div className="bg-white rounded-2xl border-2 border-purple-200 shadow-2xl overflow-hidden max-w-4xl w-full grid grid-cols-1 md:grid-cols-2">
         
-        {/* Left Side: NIEPMD Branding */}
+        {/* Left Side: NIEPMD Branding & Doctor in Medical Scrubs Illustration */}
         <div className="hidden md:flex flex-col justify-between bg-purple-50/60 p-10 relative border-r-2 border-purple-100">
           <div className="flex items-center gap-3">
             <img src={logoNiepmd} alt="NIEPMD" className="w-10 h-10 object-contain rounded-xl bg-white p-0.5 border border-purple-200" />
@@ -104,8 +105,9 @@ export default function DoctorLogin() {
           </div>
 
           <div className="my-8 text-center space-y-4">
-            <div className="w-20 h-20 rounded-2xl bg-purple-100 border border-purple-300 text-purple-800 flex items-center justify-center mx-auto shadow-xs">
-              <Stethoscope className="w-10 h-10" />
+            {/* Doctor in Medical Scrubs (NO STETHOSCOPE) */}
+            <div className="w-24 h-24 rounded-3xl bg-purple-100/80 border-2 border-purple-200 flex items-center justify-center mx-auto shadow-sm overflow-hidden p-2">
+              <DoctorScrubsAvatar className="w-20 h-20" />
             </div>
             <h3 className="text-xl font-extrabold text-purple-950">Clinical Assessment System</h3>
             <p className="text-xs text-purple-900 leading-relaxed max-w-xs mx-auto font-medium">
@@ -123,7 +125,7 @@ export default function DoctorLogin() {
           <div>
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/role-selection')}
               className="inline-flex items-center gap-1.5 text-xs text-purple-900 hover:text-purple-700 transition-colors font-bold mb-6 cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -131,8 +133,8 @@ export default function DoctorLogin() {
             </button>
 
             <div className="mb-6">
-              <div className="flex items-center gap-1.5 text-purple-700 font-extrabold text-xs uppercase tracking-wider mb-1">
-                <ShieldCheck className="w-4 h-4 text-purple-700" />
+              <div className="flex items-center gap-2 text-purple-700 font-extrabold text-xs uppercase tracking-wider mb-1">
+                <DoctorScrubsAvatar className="w-5 h-5 inline-block" />
                 <span>Therapist Portal</span>
               </div>
               <h2 className="text-2xl font-black text-purple-950">Clinician Sign In</h2>

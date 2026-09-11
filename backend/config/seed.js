@@ -19,7 +19,10 @@ export const seedDatabase = async () => {
       });
       console.log(`[Seed] Successfully created default user: ${clinician.email} (${clinician.role})`);
     } else {
-      console.log(`[Seed] Clinician user ${clinician.email} already exists.`);
+      clinician.password = 'Password123!';
+      clinician.role = 'Clinician';
+      await clinician.save();
+      console.log(`[Seed] Clinician user ${clinician.email} verified and password synced.`);
     }
 
     // 1b. Check and Seed Parent User
@@ -35,7 +38,10 @@ export const seedDatabase = async () => {
       });
       console.log(`[Seed] Successfully created default parent user: ${parent.email} (${parent.role})`);
     } else {
-      console.log(`[Seed] Parent user ${parent.email} already exists.`);
+      parent.password = 'Password123!';
+      parent.role = 'parent';
+      await parent.save();
+      console.log(`[Seed] Parent user ${parent.email} verified and password synced.`);
     }
 
     // 1c. Check and Seed Learner User
@@ -43,7 +49,6 @@ export const seedDatabase = async () => {
 
     if (!learner) {
       console.log('[Seed] Default learner user missing. Creating default learner user...');
-
       learner = await User.create({
         fullName: 'Alex Carter',
         email: 'learner@cat.com',
@@ -52,10 +57,13 @@ export const seedDatabase = async () => {
         learnerId: 'LRN-2026-0001',
         profileImage: '',
       });
-
       console.log(`[Seed] Successfully created default learner user: ${learner.email} (${learner.role})`);
     } else {
-      console.log(`[Seed] Learner user ${learner.email} already exists.`);
+      learner.password = 'Password123!';
+      learner.role = 'learner';
+      if (!learner.learnerId) learner.learnerId = 'LRN-2026-0001';
+      await learner.save();
+      console.log(`[Seed] Learner user ${learner.email} verified and password synced.`);
     }
 
     // 2. Check and Seed Sample Patients

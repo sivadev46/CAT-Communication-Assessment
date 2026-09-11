@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['Admin', 'Clinician', 'doctor', 'parent', 'learner'],
+      enum: ['Admin', 'admin', 'Clinician', 'clinician', 'doctor', 'Doctor', 'therapist', 'Therapist', 'parent', 'Parent', 'learner', 'Learner'],
       default: 'Clinician',
     },
     learnerId: {

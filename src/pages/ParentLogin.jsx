@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogIn, AlertCircle, Loader2, ArrowLeft, Mail, Lock, Heart, Eye, EyeOff, X, UserCheck } from 'lucide-react';
 import { catSupabaseService } from '../services/catSupabase';
+import ParentAvatar from '../components/Common/ParentAvatar';
 import logoNiepmd from '../assets/logo_niepmd.jpg';
 
 export default function ParentLogin() {
@@ -126,8 +127,8 @@ export default function ParentLogin() {
           </div>
 
           <div className="my-8 text-center space-y-4">
-            <div className="w-20 h-20 rounded-2xl bg-purple-100 border border-purple-300 text-purple-800 flex items-center justify-center mx-auto shadow-xs">
-              <Heart className="w-10 h-10" />
+            <div className="w-24 h-24 rounded-3xl bg-purple-100/80 border-2 border-purple-200 flex items-center justify-center mx-auto shadow-sm overflow-hidden p-2">
+              <ParentAvatar className="w-20 h-20" />
             </div>
             <h3 className="text-xl font-extrabold text-purple-950">Caregiver Portal</h3>
             <p className="text-xs text-purple-900 leading-relaxed max-w-xs mx-auto font-medium">
@@ -145,7 +146,7 @@ export default function ParentLogin() {
           <div>
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/role-selection')}
               className="inline-flex items-center gap-1.5 text-xs text-purple-900 hover:text-purple-700 transition-colors font-bold mb-6 cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />

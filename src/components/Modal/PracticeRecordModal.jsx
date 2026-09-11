@@ -8,7 +8,7 @@ import {
   Send,
   X,
   Sparkles,
-  Stethoscope,
+  UserCheck,
   CheckCircle,
   Clock,
   AlertCircle,
@@ -371,7 +371,7 @@ export default function PracticeRecordModal({
             </div>
 
             <div className="text-right flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
-              <Stethoscope className="w-3 h-3 text-emerald-600" />
+              <UserCheck className="w-3 h-3 text-emerald-600" />
               <span>{doctorName}</span>
             </div>
           </div>
