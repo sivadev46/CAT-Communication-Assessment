@@ -90,10 +90,11 @@ export default function ChromaMascot() {
     };
 
     const handleEnded = () => {
-      // Pause at frame 0 when video finishes
-      video.currentTime = 0;
-      video.pause();
-      setHasEnded(true);
+      // Loop continuously
+      if (videoRef.current) {
+        videoRef.current.currentTime = 0;
+        videoRef.current.play().catch(() => {});
+      }
     };
 
     // User gesture handler to enable audio on first document interaction
@@ -157,6 +158,7 @@ export default function ChromaMascot() {
         src={mascotVideo}
         playsInline
         autoPlay
+        loop
         preload="auto"
         style={{
           position: 'absolute',
@@ -193,7 +195,7 @@ export default function ChromaMascot() {
             ) : (
               <>
                 <Volume2 className="w-4 h-4 text-emerald-600" />
-                <span className="text-emerald-700">Shruthi Audio Active</span>
+                <span className="text-emerald-700">Vani Audio Active</span>
               </>
             )}
           </button>
@@ -202,7 +204,7 @@ export default function ChromaMascot() {
         {!isLoaded && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 backdrop-blur-xs rounded-3xl z-20">
             <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-3" />
-            <span className="text-sm font-bold text-purple-950">Loading Shruthi Mascot...</span>
+            <span className="text-sm font-bold text-purple-950">Loading Vani Mascot...</span>
           </div>
         )}
       </div>

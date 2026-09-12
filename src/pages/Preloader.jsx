@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import PreloaderChromaVideo from '../components/PreloaderChromaVideo';
 import logoNiepmd from '../assets/logo_niepmd.jpg';
 
 export default function Preloader() {
@@ -8,31 +9,29 @@ export default function Preloader() {
   const isForce = searchParams.get('force') === 'true';
   const hasNavigatedRef = useRef(false);
 
-  const handleComplete = () => {
+  const handleComplete = useCallback(() => {
     if (hasNavigatedRef.current) return;
     hasNavigatedRef.current = true;
     sessionStorage.setItem('cat_intro_seen', 'true');
     navigate('/role-selection', { replace: true });
-  };
+  }, [navigate]);
 
   useEffect(() => {
-    // If intro was already seen and not forced, immediately go to role selection
     if (!isForce && sessionStorage.getItem('cat_intro_seen') === 'true') {
       hasNavigatedRef.current = true;
       navigate('/role-selection', { replace: true });
       return;
     }
 
-    // Preloader display timer (2.5s)
     const timer = setTimeout(() => {
       handleComplete();
-    }, 2500);
+    }, 6000);
 
     return () => clearTimeout(timer);
-  }, [isForce]);
+  }, [isForce, navigate, handleComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#ffffb3] flex flex-col justify-between overflow-hidden select-none font-sans text-slate-900">
+    <div className="fixed inset-0 z-50 bg-[#ffffcc] flex flex-col justify-between overflow-hidden select-none font-sans text-slate-900">
       
       {/* Top Header Bar with NIEPMD Logo */}
       <div className="max-w-7xl w-full mx-auto px-4 md:px-8 pt-4 md:pt-6 flex items-center justify-between">
@@ -83,12 +82,12 @@ export default function Preloader() {
           </p>
         </div>
 
-        {/* Outer Circular Container - Clean Empty Centre */}
-        <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 my-2 flex items-center justify-center">
-          <div className="w-full h-full rounded-full border-4 border-purple-400/50 shadow-2xl bg-white flex items-center justify-center overflow-hidden" />
+        {/* Centered Chroma-Keyed CAT Intro Video */}
+        <div className="relative w-72 h-72 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] my-2 flex items-center justify-center">
+          <PreloaderChromaVideo onEnded={handleComplete} />
         </div>
 
-        {/* Automatic Navigation Indicator (No Manual Click Required) */}
+        {/* Automatic Navigation Indicator */}
         <div className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold text-purple-800">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse" />
           <span>Redirecting to portal automatically...</span>

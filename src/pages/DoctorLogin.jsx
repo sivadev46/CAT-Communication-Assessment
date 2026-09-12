@@ -94,7 +94,7 @@ export default function DoctorLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#ffffb3] text-slate-900 flex items-center justify-center p-4 md:p-8 font-sans selection:bg-purple-600 selection:text-white">
+    <div className="min-h-screen bg-[#ffffcc] text-slate-900 flex items-center justify-center p-4 md:p-8 font-sans selection:bg-purple-600 selection:text-white">
       <div className="bg-white rounded-2xl border-2 border-purple-200 shadow-2xl overflow-hidden max-w-4xl w-full grid grid-cols-1 md:grid-cols-2">
         
         {/* Left Side: NIEPMD Branding & Doctor in Medical Scrubs Illustration */}

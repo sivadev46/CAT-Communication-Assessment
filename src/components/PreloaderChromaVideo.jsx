@@ -34,11 +34,19 @@ const LUM_MIN          = 0.06;  // preserve absolute darks (black outlines)
 const HARD_THRESH      = 0.28;  // score ≥ → alpha 0
 const SOFT_THRESH      = 0.09;  // score < → keep opaque; between → feather
 
-export default function PreloaderChromaVideo() {
+export default function PreloaderChromaVideo({ onEnded }) {
   const videoRef  = useRef(null);
   const canvasRef = useRef(null);
   const rafRef    = useRef(null);
   const running   = useRef(true);
+  const hasEndedCalled = useRef(false);
+
+  const triggerEnded = useCallback(() => {
+    if (!hasEndedCalled.current) {
+      hasEndedCalled.current = true;
+      if (onEnded) onEnded();
+    }
+  }, [onEnded]);
 
   const rgbToHsl = (r8, g8, b8) => {
     const r = r8 / 255, g = g8 / 255, b = b8 / 255;
@@ -80,7 +88,6 @@ export default function PreloaderChromaVideo() {
       canvas.height = CANVAS_SIZE;
     }
 
-    // COVER scaling: shortest edge fills CANVAS_SIZE, circular clip handles overflow
     const videoAspect = vw / vh;
     let drawW, drawH;
     if (videoAspect >= 1) {
@@ -135,6 +142,10 @@ export default function PreloaderChromaVideo() {
 
     running.current = true;
 
+    const handleVideoEnded = () => {
+      triggerEnded();
+    };
+
     const tryPlay = async () => {
       try { video.muted = false; await video.play(); }
       catch {
@@ -150,20 +161,29 @@ export default function PreloaderChromaVideo() {
     window.addEventListener('touchstart', unlockAudio, { once: true });
     window.addEventListener('keydown',    unlockAudio, { once: true });
 
+    video.addEventListener('ended', handleVideoEnded);
+
     if (video.readyState >= 2) tryPlay();
     else video.addEventListener('canplay', tryPlay, { once: true });
+
+    // Fallback timer: video is ~5s. If ended hasn't fired in 5.5s, trigger callback.
+    const fallbackTimer = setTimeout(() => {
+      triggerEnded();
+    }, 5500);
 
     rafRef.current = requestAnimationFrame(processFrame);
 
     return () => {
       running.current = false;
+      clearTimeout(fallbackTimer);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener('click',      unlockAudio);
       window.removeEventListener('touchstart', unlockAudio);
       window.removeEventListener('keydown',    unlockAudio);
+      video.removeEventListener('ended', handleVideoEnded);
       video.pause();
     };
-  }, [processFrame]);
+  }, [processFrame, triggerEnded]);
 
   return (
     <>
